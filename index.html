@@ -13,10 +13,7 @@
             theme: { 
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    boxShadow: {
-                        'neon': '0 0 20px rgba(59, 130, 246, 0.5)',
-                        'neon-hover': '0 0 30px rgba(59, 130, 246, 0.7)',
-                    }
+                    boxShadow: { 'neon': '0 0 20px rgba(59, 130, 246, 0.5)', 'neon-hover': '0 0 30px rgba(59, 130, 246, 0.7)' }
                 } 
             } 
         }
@@ -24,49 +21,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { -webkit-font-smoothing: antialiased; }
-        
-        /* Premium Glass & Glow Effects */
         .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); }
         .dark .glass-effect { background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(59, 130, 246, 0.15); }
-        
-        /* Eye-catchy Product Cards */
-        .product-card { 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 28px; /* Extra rounded shape */
-        }
-        .product-card:hover { 
-            transform: translateY(-8px) scale(1.02); 
-            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15); 
-            border-color: rgba(59, 130, 246, 0.4); 
-        }
-        .dark .product-card { 
-            background: linear-gradient(145deg, #1e293b, #0f172a); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-        }
-        .dark .product-card:hover { 
-            box-shadow: 0 10px 35px rgba(59, 130, 246, 0.25); 
-            border-color: rgba(59, 130, 246, 0.6); 
-        }
-        
-        /* Glowing Buttons */
+        .product-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(0,0,0,0.05); border-radius: 28px; }
+        .product-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); }
+        .dark .product-card { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .dark .product-card:hover { box-shadow: 0 10px 35px rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.6); }
         .glow-btn { transition: all 0.3s ease; border-radius: 16px; }
         .glow-btn:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transform: translateY(-2px); }
         .glow-btn:disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); box-shadow: none; }
-        
         .neon-text { text-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-
         .marquee { overflow: hidden; white-space: nowrap; box-sizing: border-box; }
         .marquee span { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-        
-        /* Modals & Drawer */
         .modal-glass { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); }
         .dark .modal-glass { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59, 130, 246, 0.3); box-shadow: 0 0 50px rgba(0,0,0,0.6); }
-        .drawer-open { transform: translateX(0%); }
-        .drawer-closed { transform: translateX(100%); }
-
-        /* Payment Themes */
+        .drawer-open { transform: translateX(0%); } .drawer-closed { transform: translateX(100%); }
         .theme-bkash { border-color: #e2136e; background-color: #fce7f0; color: #e2136e; }
         .theme-nagad { border-color: #f37021; background-color: #fef0e9; color: #f37021; }
         .theme-rocket { border-color: #8c1596; background-color: #f4e8f5; color: #8c1596; }
@@ -77,6 +47,10 @@
         .btn-rocket { background: linear-gradient(135deg, #8c1596, #6b1073); color: white; }
         .btn-upi { background: linear-gradient(135deg, #16a34a, #15803d); color: white; }
         .btn-paytm { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-[#0b1121] text-slate-800 dark:text-slate-200 transition-colors duration-300">
@@ -202,20 +176,8 @@
         </div>
     </div>
 
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
-    </style>
-
     <script>
-        // Bulletproof EXPLICIT Logout Function
-        window.logout = function() {
-            localStorage.removeItem('user');
-            sessionStorage.removeItem('user'); // Extra safety
-            window.location.href = '/'; // Forces full clean redirect
-        };
+        window.logout = function() { localStorage.removeItem('user'); sessionStorage.removeItem('user'); window.location.href = '/'; };
 
         let currentUser = null;
         try { const stored = localStorage.getItem('user'); if(stored) currentUser = JSON.parse(stored); } catch(e) { localStorage.removeItem('user'); }
@@ -266,14 +228,10 @@
             } else { authDiv.innerHTML = `<a href="/login" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-neon glow-btn tracking-wide">Login / Join</a>`; }
         }
 
-        // --- CART SYSTEM ---
         function toggleCart() {
             const drawer = document.getElementById('cartDrawer'); const overlay = document.getElementById('cartOverlay');
-            if(drawer.classList.contains('drawer-closed')) {
-                drawer.classList.replace('drawer-closed', 'drawer-open'); overlay.classList.remove('hidden'); setTimeout(()=>overlay.classList.remove('opacity-0'),10); renderCart();
-            } else {
-                drawer.classList.replace('drawer-open', 'drawer-closed'); overlay.classList.add('opacity-0'); setTimeout(()=>overlay.classList.add('hidden'),300);
-            }
+            if(drawer.classList.contains('drawer-closed')) { drawer.classList.replace('drawer-closed', 'drawer-open'); overlay.classList.remove('hidden'); setTimeout(()=>overlay.classList.remove('opacity-0'),10); renderCart(); } 
+            else { drawer.classList.replace('drawer-open', 'drawer-closed'); overlay.classList.add('opacity-0'); setTimeout(()=>overlay.classList.add('hidden'),300); }
         }
         function updateCartBadge() { const badge = document.getElementById('cartBadge'); if(cart.length > 0) { badge.classList.remove('hidden'); badge.innerText = cart.length; } else { badge.classList.add('hidden'); } }
         function addToCart(id, name, priceUsd) {
@@ -288,14 +246,7 @@
             const container = document.getElementById('cartItemsContainer'); const totalEl = document.getElementById('cartTotal');
             if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-400 mt-24"><i class="fa-solid fa-basket-shopping text-6xl mb-4 opacity-30"></i><p class="font-medium">Your cart is empty.</p></div>'; totalEl.innerText = '$0.00'; return; }
             let total = 0;
-            container.innerHTML = cart.map(item => {
-                total += item.priceUsd;
-                return `
-                <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm mb-3">
-                    <div><h4 class="font-bold text-slate-800 dark:text-white leading-tight mb-1">${item.name}</h4><p class="text-blue-500 font-black">$${item.priceUsd}</p></div>
-                    <button onclick="removeFromCart(${item.id})" class="w-10 h-10 rounded-xl text-red-400 hover:text-white bg-red-50 hover:bg-red-500 dark:bg-red-500/10 dark:hover:bg-red-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
-                </div>`;
-            }).join('');
+            container.innerHTML = cart.map(item => { total += item.priceUsd; return `<div class="flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm mb-3"><div><h4 class="font-bold text-slate-800 dark:text-white leading-tight mb-1">${item.name}</h4><p class="text-blue-500 font-black">$${item.priceUsd}</p></div><button onclick="removeFromCart(${item.id})" class="w-10 h-10 rounded-xl text-red-400 hover:text-white bg-red-50 hover:bg-red-500 dark:bg-red-500/10 dark:hover:bg-red-500 transition-colors"><i class="fa-solid fa-trash"></i></button></div>`; }).join('');
             totalEl.innerText = '$' + total.toFixed(2);
         }
 
@@ -312,95 +263,45 @@
             if(data.success) {
                 currentUser.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth(); loadProducts();
                 cart = []; localStorage.removeItem('cart'); updateCartBadge(); toggleCart();
-                
                 let linksHtml = data.items.map(i => `<div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl mb-3 text-left border border-slate-200 dark:border-slate-700"><p class="font-bold text-sm text-slate-800 dark:text-white mb-2">${i.name}</p><a href="${i.link}" target="_blank" class="text-blue-500 font-bold text-sm break-all underline">${i.link}</a></div>`).join('');
-                Swal.fire({
-                    title: 'Purchase Successful! 🎉', html: `Items added to your Vault.<br><br><div class="max-h-60 overflow-y-auto custom-scrollbar">${linksHtml}</div>`,
-                    icon: 'success', confirmButtonText: '<i class="fa-solid fa-layer-group mr-2"></i>View Vault', confirmButtonColor: '#10b981', customClass: {popup: 'rounded-3xl'}
-                }).then(() => { openLibrary(); });
+                Swal.fire({ title: 'Purchase Successful! 🎉', html: `Items added to your Vault.<br><br><div class="max-h-60 overflow-y-auto custom-scrollbar">${linksHtml}</div>`, icon: 'success', confirmButtonText: '<i class="fa-solid fa-layer-group mr-2"></i>View Vault', confirmButtonColor: '#10b981', customClass: {popup: 'rounded-3xl'} }).then(() => { openLibrary(); });
             } else { Swal.fire({title: 'Checkout Failed', text: data.error, icon: 'error', customClass: {popup: 'rounded-3xl'}}); }
         }
 
-        // --- MY LIBRARY (PURCHASES) ---
         async function openLibrary() {
             document.getElementById('libraryModal').classList.replace('hidden', 'flex');
             const list = document.getElementById('libraryList'); list.innerHTML = '<p class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-4xl text-purple-500 drop-shadow-md"></i></p>';
             const res = await fetch('/api/library/' + currentUser.id); const purchases = await res.json();
-            
             if(purchases.length === 0) return list.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-box-open text-7xl text-slate-300 dark:text-slate-700 mb-5"></i><p class="text-slate-500 font-bold text-lg">Your vault is empty.</p></div>';
-            
-            list.innerHTML = purchases.map(p => `
-                <div class="p-5 border dark:border-slate-700 rounded-[24px] flex flex-col sm:flex-row justify-between items-center bg-slate-50 dark:bg-slate-800 hover:border-purple-300 dark:hover:border-purple-500 transition-colors gap-5 shadow-sm">
-                    <div class="flex items-center gap-5 w-full sm:w-auto">
-                        <div class="w-20 h-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm flex justify-center items-center overflow-hidden border dark:border-slate-700 shrink-0">
-                            ${p.product.imageId ? `<img src="/api/photo/${p.product.imageId}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-code text-3xl text-purple-400"></i>`}
-                        </div>
-                        <div>
-                            <h4 class="font-black text-xl dark:text-white leading-tight">${p.product.name}</h4>
-                            <p class="text-xs font-bold text-slate-400 mt-2 bg-slate-200 dark:bg-slate-900 inline-block px-3 py-1 rounded-full uppercase tracking-wider">Paid $${p.pricePaid} • ${new Date(p.createdAt).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                    <a href="${p.product.driveLink || '#'}" target="_blank" class="w-full sm:w-auto bg-purple-100 hover:bg-purple-600 dark:bg-purple-500/20 dark:hover:bg-purple-600 text-purple-600 hover:text-white dark:text-purple-300 px-8 py-4 rounded-xl font-black text-sm text-center transition-all shadow-sm active:scale-95 shrink-0">
-                        <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Access File
-                    </a>
-                </div>
-            `).join('');
+            list.innerHTML = purchases.map(p => `<div class="p-5 border dark:border-slate-700 rounded-[24px] flex flex-col sm:flex-row justify-between items-center bg-slate-50 dark:bg-slate-800 hover:border-purple-300 dark:hover:border-purple-500 transition-colors gap-5 shadow-sm"><div class="flex items-center gap-5 w-full sm:w-auto"><div class="w-20 h-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm flex justify-center items-center overflow-hidden border dark:border-slate-700 shrink-0">${p.product.imageId ? `<img src="/api/photo/${p.product.imageId}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-code text-3xl text-purple-400"></i>`}</div><div><h4 class="font-black text-xl dark:text-white leading-tight">${p.product.name}</h4><p class="text-xs font-bold text-slate-400 mt-2 bg-slate-200 dark:bg-slate-900 inline-block px-3 py-1 rounded-full uppercase tracking-wider">Paid $${p.pricePaid} • ${new Date(p.createdAt).toLocaleDateString()}</p></div></div><a href="${p.product.driveLink || '#'}" target="_blank" class="w-full sm:w-auto bg-purple-100 hover:bg-purple-600 dark:bg-purple-500/20 dark:hover:bg-purple-600 text-purple-600 hover:text-white dark:text-purple-300 px-8 py-4 rounded-xl font-black text-sm text-center transition-all shadow-sm active:scale-95 shrink-0"><i class="fa-solid fa-cloud-arrow-down mr-2"></i> Access File</a></div>`).join('');
         }
         function closeLibrary() { document.getElementById('libraryModal').classList.replace('flex', 'hidden'); }
 
-        // --- PRODUCT LISTING ---
         async function loadProducts() {
             const res = await fetch('/api/products'); const products = await res.json();
             const list = document.getElementById('product-list'); list.innerHTML = '';
             if(!products || products.length === 0) { list.innerHTML = '<p class="col-span-full text-center text-slate-500 font-bold text-xl">Store is empty currently.</p>'; return; }
 
-            const userCode = currentUser && currentUser.country ? currentUser.country : 'US';
-            const curr = currMap[userCode] || currMap['US'];
-            const rate = liveRates[curr.code] || 1;
+            const userCode = currentUser && currentUser.country ? currentUser.country : 'US'; const curr = currMap[userCode] || currMap['US']; const rate = liveRates[curr.code] || 1;
 
             products.forEach(p => {
-                const usdPrice = parseFloat(p.price.replace(/[^0-9.]/g, '')) || 0; 
-                const localPrice = Math.round(usdPrice * rate); const pStock = p.stock || 0;
+                const usdPrice = parseFloat(p.price.replace(/[^0-9.]/g, '')) || 0; const localPrice = Math.round(usdPrice * rate); const pStock = p.stock || 0;
                 const imageHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-52 object-cover rounded-[20px] mb-5 shadow-sm border dark:border-slate-700">` : '<div class="w-full h-52 bg-slate-100 dark:bg-slate-800 rounded-[20px] mb-5 flex items-center justify-center text-slate-300 dark:text-slate-600 shadow-inner border dark:border-slate-700"><i class="fa-solid fa-code text-6xl"></i></div>';
-                const isOutOfStock = pStock <= 0;
-                const stockBadge = isOutOfStock ? `<span class="bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 px-4 py-1.5 rounded-full text-[10px] font-black shadow-sm border border-red-200 dark:border-red-500/30 tracking-widest">SOLD OUT</span>` : `<span class="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 px-4 py-1.5 rounded-full text-[10px] font-black shadow-sm border border-blue-200 dark:border-blue-500/30 tracking-widest">STOCK: ${pStock}</span>`;
+                const isOutOfStock = pStock <= 0; const stockBadge = isOutOfStock ? `<span class="bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 px-4 py-1.5 rounded-full text-[10px] font-black shadow-sm border border-red-200 dark:border-red-500/30 tracking-widest">SOLD OUT</span>` : `<span class="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 px-4 py-1.5 rounded-full text-[10px] font-black shadow-sm border border-blue-200 dark:border-blue-500/30 tracking-widest">STOCK: ${pStock}</span>`;
 
-                list.innerHTML += `
-                    <div class="product-card p-6 flex flex-col justify-between bg-white">
-                        <div>
-                            ${imageHtml}
-                            <div class="flex justify-between items-start mb-2"><h2 class="text-[22px] font-black dark:text-white tracking-tight leading-tight">${p.name}</h2>${stockBadge}</div>
-                            <div class="mb-5 mt-4 flex items-baseline">
-                                <span class="text-4xl font-black text-blue-600 dark:text-blue-400">${curr.symbol}${localPrice}</span>
-                                <span class="text-sm font-bold text-slate-400 ml-2">USD $${usdPrice}</span>
-                            </div>
-                            <div class="text-sm text-slate-600 dark:text-slate-300 mb-6 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl font-medium border border-slate-100 dark:border-slate-800 leading-relaxed min-h-[80px]">
-                                <i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i> ${p.abilities}
-                            </div>
-                        </div>
-                        <button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${usdPrice})" class="w-full bg-slate-900 dark:bg-slate-700 text-white font-bold py-4.5 rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-600 transition-colors tracking-wide text-lg ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'glow-btn shadow-md'}" ${isOutOfStock ? 'disabled' : ''}>
-                            <i class="fa-solid ${isOutOfStock ? 'fa-ban' : 'fa-cart-plus'} mr-2"></i> ${isOutOfStock ? 'Unavailable' : 'Add to Cart'}
-                        </button>
-                    </div>
-                `;
+                list.innerHTML += `<div class="product-card p-6 flex flex-col justify-between bg-white"><div>${imageHtml}<div class="flex justify-between items-start mb-2"><h2 class="text-[22px] font-black dark:text-white tracking-tight leading-tight">${p.name}</h2>${stockBadge}</div><div class="mb-5 mt-4 flex items-baseline"><span class="text-4xl font-black text-blue-600 dark:text-blue-400">${curr.symbol}${localPrice}</span><span class="text-sm font-bold text-slate-400 ml-2">USD $${usdPrice}</span></div><div class="text-sm text-slate-600 dark:text-slate-300 mb-6 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl font-medium border border-slate-100 dark:border-slate-800 leading-relaxed min-h-[80px]"><i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i> ${p.abilities}</div></div><button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${usdPrice})" class="w-full bg-slate-900 dark:bg-slate-700 text-white font-bold py-4.5 rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-600 transition-colors tracking-wide text-lg ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'glow-btn shadow-md'}" ${isOutOfStock ? 'disabled' : ''}><i class="fa-solid ${isOutOfStock ? 'fa-ban' : 'fa-cart-plus'} mr-2"></i> ${isOutOfStock ? 'Unavailable' : 'Add to Cart'}</button></div>`;
             });
         }
 
         function renderGateways() {
-            if(!currentUser) return;
-            const country = currentUser.country || 'BD'; const gatewayDiv = document.getElementById('gatewayOptions');
-            const code = (currMap[country] || currMap['US']).code; document.getElementById('localCurrencyLabel').innerText = `Pay Equivalent`; document.querySelectorAll('.localCodeText').forEach(el => el.innerText = code);
-            
-            // Reusable styled radio buttons
+            if(!currentUser) return; const country = currentUser.country || 'BD'; const gatewayDiv = document.getElementById('gatewayOptions'); const code = (currMap[country] || currMap['US']).code; document.getElementById('localCurrencyLabel').innerText = `Pay Equivalent`; document.querySelectorAll('.localCodeText').forEach(el => el.innerText = code);
             const createRadio = (val, label, theme, no) => `<label class="cursor-pointer"><input type="radio" name="method" value="${val}" class="peer sr-only" ${no===1?'checked':''} onchange="updateTheme()"><div class="py-3 px-1 border-2 border-slate-200 dark:border-slate-600 rounded-2xl text-center peer-checked:${theme} font-black text-slate-400 dark:text-slate-500 transition-all text-sm uppercase tracking-widest">${label}</div></label>`;
-
             if (country === 'IN') { gatewayDiv.innerHTML = createRadio('upi','UPI','theme-upi',1) + createRadio('paytm','Paytm','theme-paytm',0); } 
             else { gatewayDiv.innerHTML = createRadio('bkash','bKash','theme-bkash',1) + createRadio('nagad','Nagad','theme-nagad',0) + createRadio('rocket','Rocket','theme-rocket',0); }
         }
 
         function openHistory() {
-            document.getElementById('historyModal').classList.replace('hidden', 'flex');
-            const list = document.getElementById('historyList'); list.innerHTML = '<p class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-500"></i></p>';
+            document.getElementById('historyModal').classList.replace('hidden', 'flex'); const list = document.getElementById('historyList'); list.innerHTML = '<p class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-500"></i></p>';
             fetch('/api/history/' + currentUser.id).then(r=>r.json()).then(deposits => {
                 if(!deposits || deposits.length===0) return list.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-receipt text-5xl text-slate-300 dark:text-slate-700 mb-4"></i><p class="text-slate-500 font-bold">No records found.</p></div>';
                 const curr = currMap[currentUser.country] || currMap['BD'];
@@ -418,18 +319,14 @@
             const methodInput = document.querySelector('input[name="method"]:checked'); if(!methodInput) return;
             const method = methodInput.value; const header = document.getElementById('modalHeader'); const box = document.getElementById('instructionBox'); const btn = document.getElementById('submitBtn');
             const names = document.querySelectorAll('.gateway-name'); const numbers = document.querySelectorAll('.gateway-number');
-
             let number = ''; let name = '';
-            header.className = 'p-6 flex justify-between items-center text-white transition-all duration-500 shadow-md';
-            box.className = 'p-5 rounded-3xl text-sm border shadow-sm transition-all duration-500 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50';
-            btn.className = 'w-full font-black py-4.5 rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.2)] text-lg text-white transform active:scale-95 transition-all glow-btn uppercase tracking-widest';
+            header.className = 'p-6 flex justify-between items-center text-white transition-all duration-500 shadow-md'; box.className = 'p-5 rounded-3xl text-sm border shadow-sm transition-all duration-500 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50'; btn.className = 'w-full font-black py-4.5 rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.2)] text-lg text-white transform active:scale-95 transition-all glow-btn uppercase tracking-widest';
 
             if(method === 'bkash') { header.classList.add('bg-[#e2136e]'); box.classList.add('border-[#f3b6cf]', 'text-[#c0105e]'); btn.classList.add('bg-gradient-to-r', 'from-[#e2136e]', 'to-[#c0105e]'); name = 'bKash'; number = '01846849460'; } 
             else if(method === 'nagad') { header.classList.add('bg-[#f37021]'); box.classList.add('border-[#fcd0b6]', 'text-[#d6611a]'); btn.classList.add('bg-gradient-to-r', 'from-[#f37021]', 'to-[#d6611a]'); name = 'Nagad'; number = '01846849460'; } 
             else if(method === 'rocket') { header.classList.add('bg-[#8c1596]'); box.classList.add('border-[#dcb5e3]', 'text-[#6b1073]'); btn.classList.add('bg-gradient-to-r', 'from-[#8c1596]', 'to-[#6b1073]'); name = 'Rocket'; number = '018468494606'; }
             else if(method === 'upi') { header.classList.add('bg-[#16a34a]'); box.classList.add('border-[#bbf7d0]', 'text-[#15803d]'); btn.classList.add('bg-gradient-to-r', 'from-[#16a34a]', 'to-[#15803d]'); name = 'UPI'; number = 'admin@upi'; }
             else if(method === 'paytm') { header.classList.add('bg-[#0284c7]'); box.classList.add('border-[#bae6fd]', 'text-[#0369a1]'); btn.classList.add('bg-gradient-to-r', 'from-[#0284c7]', 'to-[#0369a1]'); name = 'Paytm'; number = '9876543210'; }
-            
             names.forEach(n => n.innerText = name); numbers.forEach(n => n.innerText = number);
         }
 
