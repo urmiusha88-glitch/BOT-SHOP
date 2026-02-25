@@ -9,24 +9,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* PREMIUM GLOW FINISHING */
         .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
         .dark .glass-effect { background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(59, 130, 246, 0.2); }
         .product-card { transition: all 0.4s ease; border: 1px solid transparent; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); }
         .dark .product-card { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255, 255, 255, 0.05); }
         .dark .product-card:hover { box-shadow: 0 0 25px rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.5); }
-        
         .glow-btn { transition: all 0.3s; }
         .glow-btn:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
         .glow-btn:disabled { opacity: 0.5; pointer-events: none; box-shadow: none; filter: grayscale(1); }
-
         .marquee { overflow: hidden; white-space: nowrap; box-sizing: border-box; }
         .marquee span { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         .modal-glass { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); }
         .dark .modal-glass { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 0 40px rgba(0,0,0,0.5); }
-        
         .theme-bkash { border-color: #e2136e; background-color: #fce7f0; color: #e2136e; }
         .theme-nagad { border-color: #f37021; background-color: #fef0e9; color: #f37021; }
         .theme-rocket { border-color: #8c1596; background-color: #f4e8f5; color: #8c1596; }
@@ -126,9 +122,16 @@
     </div>
 
     <script>
-        let currentUser = JSON.parse(localStorage.getItem('user'));
+        // Bulletproof localStorage reading
+        let currentUser = null;
+        try {
+            const storedData = localStorage.getItem('user');
+            if(storedData) currentUser = JSON.parse(storedData);
+        } catch(e) {
+            localStorage.removeItem('user');
+        }
+
         let liveRates = {};
-        
         const currMap = { 'BD': { code: 'BDT', symbol: '৳' }, 'IN': { code: 'INR', symbol: '₹' }, 'PK': { code: 'PKR', symbol: '₨' }, 'US': { code: 'USD', symbol: '$' } };
 
         if(localStorage.getItem('theme') === 'dark') { document.documentElement.classList.add('dark'); document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun'); }
@@ -139,27 +142,51 @@
         }
 
         async function init() {
-            try { const res = await fetch('/api/rate'); const data = await res.json(); liveRates = data.rates; } catch(e) {}
-            if(currentUser) {
-                const res = await fetch('/api/user/' + currentUser.id); const data = await res.json();
-                if(data.success) { currentUser.balanceUsd = data.balanceUsd; currentUser.country = data.country; localStorage.setItem('user', JSON.stringify(currentUser)); }
+            // Safe Rate Fetching
+            try { const res = await fetch('/api/rate'); const data = await res.json(); liveRates = data.rates || {}; } catch(e) { console.warn("Rate API Error", e); }
+            
+            // Bulletproof User Verification
+            if(currentUser && currentUser.id) {
+                try {
+                    const res = await fetch('/api/user/' + currentUser.id); 
+                    if(res.ok) {
+                        const data = await res.json();
+                        if(data.success) { 
+                            currentUser.balanceUsd = data.balanceUsd || 0; 
+                            currentUser.country = data.country || 'BD'; 
+                            localStorage.setItem('user', JSON.stringify(currentUser)); 
+                        } else {
+                            // User deleted from DB -> Auto Logout
+                            localStorage.removeItem('user'); currentUser = null;
+                        }
+                    } else {
+                        localStorage.removeItem('user'); currentUser = null;
+                    }
+                } catch(e) { console.warn("Auth sync error", e); }
             }
-            checkAuth(); loadProducts(); loadNotices(); renderGateways();
+
+            // Safe UI Loading
+            try { checkAuth(); } catch(e) { console.error("checkAuth failed:", e); }
+            try { loadProducts(); } catch(e) { document.getElementById('product-list').innerHTML = '<p class="col-span-full text-center text-red-500">Failed to load products.</p>'; }
+            try { loadNotices(); } catch(e) {}
+            try { if(currentUser) renderGateways(); } catch(e) {}
         }
 
         async function loadNotices() {
             const res = await fetch('/api/notices'); const data = await res.json();
-            if(data.length > 0) { document.getElementById('noticeBanner').classList.remove('hidden'); document.getElementById('noticeText').innerText = "⚡ LATEST UPDATE: " + data.map(n => n.text).join('  |  '); }
+            if(data && data.length > 0) { document.getElementById('noticeBanner').classList.remove('hidden'); document.getElementById('noticeText').innerText = "⚡ LATEST UPDATE: " + data.map(n => n.text).join('  |  '); }
         }
 
         function checkAuth() {
             const authDiv = document.getElementById('authSection');
             if (currentUser) {
+                const bal = currentUser.balanceUsd ? currentUser.balanceUsd.toFixed(2) : '0.00';
+                const name = currentUser.name || 'User';
                 authDiv.innerHTML = `
                     <button onclick="openHistory()" class="text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 mr-2 transition-colors" title="History"><i class="fa-solid fa-clock-rotate-left text-xl"></i></button>
                     <div class="hidden sm:flex items-center bg-white dark:bg-slate-800 rounded-full pl-4 pr-1 py-1 shadow-inner border dark:border-slate-700">
-                        <span class="text-sm font-bold border-r dark:border-slate-600 pr-3">${currentUser.name}</span>
-                        <div class="px-3 text-blue-600 dark:text-blue-400 font-black tracking-wide">$${currentUser.balanceUsd.toFixed(2)}</div>
+                        <span class="text-sm font-bold border-r dark:border-slate-600 pr-3">${name}</span>
+                        <div class="px-3 text-blue-600 dark:text-blue-400 font-black tracking-wide">$${bal}</div>
                     </div>
                     <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-5 rounded-full text-sm glow-btn active:scale-95 ml-2"><i class="fa-solid fa-plus mr-1"></i>Fund</button>
                     <button onclick="logout()" class="text-slate-400 hover:text-red-500 p-2 ml-1 transition-colors"><i class="fa-solid fa-right-from-bracket text-lg"></i></button>
@@ -171,12 +198,12 @@
             document.getElementById('historyModal').classList.replace('hidden', 'flex');
             const list = document.getElementById('historyList'); list.innerHTML = '<p class="text-center"><i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i></p>';
             const res = await fetch('/api/history/' + currentUser.id); const deposits = await res.json();
-            if(deposits.length === 0) return list.innerHTML = '<p class="text-center text-slate-500 font-medium">No transaction records found.</p>';
+            if(!deposits || deposits.length === 0) return list.innerHTML = '<p class="text-center text-slate-500 font-medium">No transaction records found.</p>';
             
             const curr = currMap[currentUser.country] || currMap['BD'];
             list.innerHTML = deposits.map(d => `
                 <div class="p-4 border dark:border-slate-700 rounded-2xl flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 transition-colors">
-                    <div><p class="font-black text-sm uppercase dark:text-white">${d.method} <span class="text-blue-500 ml-1">${curr.symbol}${d.amountBdt}</span></p><p class="text-xs text-slate-400 mt-1 font-mono tracking-wide">ID: ${d.trxId}</p></div>
+                    <div><p class="font-black text-sm uppercase dark:text-white">${d.method || 'Bank'} <span class="text-blue-500 ml-1">${curr.symbol}${d.amountBdt}</span></p><p class="text-xs text-slate-400 mt-1 font-mono tracking-wide">ID: ${d.trxId}</p></div>
                     <span class="px-3 py-1 text-xs font-black rounded-full shadow-sm ${d.status==='APPROVED'?'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400':d.status==='REJECTED'?'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400':'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400'}">${d.status}</span>
                 </div>
             `).join('');
@@ -185,30 +212,35 @@
         function logout() { localStorage.removeItem('user'); window.location.reload(); }
 
         async function loadProducts() {
-            const res = await fetch('/api/products'); const products = await res.json();
+            const res = await fetch('/api/products'); 
+            const products = await res.json();
             const list = document.getElementById('product-list'); list.innerHTML = '';
-            if(products.length === 0) { list.innerHTML = '<p class="col-span-full text-center text-slate-500 font-bold">Store is empty currently.</p>'; return; }
+            
+            if(!products || products.length === 0) { list.innerHTML = '<p class="col-span-full text-center text-slate-500 font-bold">Store is empty currently.</p>'; return; }
 
-            const userCode = currentUser ? currentUser.country : 'US';
+            const userCode = currentUser && currentUser.country ? currentUser.country : 'US';
             const curr = currMap[userCode] || currMap['US'];
             const rate = liveRates[curr.code] || 1;
 
             products.forEach(p => {
-                const usdPrice = parseFloat(p.price.replace(/[^0-9.]/g, '')); 
+                const rawPriceStr = p.price ? p.price.toString().replace(/[^0-9.]/g, '') : '0';
+                const usdPrice = parseFloat(rawPriceStr) || 0; 
                 const localPrice = Math.round(usdPrice * rate);
+                const pStock = p.stock || 0;
+                
                 const imageHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-48 object-cover rounded-2xl mb-5 shadow-inner" onerror="this.style.display='none'">` : '<div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-5 flex items-center justify-center text-slate-300 dark:text-slate-600 shadow-inner"><i class="fa-solid fa-code text-5xl"></i></div>';
                 
-                const isOutOfStock = p.stock <= 0;
+                const isOutOfStock = pStock <= 0;
                 const stockBadge = isOutOfStock 
                     ? `<span class="bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 px-3 py-1 rounded-full text-xs font-black shadow-sm border border-red-200 dark:border-red-500/30">OUT OF STOCK</span>`
-                    : `<span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-black shadow-sm border border-blue-200 dark:border-blue-500/30">STOCK: ${p.stock}</span>`;
+                    : `<span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-black shadow-sm border border-blue-200 dark:border-blue-500/30">STOCK: ${pStock}</span>`;
 
                 list.innerHTML += `
                     <div class="product-card rounded-3xl p-6 flex flex-col justify-between">
                         <div>
                             ${imageHtml}
                             <div class="flex justify-between items-start mb-2">
-                                <h2 class="text-2xl font-black dark:text-white tracking-tight">${p.name}</h2>
+                                <h2 class="text-2xl font-black dark:text-white tracking-tight">${p.name || 'Bot Source Code'}</h2>
                                 ${stockBadge}
                             </div>
                             <div class="mb-5 mt-3">
@@ -216,7 +248,7 @@
                                 <span class="text-sm font-bold text-slate-400 ml-1">($${usdPrice})</span>
                             </div>
                             <div class="text-sm text-slate-600 dark:text-slate-400 mb-6 bg-slate-100 dark:bg-slate-900/50 p-4 rounded-2xl font-medium border dark:border-slate-800">
-                                <i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i> ${p.abilities}
+                                <i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i> ${p.abilities || 'No details added'}
                             </div>
                         </div>
                         <button onclick="buyProduct(${p.id}, ${usdPrice})" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl glow-btn tracking-wide ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : ''}" ${isOutOfStock ? 'disabled' : ''}>
@@ -236,17 +268,18 @@
             const data = await res.json();
 
             if(data.success) {
-                currentUser.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth(); loadProducts(); // Refresh stock
+                currentUser.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth(); loadProducts(); 
                 Swal.fire({
                     title: 'Purchase Successful! 🎉',
-                    html: `Enjoy your premium source code.<br><br><div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 mt-4"><a href="${data.link}" target="_blank" class="text-blue-500 font-bold break-all">${data.link}</a></div>`,
+                    html: `Enjoy your premium source code.<br><br><div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 mt-4"><a href="${data.link || '#'}" target="_blank" class="text-blue-500 font-bold break-all">${data.link || 'Link not provided'}</a></div>`,
                     icon: 'success', showCancelButton: true, confirmButtonText: '<i class="fa-regular fa-copy mr-1"></i> Copy Link', cancelButtonText: 'Close', confirmButtonColor: '#3b82f6', customClass: {popup: 'rounded-3xl'}
-                }).then((r) => { if(r.isConfirmed) { navigator.clipboard.writeText(data.link); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Copied to clipboard!', showConfirmButton:false, timer:2000}); } });
+                }).then((r) => { if(r.isConfirmed && data.link) { navigator.clipboard.writeText(data.link); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Copied to clipboard!', showConfirmButton:false, timer:2000}); } });
             } else { Swal.fire({title: 'Failed', text: data.error, icon: 'error', customClass: {popup: 'rounded-3xl'}}); }
         }
 
         function renderGateways() {
-            const country = currentUser ? currentUser.country : 'BD';
+            if(!currentUser) return;
+            const country = currentUser.country || 'BD';
             const gatewayDiv = document.getElementById('gatewayOptions');
             const code = (currMap[country] || currMap['US']).code;
             document.getElementById('localCurrencyLabel').innerText = `Pay in ${code}`;
@@ -269,5 +302,57 @@
         const overlay = document.getElementById('modalOverlay'); const modal = document.getElementById('addFundModal');
         function openModal() { overlay.classList.remove('opacity-0', 'pointer-events-none'); modal.classList.remove('scale-95'); updateTheme(); }
         function closeModal() { overlay.classList.add('opacity-0', 'pointer-events-none'); modal.classList.add('scale-95'); }
+        
         function calcLocal() { 
-            const usd = parseFloat(document.getElementById('usdAmount').value) || 0;
+            const usd = parseFloat(document.getElementById('usdAmount').value) || 0; 
+            const code = (currMap[currentUser?currentUser.country:'BD'] || currMap['US']).code;
+            const rate = liveRates[code] || 1;
+            const localVal = Math.round(usd * rate); 
+            document.getElementById('localAmount').value = localVal; document.getElementById('insAmount').innerText = localVal; 
+        }
+        
+        function updateTheme() {
+            const methodInput = document.querySelector('input[name="method"]:checked'); if(!methodInput) return;
+            const method = methodInput.value;
+            const header = document.getElementById('modalHeader'); const box = document.getElementById('instructionBox'); const btn = document.getElementById('submitBtn');
+            const names = document.querySelectorAll('.gateway-name'); const numbers = document.querySelectorAll('.gateway-number');
+
+            let number = ''; let name = '';
+            header.className = 'p-6 flex justify-between items-center text-white transition-all duration-500 shadow-md';
+            box.className = 'p-5 rounded-2xl text-sm border shadow-sm transition-all duration-500 dark:border-slate-600';
+            btn.className = 'w-full font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.2)] text-lg text-white transform active:scale-95 transition-all glow-btn tracking-wide';
+
+            if(method === 'bkash') { header.classList.add('bg-[#e2136e]'); box.classList.add('bg-[#fce7f0]', 'text-[#c0105e]', 'dark:bg-[#e2136e]/10'); btn.classList.add('bg-gradient-to-r', 'from-[#e2136e]', 'to-[#c0105e]'); name = 'bKash'; number = '01846849460'; } 
+            else if(method === 'nagad') { header.classList.add('bg-[#f37021]'); box.classList.add('bg-[#fef0e9]', 'text-[#d6611a]', 'dark:bg-[#f37021]/10'); btn.classList.add('bg-gradient-to-r', 'from-[#f37021]', 'to-[#d6611a]'); name = 'Nagad'; number = '01846849460'; } 
+            else if(method === 'rocket') { header.classList.add('bg-[#8c1596]'); box.classList.add('bg-[#f4e8f5]', 'text-[#6b1073]', 'dark:bg-[#8c1596]/10'); btn.classList.add('bg-gradient-to-r', 'from-[#8c1596]', 'to-[#6b1073]'); name = 'Rocket'; number = '018468494606'; }
+            else if(method === 'upi') { header.classList.add('bg-[#16a34a]'); box.classList.add('bg-[#dcfce7]', 'text-[#15803d]', 'dark:bg-[#16a34a]/10'); btn.classList.add('bg-gradient-to-r', 'from-[#16a34a]', 'to-[#15803d]'); name = 'UPI'; number = 'admin@upi'; }
+            else if(method === 'paytm') { header.classList.add('bg-[#0284c7]'); box.classList.add('bg-[#e0f2fe]', 'text-[#0369a1]', 'dark:bg-[#0284c7]/10'); btn.classList.add('bg-gradient-to-r', 'from-[#0284c7]', 'to-[#0369a1]'); name = 'Paytm'; number = '9876543210'; }
+            
+            names.forEach(n => n.innerText = name); numbers.forEach(n => n.innerText = number);
+        }
+
+        document.getElementById('depositForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const localRaw = document.getElementById('localAmount').value; const amountBdt = parseFloat(localRaw.replace(/[^0-9.]/g, ''));
+            const senderNumber = document.getElementById('senderNumber').value; const trxId = document.getElementById('trxId').value;
+
+            if(amountBdt <= 0) return Swal.fire({title: 'Error', text: 'Invalid amount.', icon: 'error', customClass: {popup: 'rounded-3xl'}});
+            let btn = document.getElementById('submitBtn'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...';
+
+            try {
+                const res = await fetch('/api/deposit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, method, amountBdt, senderNumber, trxId }) });
+                const data = await res.json();
+                
+                if(data.success) { closeModal(); Swal.fire({title: 'Submitted!', text: 'Your request is in queue for approval.', icon: 'success', customClass: {popup: 'rounded-3xl'}}); document.getElementById('depositForm').reset(); updateTheme(); } 
+                else { Swal.fire({title: 'Error', text: data.error || 'Duplicate TrxID', icon: 'error', customClass: {popup: 'rounded-3xl'}}); }
+            } catch(e) { Swal.fire('Error', 'Server connection failed', 'error'); }
+            
+            btn.innerHTML = 'Confirm Deposit';
+        });
+
+        // Initialize script safely
+        init();
+    </script>
+</body>
+</html>
