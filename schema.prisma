@@ -16,7 +16,7 @@ model Product {
   driveLink String?  
   stock     Int        @default(1)
   createdAt DateTime   @default(now())
-  purchases Purchase[] // Relation
+  purchases Purchase[] 
 }
 
 model User {
@@ -28,7 +28,7 @@ model User {
   country      String     @default("BD") 
   balanceUsd   Float      @default(0.0) 
   deposits     Deposit[] 
-  purchases    Purchase[] // Relation
+  purchases    Purchase[] 
   createdAt    DateTime   @default(now())
 }
 
@@ -44,7 +44,6 @@ model Deposit {
   createdAt     DateTime @default(now())
 }
 
-// Notun: User ki ki kineche tar record
 model Purchase {
   id        Int      @id @default(autoincrement())
   userId    Int
