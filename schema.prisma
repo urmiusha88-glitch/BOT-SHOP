@@ -7,10 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Apnar Bot er Source Code er List
 model Product {
   id        Int      @id @default(autoincrement())
   name      String
-  price     String
+  price     String   // Eita $ e thakbe
   abilities String
   createdAt DateTime @default(now())
+}
+
+// Notun: User der Account ar Wallet Balance
+model User {
+  id           Int       @id @default(autoincrement())
+  telegramId   BigInt    @unique
+  firstName    String
+  username     String?
+  balanceUsd   Float     @default(0.0) // Tar koto Dollar ache
+  deposits     Deposit[] // Tar shob payment history
+  createdAt    DateTime  @default(now())
+}
+
+// Notun: bKash/Nagad/Rocket er TrxID Request
+model Deposit {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  method        String   // bkash, nagad, rocket
+  amountBdt     Float    // Koto Taka pathiyeche
+  senderNumber  String   // Jei number theke Taka esheche
+  trxId         String   @unique
+  status        String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt     DateTime @default(now())
 }
