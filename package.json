@@ -4,7 +4,7 @@
   "description": "Telegram bot for selling source code",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "npx prisma db push && node index.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {
