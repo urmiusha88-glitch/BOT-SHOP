@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Bot Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: {} } }
-    </script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: {} } }</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -16,6 +14,15 @@
         .marquee { overflow: hidden; white-space: nowrap; box-sizing: border-box; }
         .marquee span { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        /* Modal Themes */
+        .modal-glass { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); }
+        .dark .modal-glass { background: rgba(30, 41, 59, 0.98); }
+        .theme-bkash { border-color: #e2136e; background-color: #fce7f0; color: #e2136e; }
+        .theme-nagad { border-color: #f37021; background-color: #fef0e9; color: #f37021; }
+        .theme-rocket { border-color: #8c1596; background-color: #f4e8f5; color: #8c1596; }
+        .btn-bkash { background: linear-gradient(135deg, #e2136e, #c0105e); color: white; }
+        .btn-nagad { background: linear-gradient(135deg, #f37021, #d6611a); color: white; }
+        .btn-rocket { background: linear-gradient(135deg, #8c1596, #6b1073); color: white; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-200 antialiased transition-colors duration-300">
@@ -43,8 +50,8 @@
     </nav>
 
     <div class="pt-16 pb-12 text-center px-4">
-        <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 text-slate-900 dark:text-white">Next-Gen <span class="text-blue-600">Source Codes</span></h1>
-        <p class="text-lg text-slate-500 dark:text-slate-400">Automate your workflow with ready-to-use Telegram bots.</p>
+        <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 text-slate-900 dark:text-white">Premium <span class="text-blue-600">Source Codes</span></h1>
+        <p class="text-lg text-slate-500 dark:text-slate-400">Instant buy & Auto-delivery directly from Google Drive.</p>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -53,56 +60,97 @@
         </div>
     </div>
 
-    <div id="historyModal" class="fixed inset-0 bg-black/50 hidden z-50 justify-center items-center px-4">
+    <div id="historyModal" class="fixed inset-0 bg-black/60 hidden z-50 justify-center items-center px-4 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 transform transition-all">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-xl dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Fund History</h3>
                 <button onclick="closeHistory()" class="text-slate-500 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="max-h-80 overflow-y-auto space-y-3" id="historyList">
-                <p class="text-center text-slate-500 py-4">Loading...</p>
+            <div class="max-h-80 overflow-y-auto space-y-3" id="historyList"></div>
+        </div>
+    </div>
+
+    <div id="modalOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center px-4 transition-all duration-300 opacity-0 pointer-events-none">
+        <div id="addFundModal" class="modal-glass rounded-3xl w-full max-w-md shadow-2xl transition-all duration-300 transform scale-95 border border-slate-200 dark:border-slate-600 overflow-hidden">
+            <div id="modalHeader" class="p-5 flex justify-between items-center text-white transition-all duration-500">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-wallet mr-2"></i> Deposit Fund</h3>
+                <button onclick="closeModal()" class="text-white hover:text-gray-200 text-2xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            
+            <form id="depositForm" class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Select Gateway</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateTheme()">
+                            <div class="py-3 px-1 border-2 rounded-2xl text-center peer-checked:theme-bkash font-extrabold text-slate-500 dark:text-slate-400">bKash</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateTheme()">
+                            <div class="py-3 px-1 border-2 rounded-2xl text-center peer-checked:theme-nagad font-extrabold text-slate-500 dark:text-slate-400">Nagad</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="method" value="rocket" class="peer sr-only" onchange="updateTheme()">
+                            <div class="py-3 px-1 border-2 rounded-2xl text-center peer-checked:theme-rocket font-extrabold text-slate-500 dark:text-slate-400">Rocket</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Add (USD)</label>
+                        <input type="number" step="0.01" id="usdAmount" oninput="calcBdt()" required class="block w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-700 dark:text-white font-bold text-lg" placeholder="$0.00">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Pay (BDT)</label>
+                        <input type="text" id="bdtAmount" disabled class="block w-full px-4 py-3 border rounded-xl bg-slate-100 dark:bg-slate-800 font-extrabold text-lg dark:text-white" value="৳0">
+                    </div>
+                </div>
+
+                <div id="instructionBox" class="p-4 rounded-xl text-sm border">
+                    <p class="font-extrabold mb-2"><i class="fa-solid fa-circle-info mr-1"></i> How to pay:</p>
+                    <ol class="list-decimal list-inside space-y-1.5 font-medium">
+                        <li>Go to <span class="gateway-name"></span> App & Select <b>Send Money</b>.</li>
+                        <li>Send to: <b class="gateway-number text-lg">01846849460</b></li>
+                        <li>Amount: <b id="insAmount" class="text-lg">0</b> BDT.</li>
+                    </ol>
+                </div>
+
+                <div class="space-y-4">
+                    <input type="text" id="senderNumber" required class="block w-full px-4 py-3 border rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white font-medium" placeholder="Your Phone Number">
+                    <input type="text" id="trxId" required class="block w-full px-4 py-3 border rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white uppercase font-medium" placeholder="Transaction ID (TrxID)">
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full btn-bkash font-bold py-3.5 rounded-xl shadow-lg text-lg text-white transform active:scale-95 transition-transform">
+                    Confirm Deposit
+                </button>
+            </form>
         </div>
     </div>
 
     <script>
         let currentUser = JSON.parse(localStorage.getItem('user'));
+        let liveRate = 120;
 
-        // Dark Mode Logic
-        if(localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun');
-        }
+        if(localStorage.getItem('theme') === 'dark') { document.documentElement.classList.add('dark'); document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun'); }
         function toggleDarkMode() {
-            const html = document.documentElement;
-            const icon = document.getElementById('themeIcon');
-            if(html.classList.contains('dark')) {
-                html.classList.remove('dark'); localStorage.setItem('theme', 'light');
-                icon.classList.replace('fa-sun', 'fa-moon');
-            } else {
-                html.classList.add('dark'); localStorage.setItem('theme', 'dark');
-                icon.classList.replace('fa-moon', 'fa-sun');
-            }
+            const html = document.documentElement; const icon = document.getElementById('themeIcon');
+            if(html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); icon.classList.replace('fa-sun', 'fa-moon'); } 
+            else { html.classList.add('dark'); localStorage.setItem('theme', 'dark'); icon.classList.replace('fa-moon', 'fa-sun'); }
         }
 
         async function init() {
             checkAuth(); loadProducts(); loadNotices();
+            try { const res = await fetch('/api/rate'); const data = await res.json(); liveRate = data.rate; } catch(e) {}
             if(currentUser) {
-                const res = await fetch('/api/user/' + currentUser.id);
-                const data = await res.json();
-                if(data.success) {
-                    currentUser.balanceUsd = data.balanceUsd;
-                    localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth();
-                }
+                const res = await fetch('/api/user/' + currentUser.id); const data = await res.json();
+                if(data.success) { currentUser.balanceUsd = data.balanceUsd; localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth(); }
             }
         }
 
         async function loadNotices() {
             const res = await fetch('/api/notices'); const data = await res.json();
-            if(data.length > 0) {
-                document.getElementById('noticeBanner').classList.remove('hidden');
-                document.getElementById('noticeText').innerText = "🔔 NOTICE: " + data.map(n => n.text).join(' | ');
-            }
+            if(data.length > 0) { document.getElementById('noticeBanner').classList.remove('hidden'); document.getElementById('noticeText').innerText = "🔔 NOTICE: " + data.map(n => n.text).join(' | '); }
         }
 
         function checkAuth() {
@@ -110,36 +158,25 @@
             if (currentUser) {
                 authDiv.innerHTML = `
                     <button onclick="openHistory()" class="text-slate-500 dark:text-slate-300 hover:text-blue-500 mr-2" title="History"><i class="fa-solid fa-clock-rotate-left text-xl"></i></button>
-                    <div class="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shadow-inner">
-                        <span class="px-3 text-sm font-bold">${currentUser.name}</span>
-                        <div class="px-3 text-emerald-600 dark:text-emerald-400 font-extrabold">$${currentUser.balanceUsd.toFixed(2)}</div>
+                    <div class="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+                        <span class="px-3 text-sm font-bold border-r dark:border-slate-600">${currentUser.name}</span>
+                        <div class="px-3 text-emerald-600 dark:text-emerald-400 font-extrabold" id="userBal">$${currentUser.balanceUsd.toFixed(2)}</div>
                     </div>
+                    <button onclick="openModal()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-xl text-sm hover:bg-blue-700 shadow-md transform active:scale-95"><i class="fa-solid fa-plus mr-1"></i>Add Fund</button>
                     <button onclick="logout()" class="text-slate-400 hover:text-red-500 p-2"><i class="fa-solid fa-power-off"></i></button>
                 `;
-            } else {
-                authDiv.innerHTML = `<a href="/login" class="bg-blue-600 text-white font-bold py-2 px-5 rounded-xl shadow-md">Login</a>`;
-            }
+            } else { authDiv.innerHTML = `<a href="/login" class="bg-blue-600 text-white font-bold py-2 px-5 rounded-xl">Login</a>`; }
         }
 
         async function openHistory() {
             document.getElementById('historyModal').classList.replace('hidden', 'flex');
-            const list = document.getElementById('historyList');
-            list.innerHTML = '<p class="text-center"><i class="fa-solid fa-spinner fa-spin"></i></p>';
-            const res = await fetch('/api/history/' + currentUser.id);
-            const deposits = await res.json();
-            
+            const list = document.getElementById('historyList'); list.innerHTML = '<p class="text-center"><i class="fa-solid fa-spinner fa-spin"></i></p>';
+            const res = await fetch('/api/history/' + currentUser.id); const deposits = await res.json();
             if(deposits.length === 0) return list.innerHTML = '<p class="text-center text-slate-500">No transactions yet.</p>';
-            
             list.innerHTML = deposits.map(d => `
                 <div class="p-3 border dark:border-slate-600 rounded-xl flex justify-between items-center bg-slate-50 dark:bg-slate-700/50">
-                    <div>
-                        <p class="font-bold text-sm uppercase">${d.method} - ৳${d.amountBdt}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">TrxID: ${d.trxId}</p>
-                    </div>
-                    <span class="px-2 py-1 text-xs font-bold rounded-lg ${
-                        d.status==='APPROVED' ? 'bg-emerald-100 text-emerald-600' : 
-                        d.status==='REJECTED' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'
-                    }">${d.status}</span>
+                    <div><p class="font-bold text-sm uppercase dark:text-white">${d.method} - ৳${d.amountBdt}</p><p class="text-xs text-slate-500 font-mono">TrxID: ${d.trxId}</p></div>
+                    <span class="px-2 py-1 text-xs font-bold rounded-lg ${d.status==='APPROVED'?'bg-emerald-100 text-emerald-600':d.status==='REJECTED'?'bg-red-100 text-red-600':'bg-orange-100 text-orange-600'}">${d.status}</span>
                 </div>
             `).join('');
         }
@@ -153,9 +190,8 @@
             if(products.length === 0) { list.innerHTML = '<p class="col-span-full text-center">No products.</p>'; return; }
 
             products.forEach(p => {
-                const priceNum = p.price.replace(/[^0-9.]/g, ''); 
-                const imageHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-48 object-cover rounded-xl mb-4 shadow-sm" alt="Product Image" onerror="this.style.display='none'">` : '';
-
+                const priceNum = parseFloat(p.price.replace(/[^0-9.]/g, '')); 
+                const imageHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-48 object-cover rounded-xl mb-4" onerror="this.style.display='none'">` : '';
                 list.innerHTML += `
                     <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-md p-6 transform hover:-translate-y-1 transition-all border dark:border-slate-700 flex flex-col justify-between group">
                         <div>
@@ -164,19 +200,79 @@
                             <span class="inline-block bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-extrabold px-3 py-1 rounded-xl text-sm mb-4">$${priceNum}</span>
                             <p class="text-sm text-slate-600 dark:text-slate-300 mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">${p.abilities}</p>
                         </div>
-                        <button onclick="buyProduct('${priceNum}')" class="w-full bg-slate-900 dark:bg-blue-600 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all"><i class="fa-solid fa-cart-shopping"></i> Buy Now</button>
+                        <button onclick="buyProduct(${p.id}, ${priceNum})" class="w-full bg-slate-900 dark:bg-blue-600 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all active:scale-95"><i class="fa-solid fa-cart-shopping"></i> Buy Now</button>
                     </div>
                 `;
             });
         }
 
-        function buyProduct(price) {
+        // INSTANT BUY & AUTO DELIVERY SYSTEM
+        async function buyProduct(productId, price) {
             if(!currentUser) return window.location.href='/login';
-            if(currentUser.balanceUsd < price) Swal.fire('Oops!', 'Not enough balance. Contact Admin.', 'warning');
-            else Swal.fire('Success', 'Contact admin on Telegram for files!', 'success');
+            
+            if(currentUser.balanceUsd < price) {
+                return Swal.fire({ title: 'Insufficient Balance', text: `You need $${price}.`, icon: 'warning', confirmButtonText: 'Add Fund', confirmButtonColor: '#3b82f6'}).then(r => { if(r.isConfirmed) openModal(); });
+            }
+
+            Swal.fire({ title: 'Processing Order...', didOpen: () => { Swal.showLoading(); } });
+            
+            const res = await fetch('/api/buy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, productId }) });
+            const data = await res.json();
+
+            if(data.success) {
+                currentUser.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth();
+                
+                Swal.fire({
+                    title: 'Purchase Successful! 🎉',
+                    html: `Your balance has been updated.<br><br><span class="text-sm text-slate-500">Google Drive Link:</span><br><a href="${data.link}" target="_blank" class="text-blue-500 font-bold underline break-all">${data.link}</a>`,
+                    icon: 'success', showCancelButton: true, confirmButtonText: '<i class="fa-regular fa-copy"></i> Copy Link', cancelButtonText: 'Close', confirmButtonColor: '#10b981'
+                }).then((r) => {
+                    if(r.isConfirmed) { navigator.clipboard.writeText(data.link); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Link Copied!', showConfirmButton:false, timer:3000}); }
+                });
+            } else { Swal.fire('Error', data.error, 'error'); }
         }
 
-        init();
+        // --- FUND DEPOSIT MODAL LOGIC ---
+        const overlay = document.getElementById('modalOverlay'); const modal = document.getElementById('addFundModal');
+        function openModal() { overlay.classList.remove('opacity-0', 'pointer-events-none'); modal.classList.remove('scale-95'); }
+        function closeModal() { overlay.classList.add('opacity-0', 'pointer-events-none'); modal.classList.add('scale-95'); }
+        function calcBdt() { const usd = parseFloat(document.getElementById('usdAmount').value) || 0; const bdt = Math.round(usd * liveRate); document.getElementById('bdtAmount').value = '৳' + bdt; document.getElementById('insAmount').innerText = bdt; }
+        
+        function updateTheme() {
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const header = document.getElementById('modalHeader'); const box = document.getElementById('instructionBox'); const btn = document.getElementById('submitBtn');
+            const names = document.querySelectorAll('.gateway-name'); const numbers = document.querySelectorAll('.gateway-number');
+
+            let number = '01846849460'; let name = '';
+            header.className = 'p-5 flex justify-between items-center text-white transition-all duration-500';
+            box.className = 'p-4 rounded-xl text-sm transition-all duration-500 border dark:border-slate-600';
+            btn.className = 'w-full font-bold py-3.5 rounded-xl shadow-lg transform active:scale-95 transition-all text-lg text-white';
+
+            if(method === 'bkash') { header.classList.add('bg-[#e2136e]'); box.classList.add('bg-[#fce7f0]', 'text-[#c0105e]', 'dark:bg-[#e2136e]/20'); btn.classList.add('bg-gradient-to-r', 'from-[#e2136e]', 'to-[#c0105e]'); name = 'bKash'; } 
+            else if(method === 'nagad') { header.classList.add('bg-[#f37021]'); box.classList.add('bg-[#fef0e9]', 'text-[#d6611a]', 'dark:bg-[#f37021]/20'); btn.classList.add('bg-gradient-to-r', 'from-[#f37021]', 'to-[#d6611a]'); name = 'Nagad'; } 
+            else if(method === 'rocket') { number = '018468494606'; header.classList.add('bg-[#8c1596]'); box.classList.add('bg-[#f4e8f5]', 'text-[#6b1073]', 'dark:bg-[#8c1596]/20'); btn.classList.add('bg-gradient-to-r', 'from-[#8c1596]', 'to-[#6b1073]'); name = 'Rocket'; }
+            
+            names.forEach(n => n.innerText = name); numbers.forEach(n => n.innerText = number);
+        }
+
+        document.getElementById('depositForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const bdtRaw = document.getElementById('bdtAmount').value; const amountBdt = parseFloat(bdtRaw.replace(/[^0-9.]/g, ''));
+            const senderNumber = document.getElementById('senderNumber').value; const trxId = document.getElementById('trxId').value;
+
+            if(amountBdt <= 0) return Swal.fire('Error', 'Invalid amount.', 'error');
+            let btn = document.getElementById('submitBtn'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+            const res = await fetch('/api/deposit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, method, amountBdt, senderNumber, trxId }) });
+            const data = await res.json();
+            
+            if(data.success) { closeModal(); Swal.fire('Sent!', 'Admin will approve it shortly.', 'success'); document.getElementById('depositForm').reset(); updateTheme(); } 
+            else { Swal.fire('Error', data.error, 'error'); }
+            btn.innerHTML = 'Confirm Deposit';
+        });
+
+        init(); updateTheme();
     </script>
 </body>
 </html>
