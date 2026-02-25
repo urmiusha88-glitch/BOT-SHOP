@@ -12,7 +12,8 @@ model Product {
   name      String
   price     String   
   abilities String
-  imageId   String?  // Telegram er chobir ID
+  imageId   String?  
+  driveLink String?  // Notun: Google Drive Link
   createdAt DateTime @default(now())
 }
 
