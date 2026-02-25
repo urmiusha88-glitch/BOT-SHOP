@@ -1,11 +1,10 @@
 {
-  "name": "source-code-seller-bot",
+  "name": "aura-store-bot",
   "version": "1.0.0",
-  "description": "Telegram bot for selling source code",
+  "description": "Premium Source Code Seller Bot",
   "main": "index.js",
   "scripts": {
-    "start": "npx prisma db push --accept-data-loss && node index.js",
-    "postinstall": "prisma generate"
+    "start": "npx prisma generate && npx prisma db push --accept-data-loss && node index.js"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
