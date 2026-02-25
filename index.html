@@ -1,47 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Bot Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: {} } }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .glass-effect { background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.3); }
-        .modal-glass { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); }
-        
-        /* Smooth Custom Radio themes */
-        .theme-bkash { border-color: #e2136e; background-color: #fce7f0; color: #e2136e; box-shadow: 0 4px 12px rgba(226, 19, 110, 0.15); }
-        .theme-nagad { border-color: #f37021; background-color: #fef0e9; color: #f37021; box-shadow: 0 4px 12px rgba(243, 112, 33, 0.15); }
-        .theme-rocket { border-color: #8c1596; background-color: #f4e8f5; color: #8c1596; box-shadow: 0 4px 12px rgba(140, 21, 150, 0.15); }
-        
-        .btn-bkash { background: linear-gradient(135deg, #e2136e, #c0105e); color: white; }
-        .btn-nagad { background: linear-gradient(135deg, #f37021, #d6611a); color: white; }
-        .btn-rocket { background: linear-gradient(135deg, #8c1596, #6b1073); color: white; }
-        
-        /* Modal Transition classes */
-        .modal-active { opacity: 1; transform: scale(1); pointer-events: auto; }
-        .modal-inactive { opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+        .dark .glass-effect { background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .marquee { overflow: hidden; white-space: nowrap; box-sizing: border-box; }
+        .marquee span { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; }
+        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased selection:bg-blue-200">
+<body class="bg-slate-50 dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-200 antialiased transition-colors duration-300">
 
-    <nav class="glass-effect fixed w-full z-40 top-0 shadow-sm transition-all">
+    <div id="noticeBanner" class="hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold py-2 marquee z-50 relative">
+        <span id="noticeText"></span>
+    </div>
+
+    <nav class="glass-effect sticky w-full z-40 top-0 shadow-sm transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 flex items-center gap-2">
-                    <i class="fa-solid fa-robot text-blue-600 text-2xl"></i>
-                    <span class="font-bold text-xl tracking-tight">Bot<span class="text-blue-600">Store</span></span>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-robot text-blue-600 dark:text-blue-400 text-2xl animate-bounce"></i>
+                    <span class="font-extrabold text-xl tracking-tight">Bot<span class="text-blue-600 dark:text-blue-400">Store</span></span>
                 </div>
-                <div id="authSection" class="flex items-center space-x-3"></div>
+                
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 hover:scale-110 transition-transform">
+                        <i id="themeIcon" class="fa-solid fa-moon"></i>
+                    </button>
+                    <div id="authSection" class="flex items-center space-x-2"></div>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="pt-28 pb-12 sm:pt-32 sm:pb-16 bg-gradient-to-b from-blue-50 to-slate-50 text-center px-4">
-        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">Premium <span class="text-blue-600">Source Codes</span></h1>
-        <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-500">Automate your workflow with ready-to-use Telegram bots.</p>
+    <div class="pt-16 pb-12 text-center px-4">
+        <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 text-slate-900 dark:text-white">Next-Gen <span class="text-blue-600">Source Codes</span></h1>
+        <p class="text-lg text-slate-500 dark:text-slate-400">Automate your workflow with ready-to-use Telegram bots.</p>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -50,98 +53,55 @@
         </div>
     </div>
 
-    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex justify-center items-center px-4 transition-all duration-300 opacity-0 pointer-events-none">
-        
-        <div id="addFundModal" class="modal-glass rounded-3xl w-full max-w-md shadow-2xl transition-all duration-300 transform scale-95 border border-white/40 overflow-hidden">
-            <div id="modalHeader" class="p-5 flex justify-between items-center text-white transition-all duration-500">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-wallet mr-2"></i> Deposit Fund</h3>
-                <button onclick="closeModal()" class="text-white/80 hover:text-white transform hover:rotate-90 transition-all"><i class="fa-solid fa-xmark text-2xl"></i></button>
+    <div id="historyModal" class="fixed inset-0 bg-black/50 hidden z-50 justify-center items-center px-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 transform transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-xl dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Fund History</h3>
+                <button onclick="closeHistory()" class="text-slate-500 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
-            <form id="depositForm" class="p-6 space-y-5">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3">Select Gateway</label>
-                    <div class="grid grid-cols-3 gap-3">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateTheme()">
-                            <div class="py-3 px-1 border-2 border-slate-200 rounded-2xl text-center peer-checked:theme-bkash transition-all font-extrabold text-slate-500 hover:bg-slate-50">bKash</div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateTheme()">
-                            <div class="py-3 px-1 border-2 border-slate-200 rounded-2xl text-center peer-checked:theme-nagad transition-all font-extrabold text-slate-500 hover:bg-slate-50">Nagad</div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="method" value="rocket" class="peer sr-only" onchange="updateTheme()">
-                            <div class="py-3 px-1 border-2 border-slate-200 rounded-2xl text-center peer-checked:theme-rocket transition-all font-extrabold text-slate-500 hover:bg-slate-50">Rocket</div>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Add Amount (USD)</label>
-                        <input type="number" step="0.01" id="usdAmount" oninput="calcBdt()" required class="block w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 font-bold text-lg transition-all" placeholder="$0.00">
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Send Exactly (BDT)</label>
-                        <input type="text" id="bdtAmount" disabled class="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-100 font-extrabold text-lg text-slate-800" value="৳0">
-                    </div>
-                </div>
-
-                <div id="instructionBox" class="p-4 rounded-xl text-sm transition-all duration-500 border">
-                    <p class="font-extrabold mb-2"><i class="fa-solid fa-circle-info mr-1"></i> How to pay:</p>
-                    <ol class="list-decimal list-inside space-y-1.5 font-medium">
-                        <li>Go to <span class="gateway-name"></span> App & Select <b>Send Money</b>.</li>
-                        <li>Send to: <b class="text-base bg-white/50 px-2 py-0.5 rounded gateway-number">01846849460</b></li>
-                        <li>Amount: <b id="insAmount" class="text-base bg-white/50 px-2 py-0.5 rounded">0</b> BDT.</li>
-                    </ol>
-                </div>
-
-                <div class="space-y-4">
-                    <input type="text" id="senderNumber" required class="block w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 transition-all font-medium" placeholder="Your Phone Number (e.g. 018XX...)">
-                    <input type="text" id="trxId" required class="block w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 uppercase transition-all font-medium tracking-wide" placeholder="Transaction ID (e.g. 9F8G...)">
-                </div>
-
-                <button type="submit" id="submitBtn" class="w-full btn-bkash font-bold py-3.5 rounded-xl shadow-lg transform hover:-translate-y-0.5 active:scale-95 transition-all text-lg tracking-wide">
-                    Confirm Deposit
-                </button>
-            </form>
+            <div class="max-h-80 overflow-y-auto space-y-3" id="historyList">
+                <p class="text-center text-slate-500 py-4">Loading...</p>
+            </div>
         </div>
     </div>
 
-    <footer class="bg-white border-t border-slate-200 mt-12 py-10">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h3 class="text-xl font-bold text-slate-800 mb-6">Contact Admin</h3>
-            <div class="flex justify-center space-x-4 mb-6">
-                <a href="https://t.me/AURA_MINATO" target="_blank" class="flex items-center bg-blue-50 text-blue-500 hover:bg-blue-600 hover:text-white px-6 py-3 rounded-2xl transition-all font-bold shadow-sm hover:shadow-md transform hover:-translate-y-1"><i class="fa-brands fa-telegram text-2xl mr-2"></i> Telegram</a>
-                <a href="#" target="_blank" class="flex items-center bg-blue-50 text-blue-600 hover:bg-blue-700 hover:text-white px-6 py-3 rounded-2xl transition-all font-bold shadow-sm hover:shadow-md transform hover:-translate-y-1"><i class="fa-brands fa-facebook text-2xl mr-2"></i> Facebook</a>
-            </div>
-            <p class="text-slate-400 text-sm font-medium">© 2026 Developer : Ononto Hasan.</p>
-        </div>
-    </footer>
-
     <script>
-        let liveRate = 120;
         let currentUser = JSON.parse(localStorage.getItem('user'));
 
-        const Toast = Swal.mixin({
-            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' }
-        });
-        
+        // Dark Mode Logic
+        if(localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun');
+        }
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if(html.classList.contains('dark')) {
+                html.classList.remove('dark'); localStorage.setItem('theme', 'light');
+                icon.classList.replace('fa-sun', 'fa-moon');
+            } else {
+                html.classList.add('dark'); localStorage.setItem('theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+            }
+        }
+
         async function init() {
-            checkAuth(); loadProducts();
-            try { const res = await fetch('/api/rate'); const data = await res.json(); liveRate = data.rate; } catch(e) {}
+            checkAuth(); loadProducts(); loadNotices();
             if(currentUser) {
-                try {
-                    const res = await fetch('/api/user/' + currentUser.id);
-                    const data = await res.json();
-                    if(data.success) {
-                        currentUser.balanceUsd = data.balanceUsd;
-                        localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth();
-                    }
-                } catch(e){}
+                const res = await fetch('/api/user/' + currentUser.id);
+                const data = await res.json();
+                if(data.success) {
+                    currentUser.balanceUsd = data.balanceUsd;
+                    localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth();
+                }
+            }
+        }
+
+        async function loadNotices() {
+            const res = await fetch('/api/notices'); const data = await res.json();
+            if(data.length > 0) {
+                document.getElementById('noticeBanner').classList.remove('hidden');
+                document.getElementById('noticeText').innerText = "🔔 NOTICE: " + data.map(n => n.text).join(' | ');
             }
         }
 
@@ -149,143 +109,74 @@
             const authDiv = document.getElementById('authSection');
             if (currentUser) {
                 authDiv.innerHTML = `
-                    <div class="hidden sm:flex items-center bg-white rounded-xl p-1 border border-slate-200 shadow-sm">
-                        <span class="px-3 text-sm font-bold text-slate-600 border-r">${currentUser.name}</span>
-                        <div class="px-3 text-emerald-600 font-extrabold flex items-center tracking-wide">$${currentUser.balanceUsd.toFixed(2)}</div>
+                    <button onclick="openHistory()" class="text-slate-500 dark:text-slate-300 hover:text-blue-500 mr-2" title="History"><i class="fa-solid fa-clock-rotate-left text-xl"></i></button>
+                    <div class="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shadow-inner">
+                        <span class="px-3 text-sm font-bold">${currentUser.name}</span>
+                        <div class="px-3 text-emerald-600 dark:text-emerald-400 font-extrabold">$${currentUser.balanceUsd.toFixed(2)}</div>
                     </div>
-                    <button onclick="openModal()" class="bg-slate-900 hover:bg-blue-600 text-white font-bold py-2 px-5 rounded-xl shadow-md transition-all text-sm transform active:scale-95"><i class="fa-solid fa-plus mr-1"></i> Add Fund</button>
-                    <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition-colors bg-white p-2 rounded-xl shadow-sm border"><i class="fa-solid fa-power-off"></i></button>
+                    <button onclick="logout()" class="text-slate-400 hover:text-red-500 p-2"><i class="fa-solid fa-power-off"></i></button>
                 `;
             } else {
-                authDiv.innerHTML = `<a href="/login" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl transition-all shadow-md transform active:scale-95">Login</a>`;
+                authDiv.innerHTML = `<a href="/login" class="bg-blue-600 text-white font-bold py-2 px-5 rounded-xl shadow-md">Login</a>`;
             }
         }
+
+        async function openHistory() {
+            document.getElementById('historyModal').classList.replace('hidden', 'flex');
+            const list = document.getElementById('historyList');
+            list.innerHTML = '<p class="text-center"><i class="fa-solid fa-spinner fa-spin"></i></p>';
+            const res = await fetch('/api/history/' + currentUser.id);
+            const deposits = await res.json();
+            
+            if(deposits.length === 0) return list.innerHTML = '<p class="text-center text-slate-500">No transactions yet.</p>';
+            
+            list.innerHTML = deposits.map(d => `
+                <div class="p-3 border dark:border-slate-600 rounded-xl flex justify-between items-center bg-slate-50 dark:bg-slate-700/50">
+                    <div>
+                        <p class="font-bold text-sm uppercase">${d.method} - ৳${d.amountBdt}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">TrxID: ${d.trxId}</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-bold rounded-lg ${
+                        d.status==='APPROVED' ? 'bg-emerald-100 text-emerald-600' : 
+                        d.status==='REJECTED' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'
+                    }">${d.status}</span>
+                </div>
+            `).join('');
+        }
+        function closeHistory() { document.getElementById('historyModal').classList.replace('flex', 'hidden'); }
 
         function logout() { localStorage.removeItem('user'); window.location.reload(); }
 
         async function loadProducts() {
-            try {
-                const res = await fetch('/api/products'); const products = await res.json();
-                const list = document.getElementById('product-list'); list.innerHTML = '';
-                if(products.length === 0) { list.innerHTML = '<p class="col-span-full text-center text-slate-500 font-medium">No products added yet.</p>'; return; }
+            const res = await fetch('/api/products'); const products = await res.json();
+            const list = document.getElementById('product-list'); list.innerHTML = '';
+            if(products.length === 0) { list.innerHTML = '<p class="col-span-full text-center">No products.</p>'; return; }
 
-                products.forEach(p => {
-                    const priceNum = p.price.replace(/[^0-9.]/g, ''); 
-                    list.innerHTML += `
-                        <div class="bg-white rounded-3xl shadow-sm hover:shadow-xl border border-slate-100 p-6 transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group">
-                            <div>
-                                <h2 class="text-2xl font-extrabold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">${p.name}</h2>
-                                <span class="inline-block bg-emerald-50 text-emerald-600 font-extrabold px-4 py-1.5 rounded-xl text-sm mb-4 border border-emerald-100">$${priceNum}</span>
-                                <p class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed font-medium">${p.abilities}</p>
-                            </div>
-                            <button onclick="buyProduct('${p.name}', ${priceNum})" class="w-full bg-slate-100 text-slate-800 font-bold py-3.5 rounded-xl hover:bg-slate-900 hover:text-white transition-all duration-300 shadow-sm flex justify-center items-center gap-2 transform active:scale-95">
-                                <i class="fa-solid fa-cart-shopping"></i> Buy Source Code
-                            </button>
+            products.forEach(p => {
+                const priceNum = p.price.replace(/[^0-9.]/g, ''); 
+                const imageHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-48 object-cover rounded-xl mb-4 shadow-sm" alt="Product Image" onerror="this.style.display='none'">` : '';
+
+                list.innerHTML += `
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-md p-6 transform hover:-translate-y-1 transition-all border dark:border-slate-700 flex flex-col justify-between group">
+                        <div>
+                            ${imageHtml}
+                            <h2 class="text-2xl font-extrabold mb-2 dark:text-white">${p.name}</h2>
+                            <span class="inline-block bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-extrabold px-3 py-1 rounded-xl text-sm mb-4">$${priceNum}</span>
+                            <p class="text-sm text-slate-600 dark:text-slate-300 mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">${p.abilities}</p>
                         </div>
-                    `;
-                });
-            } catch(e) {}
+                        <button onclick="buyProduct('${priceNum}')" class="w-full bg-slate-900 dark:bg-blue-600 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all"><i class="fa-solid fa-cart-shopping"></i> Buy Now</button>
+                    </div>
+                `;
+            });
         }
 
-        function buyProduct(name, price) {
-            if(!currentUser) return Swal.fire({title: 'Authentication Required', text:'Please login to proceed.', icon:'info', confirmButtonColor: '#3b82f6'}).then(() => window.location.href='/login');
-            
-            if(currentUser.balanceUsd < price) {
-                Swal.fire({ 
-                    title: 'Insufficient Balance', 
-                    html: `<div class="text-slate-600 font-medium mt-2">Required: <b class="text-red-500">$${price}</b><br>Available: <b class="text-emerald-500">$${currentUser.balanceUsd.toFixed(2)}</b></div>`, 
-                    icon: 'warning', 
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fa-solid fa-wallet mr-1"></i> Add Fund', 
-                    confirmButtonColor: '#3b82f6',
-                    cancelButtonText: 'Cancel',
-                    customClass: { popup: 'rounded-3xl' }
-                }).then((res) => { if(res.isConfirmed) openModal(); });
-            } else { 
-                Swal.fire({title: 'Order Processing', text: 'Contact admin on Telegram to receive the files.', icon: 'success', confirmButtonColor: '#3b82f6', customClass: { popup: 'rounded-3xl' }}); 
-            }
+        function buyProduct(price) {
+            if(!currentUser) return window.location.href='/login';
+            if(currentUser.balanceUsd < price) Swal.fire('Oops!', 'Not enough balance. Contact Admin.', 'warning');
+            else Swal.fire('Success', 'Contact admin on Telegram for files!', 'success');
         }
 
-        // --- SMOOTH MODAL LOGIC ---
-        const overlay = document.getElementById('modalOverlay');
-        const modal = document.getElementById('addFundModal');
-
-        function openModal() {
-            overlay.classList.remove('opacity-0', 'pointer-events-none');
-            modal.classList.remove('scale-95');
-        }
-        function closeModal() {
-            overlay.classList.add('opacity-0', 'pointer-events-none');
-            modal.classList.add('scale-95');
-        }
-
-        function calcBdt() {
-            const usd = parseFloat(document.getElementById('usdAmount').value) || 0;
-            const bdt = Math.round(usd * liveRate);
-            document.getElementById('bdtAmount').value = '৳' + bdt;
-            document.getElementById('insAmount').innerText = bdt;
-        }
-
-        function updateTheme() {
-            const method = document.querySelector('input[name="method"]:checked').value;
-            const header = document.getElementById('modalHeader');
-            const box = document.getElementById('instructionBox');
-            const btn = document.getElementById('submitBtn');
-            const names = document.querySelectorAll('.gateway-name');
-            const numbers = document.querySelectorAll('.gateway-number');
-
-            let number = '01846849460'; let name = '';
-
-            // Reset Classes
-            header.className = 'p-5 flex justify-between items-center text-white transition-all duration-500';
-            box.className = 'p-4 rounded-xl text-sm transition-all duration-500 border';
-            btn.className = 'w-full font-bold py-3.5 rounded-xl shadow-lg transform hover:-translate-y-0.5 active:scale-95 transition-all text-lg tracking-wide text-white';
-
-            if(method === 'bkash') {
-                header.classList.add('bg-[#e2136e]'); box.classList.add('bg-[#fce7f0]', 'border-[#f3b6cf]', 'text-[#c0105e]'); btn.classList.add('bg-gradient-to-r', 'from-[#e2136e]', 'to-[#c0105e]', 'shadow-pink-200'); name = 'bKash';
-            } else if(method === 'nagad') {
-                header.classList.add('bg-[#f37021]'); box.classList.add('bg-[#fef0e9]', 'border-[#fcd0b6]', 'text-[#d6611a]'); btn.classList.add('bg-gradient-to-r', 'from-[#f37021]', 'to-[#d6611a]', 'shadow-orange-200'); name = 'Nagad';
-            } else if(method === 'rocket') {
-                number = '018468494606'; header.classList.add('bg-[#8c1596]'); box.classList.add('bg-[#f4e8f5]', 'border-[#dcb5e3]', 'text-[#6b1073]'); btn.classList.add('bg-gradient-to-r', 'from-[#8c1596]', 'to-[#6b1073]', 'shadow-purple-200'); name = 'Rocket';
-            }
-            
-            names.forEach(n => n.innerText = name);
-            numbers.forEach(n => n.innerText = number);
-        }
-
-        document.getElementById('depositForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const method = document.querySelector('input[name="method"]:checked').value;
-            const bdtRaw = document.getElementById('bdtAmount').value;
-            const amountBdt = parseFloat(bdtRaw.replace(/[^0-9.]/g, ''));
-            const senderNumber = document.getElementById('senderNumber').value;
-            const trxId = document.getElementById('trxId').value;
-
-            if(amountBdt <= 0) return Swal.fire({icon: 'error', title: 'Invalid Amount', text: 'Enter a valid USD amount.', confirmButtonColor: '#3b82f6'});
-            
-            let btn = document.getElementById('submitBtn'); 
-            const originalText = btn.innerText;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...';
-
-            try {
-                const res = await fetch('/api/deposit', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUser.id, method, amountBdt, senderNumber, trxId })
-                });
-                const data = await res.json();
-                
-                if(data.success) {
-                    closeModal(); 
-                    Swal.fire({title: 'Request Sent!', text: 'Admin will review and approve your deposit shortly.', icon: 'success', confirmButtonColor: '#3b82f6', customClass: { popup: 'rounded-3xl' }}); 
-                    document.getElementById('depositForm').reset(); updateTheme();
-                } else { Swal.fire('Error', data.error, 'error'); }
-            } catch(err) {
-                Swal.fire('Error', 'Server connection failed', 'error');
-            }
-            btn.innerHTML = originalText;
-        });
-
-        init(); updateTheme();
+        init();
     </script>
 </body>
 </html>
