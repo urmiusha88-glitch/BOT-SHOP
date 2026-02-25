@@ -3,22 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Bot Store</title>
+    <title>Admin - Bot Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800">
+<body class="bg-slate-100 font-sans text-slate-800 transition-all duration-300">
 
-    <div class="max-w-5xl mx-auto px-4 py-10">
-        <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+    <div id="loginSection" class="h-screen flex justify-center items-center px-4 transition-all duration-500 ease-in-out">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-slate-200 transform hover:scale-[1.01] transition-all">
+            <h2 class="text-3xl font-extrabold text-center text-slate-800 mb-2"><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i>Admin Area</h2>
+            <p class="text-center text-slate-500 mb-8 text-sm">Secure login for Ononto Hasan</p>
+            
+            <form id="adminLoginForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Email</label>
+                    <input type="email" id="adminEmail" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none" placeholder="admin@example.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="adminPassInput" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-blue-600 transition-all shadow-md hover:shadow-lg transform active:scale-95">
+                    Access Dashboard <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </form>
+            <div class="text-center mt-6"><a href="/" class="text-sm text-slate-400 hover:text-blue-500 transition-colors">Back to Website</a></div>
+        </div>
+    </div>
+
+    <div id="dashboardSection" class="hidden max-w-6xl mx-auto px-4 py-10 opacity-0 transition-opacity duration-700">
+        <div class="flex justify-between items-center mb-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div>
-                <h1 class="text-3xl font-bold text-slate-800"><i class="fa-solid fa-shield-halved text-blue-600 mr-2"></i>Admin Dashboard</h1>
-                <p class="text-slate-500 mt-1">Manage your Telegram Bot Source Codes</p>
+                <h1 class="text-3xl font-bold text-slate-800"><i class="fa-solid fa-shield-halved text-blue-600 mr-2"></i>Dashboard</h1>
+                <p class="text-slate-500 mt-1">Manage Store & Maintenance</p>
             </div>
-            <a href="/" class="bg-slate-100 text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-lg font-medium transition-colors">
-                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Store
-            </a>
+            <button onclick="logoutAdmin()" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg font-bold transition-colors">
+                <i class="fa-solid fa-power-off mr-1"></i> Logout
+            </button>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 flex justify-between items-center bg-gradient-to-r from-white to-slate-50">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-screwdriver-wrench text-orange-500 mr-2"></i>Maintenance Mode</h2>
+                <p class="text-sm text-slate-500">Hide website from public users when updating.</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="maintenanceToggle" class="sr-only peer" onchange="toggleMaintenance()">
+              <div class="w-14 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-500 shadow-inner"></div>
+            </label>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -30,112 +63,111 @@
                             <th class="p-4 font-semibold">Name</th>
                             <th class="p-4 font-semibold">Price</th>
                             <th class="p-4 font-semibold">Abilities</th>
-                            <th class="p-4 font-semibold text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="admin-product-list" class="divide-y divide-slate-100">
-                        <tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></td></tr>
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        // Check for password in session storage or prompt
-        let adminPass = sessionStorage.getItem('adminPass');
-        
-        async function authenticate() {
-            if (!adminPass) {
-                const { value: password } = await Swal.fire({
-                    title: 'Admin Authentication',
-                    input: 'password',
-                    inputLabel: 'Enter your admin password',
-                    inputPlaceholder: 'Password...',
-                    allowOutsideClick: false,
-                    confirmButtonColor: '#3b82f6'
-                });
-                if (password) {
-                    adminPass = password;
-                    sessionStorage.setItem('adminPass', adminPass);
-                    loadAdminProducts();
-                } else {
-                    window.location.href = '/';
-                }
+        const loginSec = document.getElementById('loginSection');
+        const dashSec = document.getElementById('dashboardSection');
+        let sessionPass = sessionStorage.getItem('adminPass');
+
+        // Setup smooth sweet alerts
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' }
+        });
+
+        // Check Auth Status on Load
+        if (sessionStorage.getItem('adminToken')) {
+            showDashboard();
+        }
+
+        function showDashboard() {
+            loginSec.classList.add('hidden');
+            dashSec.classList.remove('hidden');
+            setTimeout(() => dashSec.classList.remove('opacity-0'), 100);
+            loadAdminProducts();
+            loadSettings();
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem('adminToken');
+            sessionStorage.removeItem('adminPass');
+            window.location.reload();
+        }
+
+        // Login Submit
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassInput').value;
+
+            const res = await fetch('/api/admin/login', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                sessionStorage.setItem('adminToken', data.token);
+                sessionStorage.setItem('adminPass', password);
+                sessionPass = password;
+                Toast.fire({ icon: 'success', title: 'Login Successful' });
+                showDashboard();
             } else {
-                loadAdminProducts();
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Invalid Credentials', confirmButtonColor: '#3b82f6' });
             }
+        });
+
+        async function loadSettings() {
+            const res = await fetch('/api/admin/settings');
+            const data = await res.json();
+            document.getElementById('maintenanceToggle').checked = data.isMaintenance;
+        }
+
+        async function toggleMaintenance() {
+            const status = document.getElementById('maintenanceToggle').checked;
+            try {
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: sessionPass, status: status })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    Toast.fire({ icon: status ? 'warning' : 'success', title: status ? 'Maintenance Mode ON' : 'Website is Live' });
+                } else {
+                    document.getElementById('maintenanceToggle').checked = !status; 
+                    Toast.fire({ icon: 'error', title: 'Auth Error' });
+                }
+            } catch (e) { console.error(e); }
         }
 
         async function loadAdminProducts() {
-            try {
-                const response = await fetch('/api/products');
-                const products = await response.json();
-                const tbody = document.getElementById('admin-product-list');
-                tbody.innerHTML = '';
-
-                if(products.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">No products found. Add from Telegram Bot.</td></tr>';
-                    return;
-                }
-
-                products.forEach(p => {
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="p-4 text-slate-500 font-mono text-sm">#${p.id}</td>
-                            <td class="p-4 font-bold text-slate-800">${p.name}</td>
-                            <td class="p-4 font-semibold text-emerald-600">${p.price}</td>
-                            <td class="p-4 text-sm text-slate-500 truncate max-w-xs">${p.abilities}</td>
-                            <td class="p-4 text-right">
-                                <button onclick="deleteProduct(${p.id})" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors" title="Delete Product">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } catch (e) {
-                Swal.fire('Error', 'Could not load products', 'error');
+            const response = await fetch('/api/products');
+            const products = await response.json();
+            const tbody = document.getElementById('admin-product-list');
+            tbody.innerHTML = '';
+            if(products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">No products found.</td></tr>'; return;
             }
-        }
-
-        async function deleteProduct(id) {
-            const confirm = await Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Yes, delete it!'
+            products.forEach(p => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-4 text-slate-500 font-mono text-sm">#${p.id}</td>
+                        <td class="p-4 font-bold text-slate-800">${p.name}</td>
+                        <td class="p-4 font-semibold text-emerald-600">${p.price}</td>
+                        <td class="p-4 text-sm text-slate-500 truncate max-w-xs">${p.abilities}</td>
+                    </tr>
+                `;
             });
-
-            if (confirm.isConfirmed) {
-                try {
-                    const res = await fetch(`/api/admin/delete/${id}`, {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password: adminPass })
-                    });
-                    
-                    if (res.ok) {
-                        Swal.fire('Deleted!', 'Product has been removed.', 'success');
-                        loadAdminProducts(); // Reload table
-                    } else {
-                        const data = await res.json();
-                        Swal.fire('Failed', data.error || 'Wrong Password!', 'error');
-                        sessionStorage.removeItem('adminPass'); // Clear wrong pass
-                        adminPass = null;
-                        setTimeout(authenticate, 1500); // Re-ask for pass
-                    }
-                } catch (e) {
-                    Swal.fire('Error', 'Server communication failed', 'error');
-                }
-            }
         }
-
-        // Start
-        authenticate();
     </script>
 </body>
 </html>
