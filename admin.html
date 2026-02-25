@@ -6,6 +6,7 @@
     <title>Master Admin - Bot Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800">
 
@@ -50,10 +51,10 @@
             </div>
 
             <div id="depositsTab" class="tab-content hidden">
-                <h1 class="text-2xl font-bold mb-4">Recent Deposits</h1>
+                <h1 class="text-2xl font-bold mb-4">Pending Deposits</h1>
                 <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 border-b"><tr class="text-slate-500"><th class="p-4">User</th><th class="p-4">TrxID</th><th class="p-4">Amount</th><th class="p-4">Status</th></tr></thead>
+                        <thead class="bg-slate-50 border-b"><tr class="text-slate-500"><th class="p-4">User</th><th class="p-4">TrxID / Method</th><th class="p-4">Amount</th><th class="p-4">Action</th></tr></thead>
                         <tbody id="depositListBody" class="divide-y"></tbody>
                     </table>
                 </div>
@@ -71,10 +72,7 @@
             <div id="settingsTab" class="tab-content hidden">
                 <h1 class="text-2xl font-bold mb-4">System Settings</h1>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border flex justify-between items-center">
-                    <div>
-                        <h2 class="text-lg font-bold text-red-500">Maintenance Mode</h2>
-                        <p class="text-sm text-slate-500">Lock the website for updates.</p>
-                    </div>
+                    <div><h2 class="text-lg font-bold text-red-500">Maintenance Mode</h2><p class="text-sm text-slate-500">Lock the website.</p></div>
                     <input type="checkbox" id="maintenanceToggle" onchange="toggleMaintenance()" class="w-6 h-6">
                 </div>
             </div>
@@ -89,8 +87,7 @@
         async function login() {
             pass = document.getElementById('adminPass').value;
             const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) });
-            if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); }
-            else alert("Wrong Password");
+            if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else alert("Wrong Password");
         }
 
         async function checkAuth() {
@@ -107,10 +104,22 @@
         async function loadAllData() {
             const res = await fetch('/api/admin/stats'); const data = await res.json();
             document.getElementById('statUsers').innerText = data.users;
-            
             document.getElementById('userListBody').innerHTML = data.userList.map(u => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${u.firstName}</td><td class="p-4 text-sm">${u.email}</td><td class="p-4 text-emerald-600 font-bold">$${u.balanceUsd}</td></tr>`).join('');
             
-            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${d.user.firstName}</td><td class="p-4 font-mono text-sm">${d.trxId}</td><td class="p-4 font-bold">৳${d.amountBdt}</td><td class="p-4">${d.status}</td></tr>`).join('');
+            // Render Deposits with Action Buttons
+            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-4 font-bold">${d.user.firstName}<br><span class="text-xs text-slate-400">${d.senderNumber}</span></td>
+                    <td class="p-4 font-mono text-sm">${d.trxId}<br><span class="uppercase font-bold text-xs">${d.method}</span></td>
+                    <td class="p-4 font-bold">৳${d.amountBdt}</td>
+                    <td class="p-4">
+                        ${d.status === 'PENDING' ? `
+                            <button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-lg font-bold text-sm mr-2 hover:bg-emerald-200">Approve</button>
+                            <button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-100 text-red-600 px-3 py-1 rounded-lg font-bold text-sm hover:bg-red-200">Reject</button>
+                        ` : `<span class="font-bold text-sm text-slate-400">${d.status}</span>`}
+                    </td>
+                </tr>
+            `).join('');
 
             const nRes = await fetch('/api/notices'); const notices = await nRes.json();
             document.getElementById('noticeList').innerHTML = notices.map(n => `<div class="bg-white p-4 rounded-xl border flex justify-between"><span>${n.text}</span> <button onclick="deleteNotice(${n.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div>`).join('');
@@ -119,20 +128,17 @@
             document.getElementById('maintenanceToggle').checked = set.isMaintenance;
         }
 
-        async function addNotice() {
-            const text = document.getElementById('noticeInput').value;
-            await fetch('/api/admin/notice', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text}) });
-            document.getElementById('noticeInput').value = ''; loadAllData();
-        }
-        async function deleteNotice(id) {
-            await fetch('/api/admin/notice/delete/'+id, { method:'POST' }); loadAllData();
+        async function actionDeposit(id, action) {
+            Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
+            const res = await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) });
+            const data = await res.json();
+            if(data.success) { Swal.fire('Done', data.msg, 'success'); loadAllData(); }
+            else Swal.fire('Error', 'Action failed', 'error');
         }
 
-        async function toggleMaintenance() {
-            const status = document.getElementById('maintenanceToggle').checked;
-            await fetch('/api/admin/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, status}) });
-            alert("Maintenance Status Updated!");
-        }
+        async function addNotice() { const text = document.getElementById('noticeInput').value; await fetch('/api/admin/notice', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text}) }); document.getElementById('noticeInput').value = ''; loadAllData(); }
+        async function deleteNotice(id) { await fetch('/api/admin/notice/delete/'+id, { method:'POST' }); loadAllData(); }
+        async function toggleMaintenance() { const status = document.getElementById('maintenanceToggle').checked; await fetch('/api/admin/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, status}) }); alert("Maintenance Updated!"); }
     </script>
 </body>
 </html>
