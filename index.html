@@ -3,34 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Bot Store</title>
+    <title>AURA STORE | Premium Bots</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class', theme: { extend: {} } }</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+        .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); }
         .dark .glass-effect { background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(59, 130, 246, 0.2); }
-        .product-card { transition: all 0.4s ease; border: 1px solid transparent; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); }
+        .product-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(0,0,0,0.05); }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); }
         .dark .product-card { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .dark .product-card:hover { box-shadow: 0 0 25px rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.5); }
+        .dark .product-card:hover { box-shadow: 0 10px 30px rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.6); }
+        
         .glow-btn { transition: all 0.3s; }
-        .glow-btn:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
-        .glow-btn:disabled { opacity: 0.5; pointer-events: none; box-shadow: none; filter: grayscale(1); }
+        .glow-btn:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transform: translateY(-2px); }
+        .glow-btn:disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+
         .marquee { overflow: hidden; white-space: nowrap; box-sizing: border-box; }
         .marquee span { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        
+        /* Modals & Drawer */
         .modal-glass { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); }
-        .dark .modal-glass { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        .dark .modal-glass { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59, 130, 246, 0.3); box-shadow: 0 0 50px rgba(0,0,0,0.6); }
+        .drawer-open { transform: translateX(0%); }
+        .drawer-closed { transform: translateX(100%); }
+
+        /* Payment Themes */
         .theme-bkash { border-color: #e2136e; background-color: #fce7f0; color: #e2136e; }
         .theme-nagad { border-color: #f37021; background-color: #fef0e9; color: #f37021; }
         .theme-rocket { border-color: #8c1596; background-color: #f4e8f5; color: #8c1596; }
-        .theme-upi { border-color: #16a34a; background-color: #dcfce7; color: #16a34a; }
         .btn-bkash { background: linear-gradient(135deg, #e2136e, #c0105e); color: white; }
         .btn-nagad { background: linear-gradient(135deg, #f37021, #d6611a); color: white; }
         .btn-rocket { background: linear-gradient(135deg, #8c1596, #6b1073); color: white; }
-        .btn-upi { background: linear-gradient(135deg, #16a34a, #15803d); color: white; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-[#0b1121] font-sans text-slate-800 dark:text-slate-200 antialiased transition-colors duration-300">
@@ -41,8 +47,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-bolt text-blue-600 dark:text-blue-500 text-2xl animate-pulse"></i>
-                    <span class="font-extrabold text-xl tracking-tight">AURA<span class="text-blue-600 dark:text-blue-500">STORE</span></span>
+                    <i class="fa-solid fa-bolt text-blue-600 dark:text-blue-500 text-3xl animate-pulse drop-shadow-md"></i>
+                    <span class="font-extrabold text-2xl tracking-tight">AURA<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-500">STORE</span></span>
                 </div>
                 <div class="flex items-center space-x-4">
                     <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 hover:scale-110 transition-transform shadow-inner"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
@@ -52,11 +58,16 @@
         </div>
     </nav>
 
+    <button onclick="toggleCart()" class="fixed bottom-8 right-8 z-50 bg-blue-600 hover:bg-blue-500 text-white w-16 h-16 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.6)] flex justify-center items-center text-2xl transform transition-transform hover:scale-110">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span id="cartBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-black w-7 h-7 rounded-full flex justify-center items-center border-2 border-white dark:border-slate-900 hidden">0</span>
+    </button>
+
     <div class="pt-20 pb-16 text-center px-4 relative overflow-hidden">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full z-0"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full z-0 pointer-events-none"></div>
         <div class="relative z-10">
-            <h1 class="text-4xl sm:text-6xl font-black mb-4 text-slate-900 dark:text-white tracking-tight">Premium <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-500 drop-shadow-sm">Source Codes</span></h1>
-            <p class="text-lg text-slate-500 dark:text-slate-400 font-medium">Auto Delivery • Localized Pricing • Stock Managed</p>
+            <h1 class="text-5xl sm:text-7xl font-black mb-6 text-slate-900 dark:text-white tracking-tight">Premium <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-500 drop-shadow-sm">Source Codes</span></h1>
+            <p class="text-lg text-slate-500 dark:text-slate-400 font-medium">Add to Cart • Instant Checkout • Lifetime Access in Library</p>
         </div>
     </div>
 
@@ -66,40 +77,69 @@
         </div>
     </div>
 
-    <div id="historyModal" class="fixed inset-0 bg-black/60 hidden z-50 justify-center items-center px-4 backdrop-blur-md">
+    <div id="cartOverlay" class="fixed inset-0 bg-black/60 z-[60] hidden opacity-0 transition-opacity backdrop-blur-sm" onclick="toggleCart()"></div>
+    <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full sm:w-96 modal-glass z-[70] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl border-l dark:border-slate-700">
+        <div class="p-6 border-b dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+            <h2 class="text-2xl font-black dark:text-white"><i class="fa-solid fa-cart-shopping text-blue-500 mr-2"></i> Your Cart</h2>
+            <button onclick="toggleCart()" class="text-slate-400 hover:text-red-500 text-2xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <p class="text-center text-slate-500 mt-10">Cart is empty.</p>
+        </div>
+        <div class="p-6 border-t dark:border-slate-700 bg-white dark:bg-slate-900">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-lg font-bold text-slate-500">Total:</span>
+                <span id="cartTotal" class="text-2xl font-black text-blue-600 dark:text-blue-400">$0.00</span>
+            </div>
+            <button onclick="checkoutCart()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:bg-blue-500 transform active:scale-95 transition-all text-lg">
+                Secure Checkout <i class="fa-solid fa-shield-check ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="libraryModal" class="fixed inset-0 bg-black/70 hidden z-[60] justify-center items-center px-4 backdrop-blur-md">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] p-8 transform transition-all border dark:border-slate-700 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6 border-b dark:border-slate-700 pb-4">
+                <h3 class="font-black text-2xl dark:text-white"><i class="fa-solid fa-layer-group text-purple-500 mr-2"></i>My Library</h3>
+                <button onclick="closeLibrary()" class="text-slate-500 hover:text-red-500 text-2xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="overflow-y-auto pr-2 flex-1 space-y-4" id="libraryList">
+                <p class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="historyModal" class="fixed inset-0 bg-black/60 hidden z-[60] justify-center items-center px-4 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg shadow-[0_0_30px_rgba(0,0,0,0.5)] p-8 transform transition-all border dark:border-slate-700">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-2xl dark:text-white"><i class="fa-solid fa-clock-rotate-left text-blue-500 mr-2"></i>History</h3>
+                <h3 class="font-bold text-2xl dark:text-white"><i class="fa-solid fa-clock-rotate-left text-blue-500 mr-2"></i>Fund History</h3>
                 <button onclick="closeHistory()" class="text-slate-500 hover:text-red-500 text-2xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="max-h-80 overflow-y-auto space-y-3 pr-2" id="historyList"></div>
         </div>
     </div>
 
-    <div id="modalOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex justify-center items-center px-4 transition-all duration-300 opacity-0 pointer-events-none">
+    <div id="modalOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex justify-center items-center px-4 transition-all duration-300 opacity-0 pointer-events-none">
         <div id="addFundModal" class="modal-glass rounded-3xl w-full max-w-md transition-all duration-300 transform scale-95 overflow-hidden">
             <div id="modalHeader" class="p-6 flex justify-between items-center text-white transition-all duration-500 shadow-md">
                 <h3 class="font-bold text-xl"><i class="fa-solid fa-wallet mr-2"></i> Deposit Fund</h3>
                 <button onclick="closeModal()" class="text-white hover:text-gray-200 text-2xl transition-transform hover:rotate-90"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
             <form id="depositForm" class="p-8 space-y-6">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wide">Gateway</label>
                     <div id="gatewayOptions" class="grid grid-cols-3 gap-3"></div>
                 </div>
-
                 <div class="flex gap-5">
                     <div class="flex-1">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">USD Amount</label>
-                        <input type="number" step="0.01" id="usdAmount" oninput="calcLocal()" required class="block w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white font-bold text-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-inner" placeholder="$0.00">
+                        <input type="number" step="0.01" id="usdAmount" oninput="calcLocal()" required class="block w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white font-bold text-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="$0.00">
                     </div>
                     <div class="flex-1">
                         <label id="localCurrencyLabel" class="block text-xs font-bold text-slate-500 uppercase mb-2">Pay</label>
-                        <input type="text" id="localAmount" disabled class="block w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800 font-black text-xl text-blue-600 dark:text-blue-400 shadow-inner" value="0">
+                        <input type="text" id="localAmount" disabled class="block w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800 font-black text-xl text-blue-600 dark:text-blue-400" value="0">
                     </div>
                 </div>
-
                 <div id="instructionBox" class="p-5 rounded-2xl text-sm border shadow-sm">
                     <p class="font-black mb-3 text-base"><i class="fa-solid fa-circle-info mr-1"></i> Instruction:</p>
                     <ol class="list-decimal list-inside space-y-2 font-medium">
@@ -108,29 +148,20 @@
                         <li>Submit TrxID below to verify.</li>
                     </ol>
                 </div>
-
                 <div class="space-y-4">
-                    <input type="text" id="senderNumber" required class="block w-full px-5 py-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white font-medium outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Sender Account / Phone Number">
-                    <input type="text" id="trxId" required class="block w-full px-5 py-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white uppercase font-bold tracking-widest outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Transaction ID (TrxID)">
+                    <input type="text" id="senderNumber" required class="block w-full px-5 py-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white font-medium outline-none focus:ring-2 focus:ring-blue-500" placeholder="Sender Account / Phone Number">
+                    <input type="text" id="trxId" required class="block w-full px-5 py-4 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white uppercase font-bold tracking-widest outline-none focus:ring-2 focus:ring-blue-500" placeholder="Transaction ID (TrxID)">
                 </div>
-
-                <button type="submit" id="submitBtn" class="w-full font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.2)] text-lg text-white transform active:scale-95 transition-all glow-btn tracking-wide">
-                    Confirm Deposit
-                </button>
+                <button type="submit" id="submitBtn" class="w-full font-bold py-4 rounded-xl shadow-lg text-lg text-white transform active:scale-95 transition-all glow-btn">Confirm Deposit</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Bulletproof localStorage reading
         let currentUser = null;
-        try {
-            const storedData = localStorage.getItem('user');
-            if(storedData) currentUser = JSON.parse(storedData);
-        } catch(e) {
-            localStorage.removeItem('user');
-        }
-
+        try { const stored = localStorage.getItem('user'); if(stored) currentUser = JSON.parse(stored); } catch(e) { localStorage.removeItem('user'); }
+        
+        let cart = JSON.parse(localStorage.getItem('cart')) || []; // Cart Storage
         let liveRates = {};
         const currMap = { 'BD': { code: 'BDT', symbol: '৳' }, 'IN': { code: 'INR', symbol: '₹' }, 'PK': { code: 'PKR', symbol: '₨' }, 'US': { code: 'USD', symbol: '$' } };
 
@@ -142,50 +173,30 @@
         }
 
         async function init() {
-            // Safe Rate Fetching
-            try { const res = await fetch('/api/rate'); const data = await res.json(); liveRates = data.rates || {}; } catch(e) { console.warn("Rate API Error", e); }
-            
-            // Bulletproof User Verification
+            try { const res = await fetch('/api/rate'); const data = await res.json(); liveRates = data.rates || {}; } catch(e) {}
             if(currentUser && currentUser.id) {
                 try {
                     const res = await fetch('/api/user/' + currentUser.id); 
-                    if(res.ok) {
-                        const data = await res.json();
-                        if(data.success) { 
-                            currentUser.balanceUsd = data.balanceUsd || 0; 
-                            currentUser.country = data.country || 'BD'; 
-                            localStorage.setItem('user', JSON.stringify(currentUser)); 
-                        } else {
-                            // User deleted from DB -> Auto Logout
-                            localStorage.removeItem('user'); currentUser = null;
-                        }
-                    } else {
-                        localStorage.removeItem('user'); currentUser = null;
-                    }
-                } catch(e) { console.warn("Auth sync error", e); }
+                    if(res.ok) { const data = await res.json(); if(data.success) { currentUser.balanceUsd = data.balanceUsd; currentUser.country = data.country; localStorage.setItem('user', JSON.stringify(currentUser)); } else { localStorage.removeItem('user'); currentUser = null; } }
+                } catch(e) {}
             }
-
-            // Safe UI Loading
-            try { checkAuth(); } catch(e) { console.error("checkAuth failed:", e); }
-            try { loadProducts(); } catch(e) { document.getElementById('product-list').innerHTML = '<p class="col-span-full text-center text-red-500">Failed to load products.</p>'; }
-            try { loadNotices(); } catch(e) {}
-            try { if(currentUser) renderGateways(); } catch(e) {}
+            checkAuth(); loadProducts(); loadNotices(); updateCartBadge(); if(currentUser) renderGateways();
         }
 
         async function loadNotices() {
             const res = await fetch('/api/notices'); const data = await res.json();
-            if(data && data.length > 0) { document.getElementById('noticeBanner').classList.remove('hidden'); document.getElementById('noticeText').innerText = "⚡ LATEST UPDATE: " + data.map(n => n.text).join('  |  '); }
+            if(data && data.length > 0) { document.getElementById('noticeBanner').classList.remove('hidden'); document.getElementById('noticeText').innerText = "⚡ ANNOUNCEMENT: " + data.map(n => n.text).join('  |  '); }
         }
 
         function checkAuth() {
             const authDiv = document.getElementById('authSection');
             if (currentUser) {
                 const bal = currentUser.balanceUsd ? currentUser.balanceUsd.toFixed(2) : '0.00';
-                const name = currentUser.name || 'User';
                 authDiv.innerHTML = `
-                    <button onclick="openHistory()" class="text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 mr-2 transition-colors" title="History"><i class="fa-solid fa-clock-rotate-left text-xl"></i></button>
+                    <button onclick="openLibrary()" class="text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-3 py-2 rounded-xl font-bold text-sm hover:bg-purple-200 transition-colors mr-2 shadow-sm"><i class="fa-solid fa-layer-group mr-1"></i>Library</button>
+                    <button onclick="openHistory()" class="text-slate-500 hover:text-blue-500 mr-2" title="History"><i class="fa-solid fa-clock-rotate-left text-xl"></i></button>
                     <div class="hidden sm:flex items-center bg-white dark:bg-slate-800 rounded-full pl-4 pr-1 py-1 shadow-inner border dark:border-slate-700">
-                        <span class="text-sm font-bold border-r dark:border-slate-600 pr-3">${name}</span>
+                        <span class="text-sm font-bold border-r dark:border-slate-600 pr-3">${currentUser.name}</span>
                         <div class="px-3 text-blue-600 dark:text-blue-400 font-black tracking-wide">$${bal}</div>
                     </div>
                     <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-5 rounded-full text-sm glow-btn active:scale-95 ml-2"><i class="fa-solid fa-plus mr-1"></i>Fund</button>
@@ -194,28 +205,101 @@
             } else { authDiv.innerHTML = `<a href="/login" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-6 rounded-full glow-btn">Login Portal</a>`; }
         }
 
-        async function openHistory() {
-            document.getElementById('historyModal').classList.replace('hidden', 'flex');
-            const list = document.getElementById('historyList'); list.innerHTML = '<p class="text-center"><i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i></p>';
-            const res = await fetch('/api/history/' + currentUser.id); const deposits = await res.json();
-            if(!deposits || deposits.length === 0) return list.innerHTML = '<p class="text-center text-slate-500 font-medium">No transaction records found.</p>';
+        // --- CART SYSTEM ---
+        function toggleCart() {
+            const drawer = document.getElementById('cartDrawer'); const overlay = document.getElementById('cartOverlay');
+            if(drawer.classList.contains('drawer-closed')) {
+                drawer.classList.replace('drawer-closed', 'drawer-open'); overlay.classList.remove('hidden'); setTimeout(()=>overlay.classList.remove('opacity-0'),10); renderCart();
+            } else {
+                drawer.classList.replace('drawer-open', 'drawer-closed'); overlay.classList.add('opacity-0'); setTimeout(()=>overlay.classList.add('hidden'),300);
+            }
+        }
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            if(cart.length > 0) { badge.classList.remove('hidden'); badge.innerText = cart.length; } else { badge.classList.add('hidden'); }
+        }
+        function addToCart(id, name, priceUsd) {
+            if(!currentUser) return window.location.href='/login';
+            if(cart.find(item => item.id === id)) return Swal.fire({toast:true, position:'top-end', icon:'info', title:'Already in cart!', showConfirmButton:false, timer:2000});
+            cart.push({id, name, priceUsd}); localStorage.setItem('cart', JSON.stringify(cart)); updateCartBadge();
+            Swal.fire({toast:true, position:'top-end', icon:'success', title:'Added to Cart', showConfirmButton:false, timer:2000});
+            // Small bounce animation on cart button
+            const cartBtn = document.querySelector('.fa-cart-shopping').parentElement;
+            cartBtn.classList.add('scale-125'); setTimeout(()=>cartBtn.classList.remove('scale-125'), 200);
+        }
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id); localStorage.setItem('cart', JSON.stringify(cart)); updateCartBadge(); renderCart();
+        }
+        function renderCart() {
+            const container = document.getElementById('cartItemsContainer'); const totalEl = document.getElementById('cartTotal');
+            if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-400 mt-20"><i class="fa-solid fa-basket-shopping text-6xl mb-4 opacity-50"></i><p>Your cart is empty.</p></div>'; totalEl.innerText = '$0.00'; return; }
             
-            const curr = currMap[currentUser.country] || currMap['BD'];
-            list.innerHTML = deposits.map(d => `
-                <div class="p-4 border dark:border-slate-700 rounded-2xl flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 transition-colors">
-                    <div><p class="font-black text-sm uppercase dark:text-white">${d.method || 'Bank'} <span class="text-blue-500 ml-1">${curr.symbol}${d.amountBdt}</span></p><p class="text-xs text-slate-400 mt-1 font-mono tracking-wide">ID: ${d.trxId}</p></div>
-                    <span class="px-3 py-1 text-xs font-black rounded-full shadow-sm ${d.status==='APPROVED'?'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400':d.status==='REJECTED'?'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400':'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400'}">${d.status}</span>
+            let total = 0;
+            container.innerHTML = cart.map(item => {
+                total += item.priceUsd;
+                return `
+                <div class="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border dark:border-slate-700 shadow-sm">
+                    <div><h4 class="font-bold text-slate-800 dark:text-white">${item.name}</h4><p class="text-blue-500 font-black">$${item.priceUsd}</p></div>
+                    <button onclick="removeFromCart(${item.id})" class="text-red-400 hover:text-red-500 bg-red-50 dark:bg-red-500/10 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+            }).join('');
+            totalEl.innerText = '$' + total.toFixed(2);
+        }
+
+        async function checkoutCart() {
+            if(cart.length === 0) return; if(!currentUser) return window.location.href='/login';
+            let totalCost = cart.reduce((sum, item) => sum + item.priceUsd, 0);
+            if(currentUser.balanceUsd < totalCost) return Swal.fire({ title: 'Insufficient Funds', html: `<p>You need <b class="text-blue-500">$${totalCost}</b> to buy these items.</p>`, icon: 'warning', confirmButtonText: 'Deposit Now', confirmButtonColor: '#3b82f6', customClass: {popup: 'rounded-3xl'}}).then(r => { if(r.isConfirmed){ toggleCart(); openModal(); }});
+
+            Swal.fire({ title: 'Processing Checkout...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, customClass: {popup: 'rounded-3xl'} });
+            const pIds = cart.map(i => i.id);
+            const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, cartItems: pIds }) });
+            const data = await res.json();
+
+            if(data.success) {
+                currentUser.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth(); loadProducts();
+                cart = []; localStorage.removeItem('cart'); updateCartBadge(); toggleCart();
+                
+                // Show purchased links
+                let linksHtml = data.items.map(i => `<div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-xl mb-2 text-left"><p class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-1">${i.name}</p><a href="${i.link}" target="_blank" class="text-blue-500 font-mono text-xs break-all underline">${i.link}</a></div>`).join('');
+                Swal.fire({
+                    title: 'Purchase Successful! 🎉', html: `Items added to your Library.<br><br><div class="max-h-40 overflow-y-auto">${linksHtml}</div>`,
+                    icon: 'success', confirmButtonText: 'View My Library', confirmButtonColor: '#10b981', customClass: {popup: 'rounded-3xl'}
+                }).then(() => { openLibrary(); });
+            } else { Swal.fire({title: 'Checkout Failed', text: data.error, icon: 'error', customClass: {popup: 'rounded-3xl'}}); }
+        }
+
+        // --- MY LIBRARY (PURCHASES) ---
+        async function openLibrary() {
+            document.getElementById('libraryModal').classList.replace('hidden', 'flex');
+            const list = document.getElementById('libraryList'); list.innerHTML = '<p class="text-center py-10"><i class="fa-solid fa-spinner fa-spin text-3xl text-purple-500"></i></p>';
+            const res = await fetch('/api/library/' + currentUser.id); const purchases = await res.json();
+            
+            if(purchases.length === 0) return list.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-box-open text-6xl text-slate-300 dark:text-slate-600 mb-4"></i><p class="text-slate-500 font-medium">You haven\'t purchased anything yet.</p></div>';
+            
+            list.innerHTML = purchases.map(p => `
+                <div class="p-5 border dark:border-slate-700 rounded-2xl flex flex-col sm:flex-row justify-between items-center bg-slate-50 dark:bg-slate-900/50 hover:border-purple-300 dark:hover:border-purple-500/50 transition-colors gap-4">
+                    <div class="flex items-center gap-4 w-full sm:w-auto">
+                        <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-xl shadow-sm flex justify-center items-center overflow-hidden">
+                            ${p.product.imageId ? `<img src="/api/photo/${p.product.imageId}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-code text-2xl text-purple-400"></i>`}
+                        </div>
+                        <div>
+                            <h4 class="font-black text-lg dark:text-white">${p.product.name}</h4>
+                            <p class="text-xs text-slate-500 font-medium mt-1">Purchased for $${p.pricePaid} • ${new Date(p.createdAt).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    <a href="${p.product.driveLink || '#'}" target="_blank" class="w-full sm:w-auto bg-purple-100 hover:bg-purple-200 dark:bg-purple-600/20 dark:hover:bg-purple-600/40 text-purple-600 dark:text-purple-400 px-6 py-3 rounded-xl font-black text-sm text-center transition-colors">
+                        <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Access File
+                    </a>
                 </div>
             `).join('');
         }
-        function closeHistory() { document.getElementById('historyModal').classList.replace('flex', 'hidden'); }
-        function logout() { localStorage.removeItem('user'); window.location.reload(); }
+        function closeLibrary() { document.getElementById('libraryModal').classList.replace('flex', 'hidden'); }
 
+        // --- PRODUCT LISTING ---
         async function loadProducts() {
-            const res = await fetch('/api/products'); 
-            const products = await res.json();
+            const res = await fetch('/api/products'); const products = await res.json();
             const list = document.getElementById('product-list'); list.innerHTML = '';
-            
             if(!products || products.length === 0) { list.innerHTML = '<p class="col-span-full text-center text-slate-500 font-bold">Store is empty currently.</p>'; return; }
 
             const userCode = currentUser && currentUser.country ? currentUser.country : 'US';
@@ -223,98 +307,55 @@
             const rate = liveRates[curr.code] || 1;
 
             products.forEach(p => {
-                const rawPriceStr = p.price ? p.price.toString().replace(/[^0-9.]/g, '') : '0';
-                const usdPrice = parseFloat(rawPriceStr) || 0; 
-                const localPrice = Math.round(usdPrice * rate);
-                const pStock = p.stock || 0;
-                
-                const imageHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-48 object-cover rounded-2xl mb-5 shadow-inner" onerror="this.style.display='none'">` : '<div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-5 flex items-center justify-center text-slate-300 dark:text-slate-600 shadow-inner"><i class="fa-solid fa-code text-5xl"></i></div>';
-                
+                const usdPrice = parseFloat(p.price.replace(/[^0-9.]/g, '')) || 0; 
+                const localPrice = Math.round(usdPrice * rate); const pStock = p.stock || 0;
+                const imageHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-48 object-cover rounded-2xl mb-5 shadow-inner">` : '<div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-5 flex items-center justify-center text-slate-300 dark:text-slate-600 shadow-inner"><i class="fa-solid fa-code text-5xl"></i></div>';
                 const isOutOfStock = pStock <= 0;
-                const stockBadge = isOutOfStock 
-                    ? `<span class="bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 px-3 py-1 rounded-full text-xs font-black shadow-sm border border-red-200 dark:border-red-500/30">OUT OF STOCK</span>`
-                    : `<span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-black shadow-sm border border-blue-200 dark:border-blue-500/30">STOCK: ${pStock}</span>`;
+                const stockBadge = isOutOfStock ? `<span class="bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 px-3 py-1 rounded-full text-xs font-black shadow-sm">OUT OF STOCK</span>` : `<span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-black shadow-sm">STOCK: ${pStock}</span>`;
 
                 list.innerHTML += `
                     <div class="product-card rounded-3xl p-6 flex flex-col justify-between">
                         <div>
                             ${imageHtml}
-                            <div class="flex justify-between items-start mb-2">
-                                <h2 class="text-2xl font-black dark:text-white tracking-tight">${p.name || 'Bot Source Code'}</h2>
-                                ${stockBadge}
-                            </div>
-                            <div class="mb-5 mt-3">
-                                <span class="text-3xl font-black text-blue-600 dark:text-blue-400">${curr.symbol}${localPrice}</span>
-                                <span class="text-sm font-bold text-slate-400 ml-1">($${usdPrice})</span>
-                            </div>
-                            <div class="text-sm text-slate-600 dark:text-slate-400 mb-6 bg-slate-100 dark:bg-slate-900/50 p-4 rounded-2xl font-medium border dark:border-slate-800">
-                                <i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i> ${p.abilities || 'No details added'}
-                            </div>
+                            <div class="flex justify-between items-start mb-2"><h2 class="text-2xl font-black dark:text-white tracking-tight">${p.name}</h2>${stockBadge}</div>
+                            <div class="mb-5 mt-3"><span class="text-3xl font-black text-blue-600 dark:text-blue-400">${curr.symbol}${localPrice}</span><span class="text-sm font-bold text-slate-400 ml-1">($${usdPrice})</span></div>
+                            <div class="text-sm text-slate-600 dark:text-slate-400 mb-6 bg-slate-100 dark:bg-slate-900/50 p-4 rounded-2xl font-medium border dark:border-slate-800"><i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i> ${p.abilities}</div>
                         </div>
-                        <button onclick="buyProduct(${p.id}, ${usdPrice})" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl glow-btn tracking-wide ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : ''}" ${isOutOfStock ? 'disabled' : ''}>
-                            <i class="fa-solid ${isOutOfStock ? 'fa-ban' : 'fa-cart-shopping'} mr-2"></i> ${isOutOfStock ? 'Sold Out' : 'Instant Checkout'}
+                        <button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${usdPrice})" class="w-full bg-slate-900 dark:bg-slate-700 text-white font-bold py-4 rounded-xl hover:bg-blue-600 transition-colors tracking-wide ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : ''}" ${isOutOfStock ? 'disabled' : ''}>
+                            <i class="fa-solid ${isOutOfStock ? 'fa-ban' : 'fa-cart-plus'} mr-2"></i> ${isOutOfStock ? 'Unavailable' : 'Add to Cart'}
                         </button>
                     </div>
                 `;
             });
         }
 
-        async function buyProduct(productId, price) {
-            if(!currentUser) return window.location.href='/login';
-            if(currentUser.balanceUsd < price) return Swal.fire({ title: 'Insufficient Funds', html: `<p class="text-slate-500">You need <b class="text-blue-500">$${price}</b> to purchase this.</p>`, icon: 'warning', confirmButtonText: 'Deposit Now', confirmButtonColor: '#3b82f6', customClass: {popup: 'rounded-3xl'}}).then(r => { if(r.isConfirmed) openModal(); });
-
-            Swal.fire({ title: 'Processing Order...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, customClass: {popup: 'rounded-3xl'} });
-            const res = await fetch('/api/buy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, productId }) });
-            const data = await res.json();
-
-            if(data.success) {
-                currentUser.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(currentUser)); checkAuth(); loadProducts(); 
-                Swal.fire({
-                    title: 'Purchase Successful! 🎉',
-                    html: `Enjoy your premium source code.<br><br><div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 mt-4"><a href="${data.link || '#'}" target="_blank" class="text-blue-500 font-bold break-all">${data.link || 'Link not provided'}</a></div>`,
-                    icon: 'success', showCancelButton: true, confirmButtonText: '<i class="fa-regular fa-copy mr-1"></i> Copy Link', cancelButtonText: 'Close', confirmButtonColor: '#3b82f6', customClass: {popup: 'rounded-3xl'}
-                }).then((r) => { if(r.isConfirmed && data.link) { navigator.clipboard.writeText(data.link); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Copied to clipboard!', showConfirmButton:false, timer:2000}); } });
-            } else { Swal.fire({title: 'Failed', text: data.error, icon: 'error', customClass: {popup: 'rounded-3xl'}}); }
-        }
-
+        // Add Fund Modal logic (Kept unchanged structurally)
         function renderGateways() {
             if(!currentUser) return;
-            const country = currentUser.country || 'BD';
-            const gatewayDiv = document.getElementById('gatewayOptions');
-            const code = (currMap[country] || currMap['US']).code;
-            document.getElementById('localCurrencyLabel').innerText = `Pay in ${code}`;
-            document.querySelectorAll('.localCodeText').forEach(el => el.innerText = code);
-
-            if (country === 'IN') {
-                gatewayDiv.innerHTML = `
-                    <label class="cursor-pointer"><input type="radio" name="method" value="upi" class="peer sr-only" checked onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:theme-upi font-black text-slate-500 dark:text-slate-400 transition-all">UPI</div></label>
-                    <label class="cursor-pointer"><input type="radio" name="method" value="paytm" class="peer sr-only" onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:border-blue-500 peer-checked:text-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-500/20 font-black text-slate-500 dark:text-slate-400 transition-all">Paytm</div></label>
-                `;
-            } else {
-                gatewayDiv.innerHTML = `
-                    <label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:theme-bkash font-black text-slate-500 dark:text-slate-400 transition-all">bKash</div></label>
-                    <label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:theme-nagad font-black text-slate-500 dark:text-slate-400 transition-all">Nagad</div></label>
-                    <label class="cursor-pointer"><input type="radio" name="method" value="rocket" class="peer sr-only" onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:theme-rocket font-black text-slate-500 dark:text-slate-400 transition-all">Rocket</div></label>
-                `;
-            }
+            const country = currentUser.country || 'BD'; const gatewayDiv = document.getElementById('gatewayOptions');
+            const code = (currMap[country] || currMap['US']).code; document.getElementById('localCurrencyLabel').innerText = `Pay in ${code}`; document.querySelectorAll('.localCodeText').forEach(el => el.innerText = code);
+            if (country === 'IN') { gatewayDiv.innerHTML = `<label class="cursor-pointer"><input type="radio" name="method" value="upi" class="peer sr-only" checked onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:theme-upi font-black text-slate-500 dark:text-slate-400">UPI</div></label><label class="cursor-pointer"><input type="radio" name="method" value="paytm" class="peer sr-only" onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:border-blue-500 peer-checked:text-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-500/20 font-black text-slate-500 dark:text-slate-400">Paytm</div></label>`; } 
+            else { gatewayDiv.innerHTML = `<label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:theme-bkash font-black text-slate-500 dark:text-slate-400">bKash</div></label><label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:theme-nagad font-black text-slate-500 dark:text-slate-400">Nagad</div></label><label class="cursor-pointer"><input type="radio" name="method" value="rocket" class="peer sr-only" onchange="updateTheme()"><div class="py-3 px-1 border-2 dark:border-slate-600 rounded-xl text-center peer-checked:theme-rocket font-black text-slate-500 dark:text-slate-400">Rocket</div></label>`; }
         }
+        function openHistory() {
+            document.getElementById('historyModal').classList.replace('hidden', 'flex');
+            const list = document.getElementById('historyList'); list.innerHTML = '<p class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i></p>';
+            fetch('/api/history/' + currentUser.id).then(r=>r.json()).then(deposits => {
+                if(!deposits || deposits.length===0) return list.innerHTML = '<p class="text-center text-slate-500 font-medium">No records found.</p>';
+                const curr = currMap[currentUser.country] || currMap['BD'];
+                list.innerHTML = deposits.map(d => `<div class="p-4 border dark:border-slate-700 rounded-2xl flex justify-between items-center bg-slate-50 dark:bg-slate-900/50"><div class="font-black text-sm uppercase dark:text-white">${d.method||'Bank'} <span class="text-blue-500">${curr.symbol}${d.amountBdt}</span></div><span class="px-3 py-1 text-xs font-black rounded-full shadow-sm ${d.status==='APPROVED'?'bg-emerald-100 text-emerald-600':d.status==='REJECTED'?'bg-red-100 text-red-600':'bg-orange-100 text-orange-600'}">${d.status}</span></div>`).join('');
+            });
+        }
+        function closeHistory() { document.getElementById('historyModal').classList.replace('flex', 'hidden'); }
 
         const overlay = document.getElementById('modalOverlay'); const modal = document.getElementById('addFundModal');
         function openModal() { overlay.classList.remove('opacity-0', 'pointer-events-none'); modal.classList.remove('scale-95'); updateTheme(); }
         function closeModal() { overlay.classList.add('opacity-0', 'pointer-events-none'); modal.classList.add('scale-95'); }
-        
-        function calcLocal() { 
-            const usd = parseFloat(document.getElementById('usdAmount').value) || 0; 
-            const code = (currMap[currentUser?currentUser.country:'BD'] || currMap['US']).code;
-            const rate = liveRates[code] || 1;
-            const localVal = Math.round(usd * rate); 
-            document.getElementById('localAmount').value = localVal; document.getElementById('insAmount').innerText = localVal; 
-        }
+        function calcLocal() { const usd = parseFloat(document.getElementById('usdAmount').value) || 0; const code = (currMap[currentUser?currentUser.country:'BD'] || currMap['US']).code; const localVal = Math.round(usd * (liveRates[code] || 1)); document.getElementById('localAmount').value = localVal; document.getElementById('insAmount').innerText = localVal; }
         
         function updateTheme() {
             const methodInput = document.querySelector('input[name="method"]:checked'); if(!methodInput) return;
-            const method = methodInput.value;
-            const header = document.getElementById('modalHeader'); const box = document.getElementById('instructionBox'); const btn = document.getElementById('submitBtn');
+            const method = methodInput.value; const header = document.getElementById('modalHeader'); const box = document.getElementById('instructionBox'); const btn = document.getElementById('submitBtn');
             const names = document.querySelectorAll('.gateway-name'); const numbers = document.querySelectorAll('.gateway-number');
 
             let number = ''; let name = '';
@@ -332,26 +373,18 @@
         }
 
         document.getElementById('depositForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const method = document.querySelector('input[name="method"]:checked').value;
-            const localRaw = document.getElementById('localAmount').value; const amountBdt = parseFloat(localRaw.replace(/[^0-9.]/g, ''));
-            const senderNumber = document.getElementById('senderNumber').value; const trxId = document.getElementById('trxId').value;
-
+            e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const localRaw = document.getElementById('localAmount').value; const amountBdt = parseFloat(localRaw.replace(/[^0-9.]/g, '')); const senderNumber = document.getElementById('senderNumber').value; const trxId = document.getElementById('trxId').value;
             if(amountBdt <= 0) return Swal.fire({title: 'Error', text: 'Invalid amount.', icon: 'error', customClass: {popup: 'rounded-3xl'}});
             let btn = document.getElementById('submitBtn'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...';
-
             try {
                 const res = await fetch('/api/deposit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, method, amountBdt, senderNumber, trxId }) });
                 const data = await res.json();
-                
                 if(data.success) { closeModal(); Swal.fire({title: 'Submitted!', text: 'Your request is in queue for approval.', icon: 'success', customClass: {popup: 'rounded-3xl'}}); document.getElementById('depositForm').reset(); updateTheme(); } 
                 else { Swal.fire({title: 'Error', text: data.error || 'Duplicate TrxID', icon: 'error', customClass: {popup: 'rounded-3xl'}}); }
-            } catch(e) { Swal.fire('Error', 'Server connection failed', 'error'); }
-            
+            } catch(e) {}
             btn.innerHTML = 'Confirm Deposit';
         });
 
-        // Initialize script safely
         init();
     </script>
 </body>
