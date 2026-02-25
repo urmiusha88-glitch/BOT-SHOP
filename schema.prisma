@@ -12,15 +12,15 @@ model Product {
   name      String
   price     String   
   abilities String
+  imageId   String?  // Telegram er chobir ID
   createdAt DateTime @default(now())
 }
 
-// User Model e Email ar Password add kora hoyeche
 model User {
   id           Int       @id @default(autoincrement())
   email        String?   @unique
   password     String?   
-  telegramId   String?   @unique // Optional kora hoyeche
+  telegramId   String?   @unique 
   firstName    String?
   balanceUsd   Float     @default(0.0) 
   deposits     Deposit[] 
@@ -37,4 +37,11 @@ model Deposit {
   trxId         String   @unique
   status        String   @default("PENDING") 
   createdAt     DateTime @default(now())
+}
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  text      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
