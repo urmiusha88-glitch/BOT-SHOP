@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin - Bot Store</title>
+    <title>Master Admin - AURA STORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Cyber Glow Finishing */
         body { background-color: #0f172a; color: #e2e8f0; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .glow-btn { transition: all 0.3s ease; }
-        .glow-btn:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); transform: translateY(-2px); }
+        .glow-btn { transition: all 0.3s ease; } .glow-btn:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); transform: translateY(-2px); }
         .glow-input:focus { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); border-color: #3b82f6; }
-        
         .tab-btn.active { background: rgba(59, 130, 246, 0.1); border-right: 4px solid #3b82f6; color: #60a5fa; }
     </style>
 </head>
 <body class="font-sans h-screen overflow-hidden selection:bg-blue-500 selection:text-white">
-
     <div id="loginSection" class="h-screen flex justify-center items-center relative">
         <div class="absolute inset-0 bg-blue-600/10 blur-[100px] rounded-full w-96 h-96 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
         <div class="glass-panel p-10 rounded-3xl shadow-2xl w-96 text-center relative z-10">
@@ -28,11 +24,9 @@
             <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold glow-btn">Initialize System</button>
         </div>
     </div>
-
     <div id="dashSection" class="hidden flex h-screen">
         <div class="w-72 glass-panel border-r border-slate-800 flex flex-col p-6 space-y-2 z-20 shadow-xl">
             <h2 class="text-2xl font-black mb-10 text-center text-white tracking-wider"><span class="text-blue-500">AURA</span> ADMIN</h2>
-            
             <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 hover:bg-slate-800/50 rounded-xl font-bold text-slate-300 transition-all"><i class="fa-solid fa-chart-line mr-3 w-5"></i> Overview</button>
             <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/50 rounded-xl font-bold text-slate-300 transition-all"><i class="fa-solid fa-box-open mr-3 w-5"></i> Products</button>
             <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 hover:bg-slate-800/50 rounded-xl font-bold text-slate-300 transition-all"><i class="fa-solid fa-money-bill-transfer mr-3 w-5"></i> Deposits</button>
@@ -40,177 +34,55 @@
             <button onclick="showTab('notices', this)" class="tab-btn text-left p-4 hover:bg-slate-800/50 rounded-xl font-bold text-slate-300 transition-all"><i class="fa-solid fa-bullhorn mr-3 w-5"></i> Notices</button>
             <button onclick="showTab('settings', this)" class="tab-btn text-left p-4 hover:bg-slate-800/50 rounded-xl font-bold text-slate-300 transition-all"><i class="fa-solid fa-gear mr-3 w-5"></i> Settings</button>
         </div>
-
         <div class="flex-1 bg-[#0b1121] p-10 overflow-y-auto relative" id="mainContent">
-            
             <div id="statsTab" class="tab-content animate-[fadeIn_0.5s_ease-out]">
                 <h1 class="text-3xl font-black mb-8 text-white">System Diagnostics</h1>
-                <div class="grid grid-cols-3 gap-8 mb-8">
-                    <div class="glass-panel p-8 rounded-3xl border border-l-4 border-l-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all">
-                        <p class="text-slate-400 font-bold mb-2 uppercase tracking-wide text-sm">Total Users</p>
-                        <h2 class="text-5xl font-black text-white" id="statUsers">0</h2>
-                    </div>
-                </div>
+                <div class="grid grid-cols-3 gap-8 mb-8"><div class="glass-panel p-8 rounded-3xl border border-l-4 border-l-blue-500"><p class="text-slate-400 font-bold mb-2 uppercase tracking-wide text-sm">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div></div>
             </div>
-
             <div id="productsTab" class="tab-content hidden animate-[fadeIn_0.5s_ease-out]">
                 <h1 class="text-3xl font-black mb-8 text-white">Product Management</h1>
-                
-                <div class="glass-panel p-6 rounded-2xl mb-8 border border-slate-700">
-                    <h3 class="font-bold text-blue-400 mb-4">Add New Product (Web)</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <input type="text" id="pName" placeholder="Product Name" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none">
-                        <input type="text" id="pPrice" placeholder="Price (e.g. 10)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none">
-                        <input type="number" id="pStock" placeholder="Stock Qty (e.g. 5)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none">
-                        <input type="text" id="pAbilities" placeholder="Abilities" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none">
-                        <input type="text" id="pLink" placeholder="Google Drive Link" class="col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none">
-                    </div>
-                    <button onclick="addProductWeb()" class="bg-blue-600 text-white px-6 py-3 font-bold rounded-xl glow-btn">Add Product</button>
-                    <p class="text-xs text-slate-500 mt-2">*Note: Add via Telegram Bot if you want to upload a Photo.</p>
-                </div>
-
-                <div class="glass-panel rounded-2xl border border-slate-700 overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-800/50 border-b border-slate-700"><tr class="text-slate-400 text-sm"><th class="p-4">Name</th><th class="p-4">Price</th><th class="p-4">Stock</th><th class="p-4 text-right">Action</th></tr></thead>
-                        <tbody id="adminProductList" class="divide-y divide-slate-800/50"></tbody>
-                    </table>
-                </div>
+                <div class="glass-panel p-6 rounded-2xl mb-8 border border-slate-700"><h3 class="font-bold text-blue-400 mb-4">Add New Product (Web)</h3><div class="grid grid-cols-2 gap-4 mb-4"><input type="text" id="pName" placeholder="Product Name" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none"><input type="text" id="pPrice" placeholder="Price (e.g. 10)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none"><input type="number" id="pStock" placeholder="Stock Qty" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none"><input type="text" id="pAbilities" placeholder="Abilities" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none"><input type="text" id="pLink" placeholder="Google Drive Link" class="col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-xl text-white glow-input outline-none"></div><button onclick="addProductWeb()" class="bg-blue-600 text-white px-6 py-3 font-bold rounded-xl glow-btn">Add Product</button><p class="text-xs text-slate-500 mt-2">*Note: Add via Telegram Bot if you want to upload a Photo.</p></div>
+                <div class="glass-panel rounded-2xl border border-slate-700 overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/50 border-b border-slate-700"><tr class="text-slate-400 text-sm"><th class="p-4">Name</th><th class="p-4">Price</th><th class="p-4">Stock</th><th class="p-4 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-800/50"></tbody></table></div>
             </div>
-
             <div id="depositsTab" class="tab-content hidden animate-[fadeIn_0.5s_ease-out]">
                 <h1 class="text-3xl font-black mb-8 text-white">Deposit Queue</h1>
-                <div class="glass-panel rounded-2xl border border-slate-700 overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-800/50 border-b border-slate-700"><tr class="text-slate-400 text-sm"><th class="p-4">User</th><th class="p-4">TrxID / Method</th><th class="p-4">Amount</th><th class="p-4 text-right">Action</th></tr></thead>
-                        <tbody id="depositListBody" class="divide-y divide-slate-800/50"></tbody>
-                    </table>
-                </div>
+                <div class="glass-panel rounded-2xl border border-slate-700 overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/50 border-b border-slate-700"><tr class="text-slate-400 text-sm"><th class="p-4">User</th><th class="p-4">TrxID / Method</th><th class="p-4">Amount</th><th class="p-4 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-800/50"></tbody></table></div>
             </div>
-
             <div id="usersTab" class="tab-content hidden animate-[fadeIn_0.5s_ease-out]">
                 <h1 class="text-3xl font-black mb-8 text-white">User Base</h1>
-                <div class="glass-panel rounded-2xl border border-slate-700 overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-800/50 border-b border-slate-700"><tr class="text-slate-400 text-sm"><th class="p-4">Name</th><th class="p-4">Email / Country</th><th class="p-4 text-right">Balance</th></tr></thead>
-                        <tbody id="userListBody" class="divide-y divide-slate-800/50"></tbody>
-                    </table>
-                </div>
+                <div class="glass-panel rounded-2xl border border-slate-700 overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/50 border-b border-slate-700"><tr class="text-slate-400 text-sm"><th class="p-4">Name</th><th class="p-4">Email / Country</th><th class="p-4 text-right">Balance</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800/50"></tbody></table></div>
             </div>
-
             <div id="noticesTab" class="tab-content hidden animate-[fadeIn_0.5s_ease-out]">
                 <h1 class="text-3xl font-black mb-8 text-white">Broadcast System</h1>
-                <div class="flex gap-4 mb-8">
-                    <input type="text" id="noticeInput" class="flex-1 px-5 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white glow-input outline-none" placeholder="Transmit new notice...">
-                    <button onclick="addNotice()" class="bg-blue-600 text-white px-8 font-bold rounded-xl glow-btn">Broadcast</button>
-                </div>
+                <div class="flex gap-4 mb-8"><input type="text" id="noticeInput" class="flex-1 px-5 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white glow-input outline-none" placeholder="Transmit new notice..."><button onclick="addNotice()" class="bg-blue-600 text-white px-8 font-bold rounded-xl glow-btn">Broadcast</button></div>
                 <div id="noticeList" class="space-y-4"></div>
             </div>
-
             <div id="settingsTab" class="tab-content hidden animate-[fadeIn_0.5s_ease-out]">
                 <h1 class="text-3xl font-black mb-8 text-white">Core Settings</h1>
-                <div class="glass-panel p-8 rounded-3xl border border-slate-700 flex justify-between items-center hover:border-red-500/50 transition-colors">
-                    <div>
-                        <h2 class="text-xl font-bold text-red-400 mb-1"><i class="fa-solid fa-lock mr-2"></i>Lockdown (Maintenance)</h2>
-                        <p class="text-sm text-slate-500">Enable this to deny public access to the storefront.</p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" id="maintenanceToggle" onchange="toggleMaintenance()" class="sr-only peer">
-                      <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-500 shadow-inner"></div>
-                    </label>
-                </div>
+                <div class="glass-panel p-8 rounded-3xl border border-slate-700 flex justify-between items-center"><h2 class="text-xl font-bold text-red-400">Lockdown (Maintenance)</h2><input type="checkbox" id="maintenanceToggle" onchange="toggleMaintenance()" class="w-6 h-6"></div>
             </div>
-
         </div>
     </div>
-
     <script>
-        let pass = sessionStorage.getItem('adminPass');
-        if(pass) checkAuth();
-
-        async function login() {
-            pass = document.getElementById('adminPass').value;
-            const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) });
-            if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); }
-            else Swal.fire({toast:true, position:'top-end', icon:'error', title:'Access Denied', showConfirmButton:false, timer:2000});
-        }
-
-        async function checkAuth() {
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('dashSection').classList.remove('hidden');
-            loadAllData();
-        }
-
-        function showTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId + 'Tab').classList.remove('hidden');
-            if(btnElement) btnElement.classList.add('active');
-        }
-
+        let pass = sessionStorage.getItem('adminPass'); if(pass) checkAuth();
+        async function login() { pass = document.getElementById('adminPass').value; const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } }
+        async function checkAuth() { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashSection').classList.remove('hidden'); loadAllData(); }
+        function showTab(tabId, btnElement) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); if(btnElement) btnElement.classList.add('active'); }
         async function loadAllData() {
             const res = await fetch('/api/admin/stats'); const data = await res.json();
             document.getElementById('statUsers').innerText = data.users;
-            
-            // Users
             document.getElementById('userListBody').innerHTML = data.userList.map(u => `<tr class="hover:bg-slate-800/30 transition-colors"><td class="p-4 font-bold text-white">${u.firstName}</td><td class="p-4 text-sm text-slate-400">${u.email} <span class="bg-slate-800 px-2 py-1 rounded-md ml-2">${u.country}</span></td><td class="p-4 text-emerald-400 font-bold text-right">$${u.balanceUsd}</td></tr>`).join('');
-            
-            // Deposits
-            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `
-                <tr class="hover:bg-slate-800/30 transition-colors">
-                    <td class="p-4 font-bold text-white">${d.user.firstName}<br><span class="text-xs text-slate-500">${d.senderNumber}</span></td>
-                    <td class="p-4 font-mono text-sm text-slate-400">${d.trxId}<br><span class="text-blue-400 font-bold text-xs uppercase">${d.method}</span></td>
-                    <td class="p-4 font-bold text-emerald-400">৳${d.amountBdt}</td>
-                    <td class="p-4 text-right">
-                        ${d.status === 'PENDING' ? `
-                            <button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-bold text-xs mr-2 hover:bg-emerald-500/40 transition-colors">Approve</button>
-                            <button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-red-500/40 transition-colors">Reject</button>
-                        ` : `<span class="font-bold text-xs text-slate-500">${d.status}</span>`}
-                    </td>
-                </tr>
-            `).join('');
-
-            // Products
-            document.getElementById('adminProductList').innerHTML = data.products.map(p => `
-                <tr class="hover:bg-slate-800/30 transition-colors">
-                    <td class="p-4 font-bold text-white">${p.name}</td>
-                    <td class="p-4 text-emerald-400 font-bold">$${p.price.replace(/[^0-9.]/g, '')}</td>
-                    <td class="p-4 font-bold ${p.stock > 0 ? 'text-blue-400' : 'text-red-400'}">${p.stock}</td>
-                    <td class="p-4 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 hover:text-red-300 p-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors"><i class="fa-solid fa-trash"></i></button></td>
-                </tr>
-            `).join('');
-
-            // Notices
-            const nRes = await fetch('/api/notices'); const notices = await nRes.json();
-            document.getElementById('noticeList').innerHTML = notices.map(n => `<div class="glass-panel p-5 rounded-2xl flex justify-between items-center"><span class="text-slate-300 font-medium">${n.text}</span> <button onclick="deleteNotice(${n.id})" class="text-red-400 hover:text-red-300 bg-red-500/10 p-2 rounded-lg transition-colors"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
-
-            const sRes = await fetch('/api/admin/settings'); const set = await sRes.json();
-            document.getElementById('maintenanceToggle').checked = set.isMaintenance;
+            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-800/30 transition-colors"><td class="p-4 font-bold text-white">${d.user.firstName}<br><span class="text-xs text-slate-500">${d.senderNumber}</span></td><td class="p-4 font-mono text-sm text-slate-400">${d.trxId}<br><span class="text-blue-400 font-bold text-xs uppercase">${d.method}</span></td><td class="p-4 font-bold text-emerald-400">৳${d.amountBdt}</td><td class="p-4 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-bold text-xs mr-2">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg font-bold text-xs">Reject</button>` : `<span class="font-bold text-xs text-slate-500">${d.status}</span>`}</td></tr>`).join('');
+            document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/30 transition-colors"><td class="p-4 font-bold text-white">${p.name}</td><td class="p-4 text-emerald-400 font-bold">$${p.price.replace(/[^0-9.]/g, '')}</td><td class="p-4 font-bold ${p.stock > 0 ? 'text-blue-400' : 'text-red-400'}">${p.stock}</td><td class="p-4 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 hover:text-red-300 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+            const nRes = await fetch('/api/notices'); const notices = await nRes.json(); document.getElementById('noticeList').innerHTML = notices.map(n => `<div class="glass-panel p-5 rounded-2xl flex justify-between items-center"><span class="text-slate-300 font-medium">${n.text}</span> <button onclick="deleteNotice(${n.id})" class="text-red-400 hover:text-red-300 bg-red-500/10 p-2 rounded-lg"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
+            const sRes = await fetch('/api/admin/settings'); const set = await sRes.json(); document.getElementById('maintenanceToggle').checked = set.isMaintenance;
         }
-
-        async function addProductWeb() {
-            const name = document.getElementById('pName').value; const price = document.getElementById('pPrice').value;
-            const stock = document.getElementById('pStock').value; const abilities = document.getElementById('pAbilities').value; const driveLink = document.getElementById('pLink').value;
-            if(!name || !price || !stock) return Swal.fire({toast:true, position:'top-end', icon:'error', title:'Fill required fields!', showConfirmButton:false, timer:2000});
-            
-            await fetch('/api/admin/product', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, name, price, stock, abilities, driveLink}) });
-            document.getElementById('pName').value = ''; document.getElementById('pPrice').value = ''; document.getElementById('pStock').value = ''; document.getElementById('pAbilities').value = ''; document.getElementById('pLink').value = '';
-            loadAllData(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Product Added!', showConfirmButton:false, timer:2000});
-        }
-        
-        async function deleteProduct(id) {
-            if(confirm('Delete this product?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); }
-        }
-
-        async function actionDeposit(id, action) {
-            Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
-            const res = await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) });
-            const data = await res.json();
-            if(data.success) { Swal.fire({toast:true, position:'top-end', icon:'success', title:data.msg, showConfirmButton:false, timer:2000}); loadAllData(); }
-        }
-
+        async function addProductWeb() { const name = document.getElementById('pName').value; const price = document.getElementById('pPrice').value; const stock = document.getElementById('pStock').value; const abilities = document.getElementById('pAbilities').value; const driveLink = document.getElementById('pLink').value; if(!name || !price || !stock) return; await fetch('/api/admin/product', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, name, price, stock, abilities, driveLink}) }); loadAllData(); }
+        async function deleteProduct(id) { if(confirm('Delete?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
+        async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
         async function addNotice() { const text = document.getElementById('noticeInput').value; if(!text) return; await fetch('/api/admin/notice', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text}) }); document.getElementById('noticeInput').value = ''; loadAllData(); }
         async function deleteNotice(id) { await fetch('/api/admin/notice/delete/'+id, { method:'POST' }); loadAllData(); }
-        async function toggleMaintenance() { const status = document.getElementById('maintenanceToggle').checked; await fetch('/api/admin/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, status}) }); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Lockdown Status Updated', showConfirmButton:false, timer:2000}); }
+        async function toggleMaintenance() { const status = document.getElementById('maintenanceToggle').checked; await fetch('/api/admin/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, status}) }); }
     </script>
 </body>
 </html>
