@@ -8,26 +8,28 @@ datasource db {
 }
 
 model Product {
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   name      String
   price     String   
   abilities String
   imageId   String?  
   driveLink String?  
-  stock     Int      @default(1) // Notun: Stock System
-  createdAt DateTime @default(now())
+  stock     Int        @default(1)
+  createdAt DateTime   @default(now())
+  purchases Purchase[] // Relation
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  email        String?   @unique
+  id           Int        @id @default(autoincrement())
+  email        String?    @unique
   password     String?   
-  telegramId   String?   @unique 
+  telegramId   String?    @unique 
   firstName    String?
-  country      String    @default("BD") 
-  balanceUsd   Float     @default(0.0) 
+  country      String     @default("BD") 
+  balanceUsd   Float      @default(0.0) 
   deposits     Deposit[] 
-  createdAt    DateTime  @default(now())
+  purchases    Purchase[] // Relation
+  createdAt    DateTime   @default(now())
 }
 
 model Deposit {
@@ -40,6 +42,17 @@ model Deposit {
   trxId         String   @unique
   status        String   @default("PENDING") 
   createdAt     DateTime @default(now())
+}
+
+// Notun: User ki ki kineche tar record
+model Purchase {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  pricePaid Float
+  createdAt DateTime @default(now())
 }
 
 model Notice {
