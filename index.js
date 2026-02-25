@@ -53,11 +53,6 @@ bot.use(stage.middleware());
 
 bot.command('addproduct', (ctx) => ctx.scene.enter('ADD_PRODUCT_SCENE'));
 
-// Web Server for Railway & Website API
-app.get('/', (req, res) => {
-  res.send('Bot and Website Backend is running!');
-});
-
 // API endpoint: Website theke product gulo dekhar jonno
 app.get('/api/products', async (req, res) => {
   try {
@@ -66,6 +61,11 @@ app.get('/api/products', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Database theke data anhte shomossha hocche' });
   }
+});
+
+// Web Server - Main folder theke index.html show korbe
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
 });
 
 // Port & Bot Launch
