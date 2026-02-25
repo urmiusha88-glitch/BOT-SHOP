@@ -24,13 +24,13 @@ async function getAllRates() {
   catch (e) { return { BDT: 120, INR: 83, PKR: 278 }; }
 }
 
-// --- BOT SCENES: ADD PRODUCT WITH STOCK ---
+// --- BOT SCENES ---
 const addProductWizard = new Scenes.WizardScene(
   'ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('2. Price in USD? (e.g. 10)'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.price = ctx.message.text; ctx.reply('3. Abilities?'); return ctx.wizard.next(); },
-  (ctx) => { ctx.wizard.state.abilities = ctx.message.text; ctx.reply('4. Stock Quantity? (Koto jon kinte parbe? e.g. 5)'); return ctx.wizard.next(); },
+  (ctx) => { ctx.wizard.state.abilities = ctx.message.text; ctx.reply('4. Stock Quantity? (e.g. 5)'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.stock = parseInt(ctx.message.text) || 1; ctx.reply('5. Send a Photo:'); return ctx.wizard.next(); },
   (ctx) => {
     if (!ctx.message.photo) { ctx.reply('❌ Photo missing!'); return ctx.scene.leave(); }
@@ -53,21 +53,16 @@ bot.use(session()); bot.use(stage.middleware());
 
 bot.command('start', (ctx) => ctx.reply(`Welcome! Your Telegram ID is: ${ctx.from.id}`));
 bot.command('addproduct', (ctx) => ctx.scene.enter('ADD_PRODUCT_SCENE'));
-
-// NEW: BOT DELETE COMMAND
 bot.command('deleteproduct', async (ctx) => {
   if (ctx.from.id.toString() !== ADMIN_ID) return;
   const products = await prisma.product.findMany();
   if (products.length === 0) return ctx.reply("❌ No products available.");
-  
   const buttons = products.map((p, index) => ([{ text: `❌ ${index + 1}. ${p.name}`, callback_data: `delprod_${p.id}` }]));
   ctx.reply("Select a product to delete:", { reply_markup: { inline_keyboard: buttons } });
 });
-
 bot.action(/delprod_(.+)/, async (ctx) => {
   if (ctx.from.id.toString() !== ADMIN_ID) return;
-  const prodId = parseInt(ctx.match[1]);
-  await prisma.product.delete({ where: { id: prodId } });
+  await prisma.product.delete({ where: { id: parseInt(ctx.match[1]) } });
   ctx.editMessageText("✅ Product deleted successfully!");
 });
 
@@ -78,7 +73,6 @@ async function processDeposit(depositId, action) {
       const rates = await getAllRates();
       const userRate = deposit.user.country === 'IN' ? rates.INR : (deposit.user.country === 'PK' ? rates.PKR : rates.BDT);
       const usdAmount = deposit.amountBdt / userRate; 
-      
       await prisma.user.update({ where: { id: deposit.userId }, data: { balanceUsd: { increment: usdAmount } } });
       await prisma.deposit.update({ where: { id: depositId }, data: { status: 'APPROVED' } });
       return { success: true, msg: `Approved: $${usdAmount.toFixed(2)}` };
@@ -103,28 +97,57 @@ app.get('/api/products', async (req, res) => {
   res.json(products.map(p => ({ id: p.id, name: p.name, price: p.price, abilities: p.abilities, imageId: p.imageId, stock: p.stock })));
 });
 
-// BUY API with Stock Logic
-app.post('/api/buy', async (req, res) => {
-  const { userId, productId } = req.body;
+// NEW: CART CHECKOUT API
+app.post('/api/checkout', async (req, res) => {
+  const { userId, cartItems } = req.body; // cartItems is array of product IDs
   try {
     const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
-    const product = await prisma.product.findUnique({ where: { id: parseInt(productId) } });
-    const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, ''));
+    let totalCost = 0;
+    let productsToBuy = [];
+
+    // Verify all products
+    for (let pId of cartItems) {
+      const product = await prisma.product.findUnique({ where: { id: parseInt(pId) } });
+      if (!product || product.stock <= 0) return res.json({ success: false, error: `${product?.name || 'A product'} is out of stock!` });
+      const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, ''));
+      totalCost += priceNum;
+      productsToBuy.push({ product, priceNum });
+    }
+
+    if (user.balanceUsd < totalCost) return res.json({ success: false, error: `Insufficient Balance. Need $${totalCost.toFixed(2)}` });
+
+    // Deduct balance
+    await prisma.user.update({ where: { id: user.id }, data: { balanceUsd: { decrement: totalCost } } });
     
-    if (product.stock <= 0) return res.json({ success: false, error: 'Out of Stock!' });
-    if (user.balanceUsd >= priceNum) {
-      await prisma.user.update({ where: { id: user.id }, data: { balanceUsd: { decrement: priceNum } } });
-      await prisma.product.update({ where: { id: product.id }, data: { stock: { decrement: 1 } } });
-      res.json({ success: true, link: product.driveLink, newBalance: user.balanceUsd - priceNum });
-    } else { res.json({ success: false, error: 'Insufficient Balance' }); }
-  } catch (e) { res.status(500).json({ success: false, error: 'Server error' }); }
+    // Create Purchases & Update Stock
+    let purchasedLinks = [];
+    for (let item of productsToBuy) {
+      await prisma.product.update({ where: { id: item.product.id }, data: { stock: { decrement: 1 } } });
+      await prisma.purchase.create({ data: { userId: user.id, productId: item.product.id, pricePaid: item.priceNum } });
+      purchasedLinks.push({ name: item.product.name, link: item.product.driveLink });
+    }
+
+    res.json({ success: true, newBalance: user.balanceUsd - totalCost, items: purchasedLinks });
+  } catch (e) { res.status(500).json({ success: false, error: 'Checkout failed' }); }
 });
 
-// Auth & Deposit APIs...
+// NEW: GET USER'S PURCHASE HISTORY (LIBRARY)
+app.get('/api/library/:userId', async (req, res) => {
+  try {
+    const purchases = await prisma.purchase.findMany({
+      where: { userId: parseInt(req.params.userId) },
+      include: { product: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(purchases);
+  } catch(e) { res.status(500).json([]); }
+});
+
 app.post('/api/register', async (req, res) => { try { await prisma.user.create({ data: { firstName: req.body.name, email: req.body.email, password: req.body.password, country: req.body.country } }); res.json({ success: true }); } catch (e) { res.status(400).json({ success: false, error: 'Email exists' }); } });
 app.post('/api/login', async (req, res) => { const user = await prisma.user.findUnique({ where: { email: req.body.email } }); if (user && user.password === req.body.password) res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceUsd: user.balanceUsd, country: user.country } }); else res.status(401).json({ success: false, error: 'Invalid login' }); });
 app.get('/api/user/:id', async (req, res) => { const user = await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } }); if (user) res.json({ success: true, balanceUsd: user.balanceUsd, country: user.country }); else res.json({ success: false }); });
 app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
+
 app.post('/api/deposit', async (req, res) => {
   const { userId, method, amountBdt, senderNumber, trxId } = req.body;
   try {
@@ -138,30 +161,15 @@ app.post('/api/deposit', async (req, res) => {
 
 // --- ADMIN APIs ---
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true, token: 'auth' }); else res.status(401).json({ success: false }); });
-app.get('/api/admin/stats', async (req, res) => {
-  const users = await prisma.user.count(); const deposits = await prisma.deposit.findMany({ orderBy: { createdAt: 'desc' }, take: 20, include: { user: true } }); const userList = await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 20 });
-  const allProducts = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); // Web admin e product list anar jonno
-  res.json({ users, deposits, userList, products: allProducts });
-});
+app.get('/api/admin/stats', async (req, res) => { const users = await prisma.user.count(); const deposits = await prisma.deposit.findMany({ orderBy: { createdAt: 'desc' }, take: 20, include: { user: true } }); const userList = await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 20 }); const allProducts = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); res.json({ users, deposits, userList, products: allProducts }); });
 app.post('/api/admin/deposit/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const result = await processDeposit(parseInt(req.body.id), req.body.action); res.json(result); });
 app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({ data: { text: req.body.text } }); res.json({ success: true }); });
 app.post('/api/admin/notice/delete/:id', async (req, res) => { await prisma.notice.delete({ where: { id: parseInt(req.params.id) } }); res.json({ success: true }); });
 app.get('/api/admin/settings', (req, res) => res.json({ isMaintenance }));
 app.post('/api/admin/settings', (req, res) => { isMaintenance = req.body.status; res.json({ success: true }); });
 
-// NEW: ADMIN ADD/DELETE PRODUCT FROM WEB
-app.post('/api/admin/product', async (req, res) => {
-  if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
-  try {
-    const { name, price, abilities, stock, driveLink } = req.body;
-    await prisma.product.create({ data: { name, price, abilities, stock: parseInt(stock), driveLink } });
-    res.json({ success: true });
-  } catch(e) { res.status(500).json({ success: false }); }
-});
-app.delete('/api/admin/product/:id', async (req, res) => {
-  if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
-  try { await prisma.product.delete({ where: { id: parseInt(req.params.id) } }); res.json({ success: true }); } catch(e) { res.status(500).json({ success: false }); }
-});
+app.post('/api/admin/product', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); try { const { name, price, abilities, stock, driveLink } = req.body; await prisma.product.create({ data: { name, price, abilities, stock: parseInt(stock), driveLink } }); res.json({ success: true }); } catch(e) { res.status(500).json({ success: false }); } });
+app.delete('/api/admin/product/:id', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); try { await prisma.product.delete({ where: { id: parseInt(req.params.id) } }); res.json({ success: true }); } catch(e) { res.status(500).json({ success: false }); } });
 
 // Routing
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
