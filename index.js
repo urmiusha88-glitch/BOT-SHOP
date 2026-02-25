@@ -7,9 +7,13 @@ const prisma = new PrismaClient();
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const app = express();
 
+// Pro setup: JSON body parse korar jonno
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Bot er Start Command
 bot.command('start', (ctx) => {
-  ctx.reply('Welcome to the Source Code Store!\n\nDeveloper : Ononto Hasan\n\nUse /addproduct to add a new source code to the database.');
+  ctx.reply('Welcome to the Premium Source Code Store!\n\nDeveloper: Ononto Hasan\n\nUse /addproduct to add a new source code to the database.');
 });
 
 // Step-by-step data neyar jonno Wizard Scene
@@ -21,7 +25,7 @@ const addProductWizard = new Scenes.WizardScene(
   },
   (ctx) => {
     ctx.wizard.state.name = ctx.message.text;
-    ctx.reply('Product er price koto?');
+    ctx.reply('Product er price koto? (e.g. 30$)');
     return ctx.wizard.next();
   },
   (ctx) => {
@@ -37,7 +41,7 @@ const addProductWizard = new Scenes.WizardScene(
       await prisma.product.create({
         data: { name, price, abilities }
       });
-      ctx.reply(`✅ Product successfully added!\n\n📦 Name: ${name}\n💰 Price: ${price}\n⚙️ Abilities: ${abilities}`);
+      ctx.reply(`✅ Product successfully added!\n\n📦 Name: ${name}\n💰 Price: ${price}\n⚙️ Abilities: ${abilities}\n\nLive on Website now!`);
     } catch (error) {
       console.error(error);
       ctx.reply('❌ Database e save korte shomossha hoyeche.');
@@ -53,17 +57,42 @@ bot.use(stage.middleware());
 
 bot.command('addproduct', (ctx) => ctx.scene.enter('ADD_PRODUCT_SCENE'));
 
-// API endpoint: Website theke product gulo dekhar jonno
+// ----- WEB & API ROUTES -----
+
+// 1. Website theke shob product anar API
 app.get('/api/products', async (req, res) => {
   try {
-    const products = await prisma.product.findMany();
+    // Sobcheye notun product aage dekhabe
+    const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: 'Database theke data anhte shomossha hocche' });
   }
 });
 
-// Web Server - Main folder theke index.html show korbe
+// 2. Admin Panel theke Product Delete korar API
+app.delete('/api/admin/delete/:id', async (req, res) => {
+  const { password } = req.body;
+  const adminPassword = process.env.ADMIN_PASSWORD || 'ononto123'; // Default password jodi .env te na thake
+  
+  if (password !== adminPassword) {
+    return res.status(403).json({ error: 'Incorrect Admin Password!' });
+  }
+
+  try {
+    const productId = parseInt(req.params.id);
+    await prisma.product.delete({ where: { id: productId } });
+    res.json({ success: true, message: 'Product deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
+// 3. Web Server - Main file gulo serve korbe
+app.get('/admin', (req, res) => {
+  res.sendFile(__dirname + '/admin.html');
+});
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
