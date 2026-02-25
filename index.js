@@ -13,12 +13,27 @@ app.use(express.urlencoded({ extended: true }));
 const ADMIN_ID = process.env.ADMIN_ID; 
 let isMaintenance = false;
 
+// --- PERFECTED MAINTENANCE MIDDLEWARE ---
 app.use((req, res, next) => {
-  if (req.path.startsWith('/admin') || req.path.startsWith('/api/admin')) return next();
-  if (isMaintenance && req.path !== '/maintenance.html') return res.sendFile(__dirname + '/maintenance.html');
+  // 1. Admin der jonno sob open thakbe
+  if (req.path.startsWith('/admin') || req.path.startsWith('/api/admin')) {
+    return next();
+  }
+  
+  // 2. Jodi maintenance ON thake
+  if (isMaintenance) {
+    // API request asle JSON error dibe (Browser crash thekabey)
+    if (req.path.startsWith('/api/')) {
+      return res.status(503).json({ success: false, error: 'Maintenance Mode is ON' });
+    }
+    // Website e dhukte chaile sorashori maintenance.html dekhabe
+    return res.sendFile(__dirname + '/maintenance.html');
+  }
+  
   next();
 });
 
+// Exchange Rate
 async function getAllRates() {
   try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); return data.rates; } 
   catch (e) { return { BDT: 120, INR: 83, PKR: 278 }; }
@@ -91,57 +106,33 @@ bot.action(/reject_(.+)/, async (ctx) => { const res = await processDeposit(pars
 app.get('/api/rate', async (req, res) => res.json({ rates: await getAllRates() }));
 app.get('/api/notices', async (req, res) => res.json(await prisma.notice.findMany({ where: { isActive: true } })));
 app.get('/api/photo/:fileId', async (req, res) => { try { const link = await bot.telegram.getFileLink(req.params.fileId); res.redirect(link.href); } catch(e) { res.status(404).send('Not found'); } });
+app.get('/api/products', async (req, res) => { const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); res.json(products.map(p => ({ id: p.id, name: p.name, price: p.price, abilities: p.abilities, imageId: p.imageId, stock: p.stock }))); });
 
-app.get('/api/products', async (req, res) => {
-  const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
-  res.json(products.map(p => ({ id: p.id, name: p.name, price: p.price, abilities: p.abilities, imageId: p.imageId, stock: p.stock })));
-});
-
-// NEW: CART CHECKOUT API
 app.post('/api/checkout', async (req, res) => {
-  const { userId, cartItems } = req.body; // cartItems is array of product IDs
+  const { userId, cartItems } = req.body;
   try {
     const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
-    let totalCost = 0;
-    let productsToBuy = [];
-
-    // Verify all products
+    let totalCost = 0; let productsToBuy = [];
     for (let pId of cartItems) {
       const product = await prisma.product.findUnique({ where: { id: parseInt(pId) } });
       if (!product || product.stock <= 0) return res.json({ success: false, error: `${product?.name || 'A product'} is out of stock!` });
       const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, ''));
-      totalCost += priceNum;
-      productsToBuy.push({ product, priceNum });
+      totalCost += priceNum; productsToBuy.push({ product, priceNum });
     }
+    if (user.balanceUsd < totalCost) return res.json({ success: false, error: `Insufficient Balance.` });
 
-    if (user.balanceUsd < totalCost) return res.json({ success: false, error: `Insufficient Balance. Need $${totalCost.toFixed(2)}` });
-
-    // Deduct balance
     await prisma.user.update({ where: { id: user.id }, data: { balanceUsd: { decrement: totalCost } } });
-    
-    // Create Purchases & Update Stock
     let purchasedLinks = [];
     for (let item of productsToBuy) {
       await prisma.product.update({ where: { id: item.product.id }, data: { stock: { decrement: 1 } } });
       await prisma.purchase.create({ data: { userId: user.id, productId: item.product.id, pricePaid: item.priceNum } });
       purchasedLinks.push({ name: item.product.name, link: item.product.driveLink });
     }
-
     res.json({ success: true, newBalance: user.balanceUsd - totalCost, items: purchasedLinks });
   } catch (e) { res.status(500).json({ success: false, error: 'Checkout failed' }); }
 });
 
-// NEW: GET USER'S PURCHASE HISTORY (LIBRARY)
-app.get('/api/library/:userId', async (req, res) => {
-  try {
-    const purchases = await prisma.purchase.findMany({
-      where: { userId: parseInt(req.params.userId) },
-      include: { product: true },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json(purchases);
-  } catch(e) { res.status(500).json([]); }
-});
+app.get('/api/library/:userId', async (req, res) => { try { const purchases = await prisma.purchase.findMany({ where: { userId: parseInt(req.params.userId) }, include: { product: true }, orderBy: { createdAt: 'desc' } }); res.json(purchases); } catch(e) { res.status(500).json([]); } });
 
 app.post('/api/register', async (req, res) => { try { await prisma.user.create({ data: { firstName: req.body.name, email: req.body.email, password: req.body.password, country: req.body.country } }); res.json({ success: true }); } catch (e) { res.status(400).json({ success: false, error: 'Email exists' }); } });
 app.post('/api/login', async (req, res) => { const user = await prisma.user.findUnique({ where: { email: req.body.email } }); if (user && user.password === req.body.password) res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceUsd: user.balanceUsd, country: user.country } }); else res.status(401).json({ success: false, error: 'Invalid login' }); });
@@ -167,11 +158,10 @@ app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({
 app.post('/api/admin/notice/delete/:id', async (req, res) => { await prisma.notice.delete({ where: { id: parseInt(req.params.id) } }); res.json({ success: true }); });
 app.get('/api/admin/settings', (req, res) => res.json({ isMaintenance }));
 app.post('/api/admin/settings', (req, res) => { isMaintenance = req.body.status; res.json({ success: true }); });
-
 app.post('/api/admin/product', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); try { const { name, price, abilities, stock, driveLink } = req.body; await prisma.product.create({ data: { name, price, abilities, stock: parseInt(stock), driveLink } }); res.json({ success: true }); } catch(e) { res.status(500).json({ success: false }); } });
 app.delete('/api/admin/product/:id', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); try { await prisma.product.delete({ where: { id: parseInt(req.params.id) } }); res.json({ success: true }); } catch(e) { res.status(500).json({ success: false }); } });
 
-// Routing
+// --- ROUTING ---
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
 app.get('/admin', (req, res) => res.sendFile(__dirname + '/admin.html'));
