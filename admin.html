@@ -3,170 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Bot Store</title>
+    <title>Master Admin - Bot Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 transition-all duration-300">
+<body class="bg-slate-100 font-sans text-slate-800">
 
-    <div id="loginSection" class="h-screen flex justify-center items-center px-4 transition-all duration-500 ease-in-out">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-slate-200 transform hover:scale-[1.01] transition-all">
-            <h2 class="text-3xl font-extrabold text-center text-slate-800 mb-2"><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i>Admin Area</h2>
-            <p class="text-center text-slate-500 mb-8 text-sm">Secure login for Ononto Hasan</p>
-            
-            <form id="adminLoginForm" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Email</label>
-                    <input type="email" id="adminEmail" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none" placeholder="admin@example.com">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Password</label>
-                    <input type="password" id="adminPassInput" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none" placeholder="••••••••">
-                </div>
-                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-blue-600 transition-all shadow-md hover:shadow-lg transform active:scale-95">
-                    Access Dashboard <i class="fa-solid fa-arrow-right ml-2"></i>
-                </button>
-            </form>
-            <div class="text-center mt-6"><a href="/" class="text-sm text-slate-400 hover:text-blue-500 transition-colors">Back to Website</a></div>
+    <div id="loginSection" class="h-screen flex justify-center items-center">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-96 text-center">
+            <h2 class="text-2xl font-bold mb-6">Admin Master Login</h2>
+            <input type="password" id="adminPass" class="w-full px-4 py-3 border rounded-xl mb-4" placeholder="Password...">
+            <button onclick="login()" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold">Login</button>
         </div>
     </div>
 
-    <div id="dashboardSection" class="hidden max-w-6xl mx-auto px-4 py-10 opacity-0 transition-opacity duration-700">
-        <div class="flex justify-between items-center mb-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-800"><i class="fa-solid fa-shield-halved text-blue-600 mr-2"></i>Dashboard</h1>
-                <p class="text-slate-500 mt-1">Manage Store & Maintenance</p>
-            </div>
-            <button onclick="logoutAdmin()" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg font-bold transition-colors">
-                <i class="fa-solid fa-power-off mr-1"></i> Logout
-            </button>
+    <div id="dashSection" class="hidden flex h-screen overflow-hidden">
+        <div class="w-64 bg-slate-900 text-white flex flex-col p-4 space-y-2">
+            <h2 class="text-2xl font-bold mb-8 text-center text-blue-400">Master Panel</h2>
+            <button onclick="showTab('stats')" class="text-left p-3 hover:bg-slate-800 rounded-xl font-bold"><i class="fa-solid fa-chart-pie mr-2"></i> Web Stats</button>
+            <button onclick="showTab('users')" class="text-left p-3 hover:bg-slate-800 rounded-xl font-bold"><i class="fa-solid fa-users mr-2"></i> Users</button>
+            <button onclick="showTab('deposits')" class="text-left p-3 hover:bg-slate-800 rounded-xl font-bold"><i class="fa-solid fa-money-bill-transfer mr-2"></i> Deposits</button>
+            <button onclick="showTab('notices')" class="text-left p-3 hover:bg-slate-800 rounded-xl font-bold"><i class="fa-solid fa-bullhorn mr-2"></i> Notices</button>
+            <button onclick="showTab('settings')" class="text-left p-3 hover:bg-slate-800 rounded-xl font-bold"><i class="fa-solid fa-gear mr-2"></i> Settings</button>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 flex justify-between items-center bg-gradient-to-r from-white to-slate-50">
-            <div>
-                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-screwdriver-wrench text-orange-500 mr-2"></i>Maintenance Mode</h2>
-                <p class="text-sm text-slate-500">Hide website from public users when updating.</p>
+        <div class="flex-1 bg-slate-50 p-8 overflow-y-auto" id="mainContent">
+            
+            <div id="statsTab" class="tab-content">
+                <h1 class="text-3xl font-bold mb-6">Dashboard Overview</h1>
+                <div class="grid grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-l-4 border-l-blue-500">
+                        <p class="text-slate-500 font-bold">Total Users</p>
+                        <h2 class="text-4xl font-black text-slate-800" id="statUsers">0</h2>
+                    </div>
+                </div>
             </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="maintenanceToggle" class="sr-only peer" onchange="toggleMaintenance()">
-              <div class="w-14 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-500 shadow-inner"></div>
-            </label>
-        </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm uppercase tracking-wider">
-                            <th class="p-4 font-semibold">ID</th>
-                            <th class="p-4 font-semibold">Name</th>
-                            <th class="p-4 font-semibold">Price</th>
-                            <th class="p-4 font-semibold">Abilities</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-product-list" class="divide-y divide-slate-100">
-                        </tbody>
-                </table>
+            <div id="usersTab" class="tab-content hidden">
+                <h1 class="text-2xl font-bold mb-4">User List</h1>
+                <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b"><tr class="text-slate-500"><th class="p-4">Name</th><th class="p-4">Email</th><th class="p-4">Balance</th></tr></thead>
+                        <tbody id="userListBody" class="divide-y"></tbody>
+                    </table>
+                </div>
             </div>
+
+            <div id="depositsTab" class="tab-content hidden">
+                <h1 class="text-2xl font-bold mb-4">Recent Deposits</h1>
+                <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b"><tr class="text-slate-500"><th class="p-4">User</th><th class="p-4">TrxID</th><th class="p-4">Amount</th><th class="p-4">Status</th></tr></thead>
+                        <tbody id="depositListBody" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="noticesTab" class="tab-content hidden">
+                <h1 class="text-2xl font-bold mb-4">Manage Notices</h1>
+                <div class="flex gap-4 mb-6">
+                    <input type="text" id="noticeInput" class="flex-1 px-4 py-3 border rounded-xl" placeholder="Write a new notice...">
+                    <button onclick="addNotice()" class="bg-blue-600 text-white px-6 font-bold rounded-xl">Add</button>
+                </div>
+                <div id="noticeList" class="space-y-3"></div>
+            </div>
+
+            <div id="settingsTab" class="tab-content hidden">
+                <h1 class="text-2xl font-bold mb-4">System Settings</h1>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold text-red-500">Maintenance Mode</h2>
+                        <p class="text-sm text-slate-500">Lock the website for updates.</p>
+                    </div>
+                    <input type="checkbox" id="maintenanceToggle" onchange="toggleMaintenance()" class="w-6 h-6">
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        const loginSec = document.getElementById('loginSection');
-        const dashSec = document.getElementById('dashboardSection');
-        let sessionPass = sessionStorage.getItem('adminPass');
+        let pass = sessionStorage.getItem('adminPass');
+        if(pass) checkAuth();
 
-        // Setup smooth sweet alerts
-        const Toast = Swal.mixin({
-            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' }
-        });
-
-        // Check Auth Status on Load
-        if (sessionStorage.getItem('adminToken')) {
-            showDashboard();
+        async function login() {
+            pass = document.getElementById('adminPass').value;
+            const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) });
+            if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); }
+            else alert("Wrong Password");
         }
 
-        function showDashboard() {
-            loginSec.classList.add('hidden');
-            dashSec.classList.remove('hidden');
-            setTimeout(() => dashSec.classList.remove('opacity-0'), 100);
-            loadAdminProducts();
-            loadSettings();
+        async function checkAuth() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashSection').classList.remove('hidden');
+            loadAllData();
         }
 
-        function logoutAdmin() {
-            sessionStorage.removeItem('adminToken');
-            sessionStorage.removeItem('adminPass');
-            window.location.reload();
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId + 'Tab').classList.remove('hidden');
         }
 
-        // Login Submit
-        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassInput').value;
+        async function loadAllData() {
+            const res = await fetch('/api/admin/stats'); const data = await res.json();
+            document.getElementById('statUsers').innerText = data.users;
+            
+            document.getElementById('userListBody').innerHTML = data.userList.map(u => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${u.firstName}</td><td class="p-4 text-sm">${u.email}</td><td class="p-4 text-emerald-600 font-bold">$${u.balanceUsd}</td></tr>`).join('');
+            
+            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${d.user.firstName}</td><td class="p-4 font-mono text-sm">${d.trxId}</td><td class="p-4 font-bold">৳${d.amountBdt}</td><td class="p-4">${d.status}</td></tr>`).join('');
 
-            const res = await fetch('/api/admin/login', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const data = await res.json();
+            const nRes = await fetch('/api/notices'); const notices = await nRes.json();
+            document.getElementById('noticeList').innerHTML = notices.map(n => `<div class="bg-white p-4 rounded-xl border flex justify-between"><span>${n.text}</span> <button onclick="deleteNotice(${n.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div>`).join('');
 
-            if (data.success) {
-                sessionStorage.setItem('adminToken', data.token);
-                sessionStorage.setItem('adminPass', password);
-                sessionPass = password;
-                Toast.fire({ icon: 'success', title: 'Login Successful' });
-                showDashboard();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Invalid Credentials', confirmButtonColor: '#3b82f6' });
-            }
-        });
+            const sRes = await fetch('/api/admin/settings'); const set = await sRes.json();
+            document.getElementById('maintenanceToggle').checked = set.isMaintenance;
+        }
 
-        async function loadSettings() {
-            const res = await fetch('/api/admin/settings');
-            const data = await res.json();
-            document.getElementById('maintenanceToggle').checked = data.isMaintenance;
+        async function addNotice() {
+            const text = document.getElementById('noticeInput').value;
+            await fetch('/api/admin/notice', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text}) });
+            document.getElementById('noticeInput').value = ''; loadAllData();
+        }
+        async function deleteNotice(id) {
+            await fetch('/api/admin/notice/delete/'+id, { method:'POST' }); loadAllData();
         }
 
         async function toggleMaintenance() {
             const status = document.getElementById('maintenanceToggle').checked;
-            try {
-                const res = await fetch('/api/admin/settings', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: sessionPass, status: status })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    Toast.fire({ icon: status ? 'warning' : 'success', title: status ? 'Maintenance Mode ON' : 'Website is Live' });
-                } else {
-                    document.getElementById('maintenanceToggle').checked = !status; 
-                    Toast.fire({ icon: 'error', title: 'Auth Error' });
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        async function loadAdminProducts() {
-            const response = await fetch('/api/products');
-            const products = await response.json();
-            const tbody = document.getElementById('admin-product-list');
-            tbody.innerHTML = '';
-            if(products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">No products found.</td></tr>'; return;
-            }
-            products.forEach(p => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-4 text-slate-500 font-mono text-sm">#${p.id}</td>
-                        <td class="p-4 font-bold text-slate-800">${p.name}</td>
-                        <td class="p-4 font-semibold text-emerald-600">${p.price}</td>
-                        <td class="p-4 text-sm text-slate-500 truncate max-w-xs">${p.abilities}</td>
-                    </tr>
-                `;
-            });
+            await fetch('/api/admin/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, status}) });
+            alert("Maintenance Status Updated!");
         }
     </script>
 </body>
