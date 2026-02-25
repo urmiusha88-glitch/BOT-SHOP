@@ -3,68 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Source Code Store - Ononto Hasan</title>
+    <title>Premium Bot Store - Ononto Hasan</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .gradient-text { background: linear-gradient(90deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<body class="bg-slate-50 font-sans text-slate-800 antialiased selection:bg-blue-200">
 
-    <nav class="bg-gray-800 p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-white text-2xl font-bold">Bot Shop</a>
-            <span class="text-gray-300 text-sm">Developer : Ononto Hasan</span>
+    <nav class="glass-effect fixed w-full z-50 top-0 border-b border-slate-200 transition-all shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <i class="fa-solid fa-robot text-blue-600 text-2xl"></i>
+                    <span class="font-bold text-xl tracking-tight">Bot<span class="text-blue-600">Store</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <span class="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                        <i class="fa-solid fa-code text-blue-500 mr-1"></i> Dev: Ononto Hasan
+                    </span>
+                    <a href="/admin" class="text-slate-600 hover:text-blue-600 font-medium transition-colors">Admin Login</a>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container mx-auto mt-10 px-4">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Available Source Codes</h1>
-        
-        <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <p class="text-center col-span-full text-gray-500">Loading products...</p>
+    <div class="pt-28 pb-12 sm:pt-32 sm:pb-16 lg:pb-20 bg-gradient-to-b from-blue-50 to-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
+                Next-Gen <span class="gradient-text">Source Codes</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500">
+                Enhance your workflow with premium, ready-to-use Telegram bot source codes. Built for speed and reliability.
+            </p>
+            
+            <div class="mt-10 max-w-xl mx-auto relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-slate-400"></i>
+                </div>
+                <input type="text" id="searchInput" onkeyup="filterProducts()" class="block w-full pl-10 pr-3 py-4 border border-slate-300 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm transition-all" placeholder="Search for bots, abilities...">
+            </div>
         </div>
     </div>
 
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="col-span-full flex justify-center py-12 text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-4xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 font-medium">© 2026 Developed by Ononto Hasan.</p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <a href="https://www.tiktok.com/@AURA_MINATO" target="_blank" class="text-slate-400 hover:text-black transition-colors text-2xl" title="TikTok Profile">
+                    <i class="fa-brands fa-tiktok"></i> <span class="text-sm font-bold align-middle">AURA MINATO</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
     <script>
+        let allProducts = [];
+
         async function loadProducts() {
             try {
-                // API theke data anar request
                 const response = await fetch('/api/products');
-                const products = await response.json();
-                
-                const productList = document.getElementById('product-list');
-                productList.innerHTML = ''; // Clear loading text
-
-                if (products.length === 0) {
-                    productList.innerHTML = '<p class="text-center col-span-full text-gray-500">Ekhono kono product add kora hoyni.</p>';
-                    return;
-                }
-
-                // Protita product er jonno ekta kore Card toiri kora
-                products.forEach(product => {
-                    const card = `
-                        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-2">${product.name}</h2>
-                            <p class="text-gray-600 mb-4 h-16 overflow-y-auto"><strong>Abilities:</strong> ${product.abilities}</p>
-                            <div class="flex justify-between items-center mt-4 border-t pt-4">
-                                <span class="text-green-600 font-bold text-xl">${product.price}</span>
-                                <button onclick="buyProduct('${product.name}')" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition-colors">
-                                    Buy Now
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    productList.innerHTML += card;
-                });
+                allProducts = await response.json();
+                renderProducts(allProducts);
             } catch (error) {
-                console.error('Error fetching products:', error);
-                document.getElementById('product-list').innerHTML = '<p class="text-center col-span-full text-red-500">Data load korte shomossha hocche!</p>';
+                document.getElementById('product-list').innerHTML = '<p class="text-center col-span-full text-red-500 font-medium">Failed to load data. Please try again later.</p>';
             }
         }
 
-        function buyProduct(name) {
-            alert(`Apni '${name}' kinar jonno click korechen. Ekhane apni apnar Telegram Bot er payment link ba message link add korte parben!`);
+        function renderProducts(products) {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = ''; 
+
+            if (products.length === 0) {
+                productList.innerHTML = `
+                    <div class="col-span-full text-center py-16">
+                        <i class="fa-solid fa-box-open text-6xl text-slate-300 mb-4"></i>
+                        <p class="text-slate-500 text-lg">No source codes available right now.</p>
+                    </div>`;
+                return;
+            }
+
+            products.forEach(product => {
+                const abilitiesHtml = product.abilities.split(',').map(a => `<span class="inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-xs font-semibold mr-2 mb-2">${a.trim()}</span>`).join('');
+                
+                const card = `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <h2 class="text-2xl font-bold text-slate-800">${product.name}</h2>
+                                <span class="bg-emerald-100 text-emerald-700 font-bold px-3 py-1 rounded-lg text-sm"><i class="fa-solid fa-tag mr-1"></i>${product.price}</span>
+                            </div>
+                            <div class="mb-6 h-20 overflow-y-auto custom-scrollbar">
+                                ${abilitiesHtml}
+                            </div>
+                        </div>
+                        <button onclick="buyProduct('${product.name}')" class="w-full bg-slate-900 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors shadow-md flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-cart-shopping"></i> Purchase Source Code
+                        </button>
+                    </div>
+                `;
+                productList.innerHTML += card;
+            });
         }
 
-        // Page load holei product gulo anbe
+        function filterProducts() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => 
+                p.name.toLowerCase().includes(query) || p.abilities.toLowerCase().includes(query)
+            );
+            renderProducts(filtered);
+        }
+
+        function buyProduct(name) {
+            Swal.fire({
+                title: 'Order Processing',
+                html: `You selected <b>${name}</b>.<br>Please contact the developer on Telegram to complete the payment.`,
+                icon: 'info',
+                confirmButtonText: '<i class="fa-brands fa-telegram"></i> Message Admin',
+                confirmButtonColor: '#3b82f6',
+                showCancelButton: true,
+                cancelButtonText: 'Cancel'
+            });
+        }
+
         loadProducts();
     </script>
 </body>
