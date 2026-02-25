@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register - Bot Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-slate-50 h-screen flex justify-center items-center px-4">
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border border-slate-200">
+        
+        <div class="flex mb-6 bg-slate-100 p-1 rounded-xl">
+            <button id="showLoginBtn" onclick="toggleForm('login')" class="flex-1 py-2 font-bold rounded-lg bg-white shadow-sm text-blue-600 transition-all">Login</button>
+            <button id="showRegBtn" onclick="toggleForm('register')" class="flex-1 py-2 font-bold rounded-lg text-slate-500 hover:text-slate-800 transition-all">Register</button>
+        </div>
+
+        <form id="loginForm" class="space-y-4 block">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Email</label>
+                <input type="email" id="logEmail" required class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-blue-500" placeholder="Enter your email">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Password</label>
+                <input type="password" id="logPass" required class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-blue-500" placeholder="Enter your password">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Login</button>
+        </form>
+
+        <form id="registerForm" class="space-y-4 hidden">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Full Name</label>
+                <input type="text" id="regName" required class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-blue-500" placeholder="John Doe">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Email</label>
+                <input type="email" id="regEmail" required class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-blue-500" placeholder="Enter your email">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Password</label>
+                <input type="password" id="regPass" required class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-blue-500" placeholder="Create a password">
+            </div>
+            <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors">Create Account</button>
+        </form>
+
+    </div>
+
+    <script>
+        function toggleForm(type) {
+            if(type === 'login') {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('showLoginBtn').classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+                document.getElementById('showRegBtn').classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+            } else {
+                document.getElementById('registerForm').classList.remove('hidden');
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('showRegBtn').classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+                document.getElementById('showLoginBtn').classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+            }
+        }
+
+        // Register Action
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            const data = await res.json();
+            if(data.success) {
+                Swal.fire('Success!', 'Account created successfully. Please login.', 'success');
+                toggleForm('login');
+            } else {
+                Swal.fire('Error', data.error, 'error');
+            }
+        });
+
+        // Login Action
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('logEmail').value;
+            const password = document.getElementById('logPass').value;
+
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if(data.success) {
+                // User logged in, save to local storage
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/'; // Go to home page
+            } else {
+                Swal.fire('Error', data.error, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

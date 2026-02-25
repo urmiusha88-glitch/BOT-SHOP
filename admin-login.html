@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Bot Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-slate-100 h-screen flex justify-center items-center">
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border border-slate-200">
+        <h2 class="text-3xl font-bold text-center text-slate-800 mb-6">Admin Panel</h2>
+        
+        <form id="adminLoginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Admin Email</label>
+                <input type="email" id="email" required class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" placeholder="admin@example.com">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Password</label>
+                <input type="password" id="password" required class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
+            </div>
+            <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-blue-600 transition-colors">
+                Login as Admin
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                sessionStorage.setItem('adminToken', data.token);
+                window.location.href = '/admin';
+            } else {
+                Swal.fire('Error', data.error, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

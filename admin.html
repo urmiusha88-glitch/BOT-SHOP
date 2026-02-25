@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Bot Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800">
+
+    <div class="max-w-5xl mx-auto px-4 py-10">
+        <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800"><i class="fa-solid fa-shield-halved text-blue-600 mr-2"></i>Admin Dashboard</h1>
+                <p class="text-slate-500 mt-1">Manage your Telegram Bot Source Codes</p>
+            </div>
+            <a href="/" class="bg-slate-100 text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Store
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm uppercase tracking-wider">
+                            <th class="p-4 font-semibold">ID</th>
+                            <th class="p-4 font-semibold">Name</th>
+                            <th class="p-4 font-semibold">Price</th>
+                            <th class="p-4 font-semibold">Abilities</th>
+                            <th class="p-4 font-semibold text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-product-list" class="divide-y divide-slate-100">
+                        <tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check for password in session storage or prompt
+        let adminPass = sessionStorage.getItem('adminPass');
+        
+        async function authenticate() {
+            if (!adminPass) {
+                const { value: password } = await Swal.fire({
+                    title: 'Admin Authentication',
+                    input: 'password',
+                    inputLabel: 'Enter your admin password',
+                    inputPlaceholder: 'Password...',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#3b82f6'
+                });
+                if (password) {
+                    adminPass = password;
+                    sessionStorage.setItem('adminPass', adminPass);
+                    loadAdminProducts();
+                } else {
+                    window.location.href = '/';
+                }
+            } else {
+                loadAdminProducts();
+            }
+        }
+
+        async function loadAdminProducts() {
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+                const tbody = document.getElementById('admin-product-list');
+                tbody.innerHTML = '';
+
+                if(products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">No products found. Add from Telegram Bot.</td></tr>';
+                    return;
+                }
+
+                products.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 text-slate-500 font-mono text-sm">#${p.id}</td>
+                            <td class="p-4 font-bold text-slate-800">${p.name}</td>
+                            <td class="p-4 font-semibold text-emerald-600">${p.price}</td>
+                            <td class="p-4 text-sm text-slate-500 truncate max-w-xs">${p.abilities}</td>
+                            <td class="p-4 text-right">
+                                <button onclick="deleteProduct(${p.id})" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors" title="Delete Product">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                Swal.fire('Error', 'Could not load products', 'error');
+            }
+        }
+
+        async function deleteProduct(id) {
+            const confirm = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (confirm.isConfirmed) {
+                try {
+                    const res = await fetch(`/api/admin/delete/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: adminPass })
+                    });
+                    
+                    if (res.ok) {
+                        Swal.fire('Deleted!', 'Product has been removed.', 'success');
+                        loadAdminProducts(); // Reload table
+                    } else {
+                        const data = await res.json();
+                        Swal.fire('Failed', data.error || 'Wrong Password!', 'error');
+                        sessionStorage.removeItem('adminPass'); // Clear wrong pass
+                        adminPass = null;
+                        setTimeout(authenticate, 1500); // Re-ask for pass
+                    }
+                } catch (e) {
+                    Swal.fire('Error', 'Server communication failed', 'error');
+                }
+            }
+        }
+
+        // Start
+        authenticate();
+    </script>
+</body>
+</html>
