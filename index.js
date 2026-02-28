@@ -7,13 +7,12 @@ const prisma = new PrismaClient();
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // For base64 avatars
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 const ADMIN_ID = process.env.ADMIN_ID; 
-let isMaintenance = false; // 🔥 Maintenance Variable
+let isMaintenance = false;
 
-// 🔥 Maintenance Middleware (Blocks users, allows Admin)
 app.use((req, res, next) => {
   if (req.path.startsWith('/auraminato') || req.path.startsWith('/api/admin') || req.path === '/admin') return next();
   if (isMaintenance) {
@@ -24,13 +23,9 @@ app.use((req, res, next) => {
 });
 
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+async function getAllRates() { try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); return data.rates; } catch (e) { return { BDT: 120, INR: 83, PKR: 278 }; } }
 
-async function getAllRates() {
-  try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); return data.rates; } 
-  catch (e) { return { BDT: 120, INR: 83, PKR: 278 }; }
-}
-
-// --- 🤖 BOT LOGIC ---
+// --- BOT LOGIC ---
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('🛒 1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in USD? (e.g. 15)'); return ctx.wizard.next(); },
@@ -50,30 +45,10 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
     return ctx.scene.leave();
   }
 );
+const stage = new Scenes.Stage([addProductWizard]); bot.use(session()); bot.use(stage.middleware());
 
-const stage = new Scenes.Stage([addProductWizard]);
-bot.use(session()); bot.use(stage.middleware());
-
-bot.start((ctx) => {
-    ctx.reply(`🌟 *Welcome to AURA DIGITAL STORE* 🌟\n\nHello ${ctx.from.first_name}!\nYour Telegram ID: \`${ctx.from.id}\``, {
-        parse_mode: 'Markdown',
-        reply_markup: { inline_keyboard: [[{ text: '🌐 Visit Website', url: 'https://onontorshop.up.railway.app/' }], [{ text: '📦 View Products', callback_data: 'bot_products' }]] }
-    });
-});
-
-bot.action('bot_products', async (ctx) => {
-    const products = await prisma.product.findMany({ take: 5, orderBy: { createdAt: 'desc' } });
-    if(products.length === 0) return ctx.answerCbQuery('Store is empty!', { show_alert: true });
-    let txt = '🔥 *Latest Products:*\n\n';
-    products.forEach(p => txt += `▪️ *${p.name}* - $${p.price}\n`);
-    ctx.reply(txt, { parse_mode: 'Markdown' });
-    ctx.answerCbQuery();
-});
-
-bot.command('addproduct', (ctx) => {
-    if (ctx.from.id.toString() !== ADMIN_ID) return ctx.reply("🚫 Admin only.");
-    ctx.scene.enter('ADD_PRODUCT_SCENE');
-});
+bot.start((ctx) => { ctx.reply(`🌟 *Welcome to AURA DIGITAL STORE* 🌟\nYour ID: \`${ctx.from.id}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🌐 Visit Website', url: 'https://onontorshop.up.railway.app/' }]] }}); });
+bot.command('addproduct', (ctx) => { if (ctx.from.id.toString() !== ADMIN_ID) return; ctx.scene.enter('ADD_PRODUCT_SCENE'); });
 
 async function processDeposit(id, action) {
   const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } });
@@ -132,10 +107,7 @@ app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password, country, refCode } = req.body;
         await prisma.user.create({ data: { firstName: name, email, password, country, refCode: generateRefCode() } });
-        if(refCode) { 
-            const r = await prisma.user.findUnique({where:{refCode:refCode.toUpperCase()}}); 
-            if(r) await prisma.user.update({where:{id:r.id}, data:{balanceUsd:{increment:2.0}}}); 
-        }
+        if(refCode) { const r = await prisma.user.findUnique({where:{refCode:refCode.toUpperCase()}}); if(r) await prisma.user.update({where:{id:r.id}, data:{balanceUsd:{increment:2.0}}}); }
         res.json({ success: true });
     } catch(e) { res.status(400).json({ success: false, error: 'Email exists' }); }
 });
@@ -144,14 +116,27 @@ app.post('/api/login', async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email: req.body.email } });
     if (user && user.password === req.body.password) {
         if(user.isBanned) return res.status(403).json({ success: false, error: 'Banned' });
-        res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceUsd: user.balanceUsd, country: user.country, refCode: user.refCode, isVip: user.isVip } });
+        res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceUsd: user.balanceUsd, country: user.country, refCode: user.refCode, isVip: user.isVip, role: user.role, avatar: user.avatar } });
     } else res.status(401).json({ success: false });
 });
 
 app.get('/api/user/:id', async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } });
-    if(user) res.json({ success: true, balanceUsd: user.balanceUsd, country: user.country, refCode: user.refCode, isVip: user.isVip, isBanned: user.isBanned });
+    if(user) res.json({ success: true, balanceUsd: user.balanceUsd, country: user.country, refCode: user.refCode, isVip: user.isVip, isBanned: user.isBanned, role: user.role, avatar: user.avatar });
     else res.json({ success: false });
+});
+
+// 🔥 NEW: Update Profile Info (Email, Password, Avatar)
+app.post('/api/user/update', async (req, res) => {
+    const { userId, email, password, avatar } = req.body;
+    try {
+        const data = {};
+        if (email) data.email = email;
+        if (password) data.password = password;
+        if (avatar !== undefined) data.avatar = avatar; // Allow empty string to remove avatar
+        await prisma.user.update({ where: { id: parseInt(userId) }, data });
+        res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: 'Update failed. Email may exist.' }); }
 });
 
 app.post('/api/deposit', async (req, res) => {
@@ -160,8 +145,7 @@ app.post('/api/deposit', async (req, res) => {
         const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } });
         const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
         if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ${amountBdt} BDT\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, {
-            parse_mode: 'Markdown',
-            reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] }
+            parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] }
         });
         res.json({ success: true });
     } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); }
@@ -170,14 +154,14 @@ app.post('/api/deposit', async (req, res) => {
 // --- ADMIN APIs ---
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { 
-    const recentPurchases = await prisma.purchase.findMany({ take: 30 });
-    let revenue = recentPurchases.reduce((acc, p) => acc + p.pricePaid, 0);
-    res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20 }), products: await prisma.product.findMany(), promos: await prisma.promo.findMany(), userList: await prisma.user.findMany({ take: 20 }), revenue }); 
+    const recentPurchases = await prisma.purchase.findMany({ take: 30 }); let revenue = recentPurchases.reduce((acc, p) => acc + p.pricePaid, 0);
+    res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany(), promos: await prisma.promo.findMany(), userList: await prisma.user.findMany({ take: 20 }), revenue }); 
 });
 app.post('/api/admin/user/action', async (req, res) => {
     if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
     if(req.body.action === 'ban') { const u = await prisma.user.findUnique({where:{id:parseInt(req.body.id)}}); await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{isBanned:!u.isBanned}}); }
     else if(req.body.action === 'balance') { await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{balanceUsd:parseFloat(req.body.amount)}}); }
+    else if(req.body.action === 'role') { await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{role:req.body.role}}); } // 🔥 Set Admin/User Role
     res.json({success:true});
 });
 app.post('/api/admin/deposit/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const result = await processDeposit(parseInt(req.body.id), req.body.action); res.json(result); });
@@ -186,16 +170,9 @@ app.delete('/api/admin/product/:id', async (req, res) => { try { await prisma.pr
 app.post('/api/admin/promo', async (req, res) => { await prisma.promo.create({ data: { code: req.body.code.toUpperCase(), discount: parseInt(req.body.discount) } }); res.json({success:true}); });
 app.delete('/api/admin/promo/:id', async (req, res) => { await prisma.promo.delete({ where: { id: parseInt(req.params.id) } }); res.json({success:true}); });
 app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({ data: { text: req.body.text } }); res.json({ success: true }); });
-
-// 🔥 Maintenance Settings API
 app.get('/api/admin/settings', (req, res) => res.json({ isMaintenance }));
-app.post('/api/admin/settings', (req, res) => { 
-    if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
-    isMaintenance = req.body.status; 
-    res.json({ success: true }); 
-});
+app.post('/api/admin/settings', (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); isMaintenance = req.body.status; res.json({ success: true }); });
 
-// Routing
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
 app.get('/auraminato', (req, res) => res.sendFile(__dirname + '/admin.html'));
