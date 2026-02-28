@@ -1,6 +1,7 @@
 {
   "name": "aura-store-bot",
   "version": "4.0.0",
+  "description": "Premium Digital Product Store",
   "main": "index.js",
   "scripts": {
     "start": "npx prisma generate && npx prisma db push --force-reset --accept-data-loss && node index.js"
