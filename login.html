@@ -3,61 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Register - AURA STORE</title>
+    <title>AURA STORE | Authentication</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], } } } }</script>
     <style>
         body { background-color: #f8fafc; -webkit-font-smoothing: antialiased; } 
-        .toggle-active { background-color: #ffffff; color: #2563eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .toggle-inactive { color: #64748b; } .toggle-inactive:hover { color: #334155; }
-        .input-focus { transition: all 0.2s ease; } .input-focus:focus { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); border-color: #3b82f6; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .toggle-active { background-color: #2563eb; color: #ffffff; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
+        .toggle-inactive { color: #64748b; background: transparent; } 
+        .input-focus:focus { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); border-color: #3b82f6; transform: translateY(-1px); }
+        .bg-animate { background: linear-gradient(-45deg, #2563eb, #7c3aed, #0ea5e9); background-size: 400% 400%; animation: gradientBG 10s ease infinite; }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="h-screen flex justify-center items-center px-4 text-slate-800">
-    <div class="bg-white p-8 sm:p-10 rounded-[20px] shadow-[0_10px_40px_rgb(0,0,0,0.04)] w-full max-w-md border border-slate-100">
-        <div class="flex bg-slate-100/80 p-1.5 rounded-xl mb-8">
-            <button id="btn-login" onclick="switchTab('login')" class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 toggle-active tracking-wide">Login</button>
-            <button id="btn-register" onclick="switchTab('register')" class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 toggle-inactive tracking-wide">Register</button>
+<body class="h-screen w-full flex flex-col lg:flex-row text-slate-800 selection:bg-blue-500 overflow-hidden bg-slate-50 lg:bg-white">
+    <div class="w-full lg:w-1/2 h-[35vh] lg:h-full bg-animate flex flex-col justify-center lg:justify-between p-8 lg:p-12 text-white relative z-0">
+        <div class="absolute inset-0 bg-black/10 z-0"></div><div class="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="relative z-10 text-center lg:text-left">
+            <div class="hidden lg:flex items-center gap-3 mb-4 cursor-pointer" onclick="window.location.href='/'"><div class="w-12 h-12 rounded-xl bg-white/20 flex justify-center items-center backdrop-blur-md border border-white/30"><i class="fa-solid fa-bolt text-white text-2xl animate-pulse"></i></div><span class="font-black text-3xl tracking-tight">AURA<span class="text-blue-200">STORE</span></span></div>
+            <div class="lg:hidden flex flex-col items-center justify-center -mt-6"><i class="fa-solid fa-bolt text-white text-4xl mb-2 drop-shadow-md"></i><h1 class="text-3xl font-black tracking-widest">AURA STORE</h1><p class="text-blue-200 font-medium text-sm mt-1">Premium Source Codes</p></div>
+            <div class="hidden lg:block mb-20 mt-12"><h1 class="text-5xl font-black leading-tight mb-6 drop-shadow-md">Unlock Premium<br>Source Codes.</h1><p class="text-lg text-white/90 font-medium max-w-md leading-relaxed">Join the elite community. Get instant access to bots and web scripts.</p></div>
         </div>
-        <form id="loginForm" class="space-y-5 block animate-fade-in">
-            <div><label class="block text-sm font-semibold text-slate-700 mb-2">Email</label><input type="email" id="logEmail" placeholder="Enter your email" required class="input-focus w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none text-slate-800 placeholder-slate-400 bg-white text-sm"></div>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-2">Password</label><input type="password" id="logPass" placeholder="Enter your password" required class="input-focus w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none text-slate-800 placeholder-slate-400 bg-white text-sm"></div>
-            <button type="submit" class="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] mt-2 tracking-wide text-[15px]">Login</button>
-            <div class="text-center mt-6"><a href="/" class="text-sm text-slate-400 hover:text-blue-600 transition-colors font-medium">Back to Home</a></div>
-        </form>
-        <form id="registerForm" class="space-y-4 hidden animate-fade-in">
-            <div><label class="block text-sm font-semibold text-slate-700 mb-2">Full Name</label><input type="text" id="regName" placeholder="Enter your full name" required class="input-focus w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none text-slate-800 placeholder-slate-400 bg-white text-sm"></div>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-2">Email</label><input type="email" id="regEmail" placeholder="Enter your email" required class="input-focus w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none text-slate-800 placeholder-slate-400 bg-white text-sm"></div>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-2">Password</label><input type="password" id="regPass" placeholder="Create a password" required class="input-focus w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none text-slate-800 placeholder-slate-400 bg-white text-sm"></div>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-2">Select Country</label><select id="regCountry" class="input-focus w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none text-slate-800 bg-white text-sm cursor-pointer appearance-none"><option value="BD">🇧🇩 Bangladesh (BDT)</option><option value="IN">🇮🇳 India (INR)</option><option value="PK">🇵🇰 Pakistan (PKR)</option><option value="US">🇺🇸 Global (USD)</option></select></div>
-            <button type="submit" class="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] mt-4 tracking-wide text-[15px]">Create Account</button>
-            <div class="text-center mt-4"><a href="/" class="text-sm text-slate-400 hover:text-blue-600 transition-colors font-medium">Back to Home</a></div>
-        </form>
     </div>
+
+    <div class="w-full lg:w-1/2 h-[70vh] lg:h-full bg-white rounded-t-[40px] lg:rounded-none -mt-10 lg:mt-0 z-10 flex flex-col justify-start lg:justify-center items-center p-6 sm:p-10 lg:p-12 overflow-y-auto shadow-[0_-15px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
+        <div class="w-full max-w-md">
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 lg:hidden"></div>
+            <h2 class="text-3xl font-black text-slate-900 mb-2 text-center lg:text-left" id="formTitle">Welcome Back</h2>
+            <p class="text-slate-500 mb-8 font-medium text-center lg:text-left" id="formSubtitle">Enter details to access your account.</p>
+
+            <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
+                <button id="btn-login" onclick="switchTab('login')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 toggle-active">Login</button>
+                <button id="btn-register" onclick="switchTab('register')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 toggle-inactive">Register</button>
+            </div>
+
+            <form id="loginForm" class="space-y-4 lg:space-y-5 animate-fade pb-20 lg:pb-0">
+                <div><label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Email</label><div class="relative"><i class="fa-solid fa-envelope absolute left-4 top-[18px] text-slate-400 text-sm"></i><input type="email" id="logEmail" placeholder="name@example.com" required class="input-focus w-full pl-11 pr-4 py-4 border-2 border-slate-100 rounded-2xl outline-none text-slate-800 bg-slate-50 font-bold"></div></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Password</label><div class="relative"><i class="fa-solid fa-lock absolute left-4 top-[18px] text-slate-400 text-sm"></i><input type="password" id="logPass" placeholder="••••••••" required class="input-focus w-full pl-11 pr-4 py-4 border-2 border-slate-100 rounded-2xl outline-none text-slate-800 bg-slate-50 font-bold"></div></div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4.5 lg:py-4 rounded-2xl shadow-[0_10px_20px_rgba(37,99,235,0.3)] active:scale-95 mt-6 tracking-widest uppercase">Access Account</button>
+                <p class="text-center mt-6 lg:hidden"><a href="/" class="text-sm font-bold text-slate-400">Cancel & Go Back</a></p>
+            </form>
+
+            <form id="registerForm" class="space-y-4 hidden animate-fade pb-20 lg:pb-0">
+                <div><label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Full Name</label><div class="relative"><i class="fa-solid fa-user absolute left-4 top-[18px] text-slate-400 text-sm"></i><input type="text" id="regName" placeholder="John Doe" required class="input-focus w-full pl-11 pr-4 py-4 border-2 border-slate-100 rounded-2xl outline-none text-slate-800 bg-slate-50 font-bold"></div></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Email</label><div class="relative"><i class="fa-solid fa-envelope absolute left-4 top-[18px] text-slate-400 text-sm"></i><input type="email" id="regEmail" placeholder="name@example.com" required class="input-focus w-full pl-11 pr-4 py-4 border-2 border-slate-100 rounded-2xl outline-none text-slate-800 bg-slate-50 font-bold"></div></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Password</label><div class="relative"><i class="fa-solid fa-lock absolute left-4 top-[18px] text-slate-400 text-sm"></i><input type="password" id="regPass" placeholder="••••••••" required class="input-focus w-full pl-11 pr-4 py-4 border-2 border-slate-100 rounded-2xl outline-none text-slate-800 bg-slate-50 font-bold"></div></div>
+                    <div><label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Country</label><select id="regCountry" class="input-focus w-full px-4 py-4 border-2 border-slate-100 rounded-2xl outline-none text-slate-800 bg-slate-50 font-black cursor-pointer appearance-none"><option value="BD">🇧🇩 BDT</option><option value="IN">🇮🇳 INR</option><option value="PK">🇵🇰 PKR</option><option value="US">🇺🇸 USD</option></select></div>
+                </div>
+                <div><label class="block text-xs font-bold text-emerald-500 mb-2 uppercase tracking-widest"><i class="fa-solid fa-gift"></i> Referral Code (Optional)</label><input type="text" id="regRef" placeholder="e.g. AURA99" class="input-focus w-full px-4 py-4 border-2 border-emerald-100 rounded-2xl outline-none text-slate-800 bg-emerald-50 font-bold text-center tracking-widest uppercase"></div>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-black py-4.5 lg:py-4 rounded-2xl shadow-xl active:scale-95 mt-6 tracking-widest uppercase">Create Identity</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         function switchTab(tab) {
             const loginForm = document.getElementById('loginForm'); const regForm = document.getElementById('registerForm'); const btnLogin = document.getElementById('btn-login'); const btnReg = document.getElementById('btn-register');
-            if(tab === 'login') { loginForm.classList.remove('hidden'); regForm.classList.add('hidden'); btnLogin.className = "flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 toggle-active tracking-wide"; btnReg.className = "flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 toggle-inactive tracking-wide"; } 
-            else { regForm.classList.remove('hidden'); loginForm.classList.add('hidden'); btnReg.className = "flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 toggle-active tracking-wide"; btnLogin.className = "flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 toggle-inactive tracking-wide"; }
+            const title = document.getElementById('formTitle'); const subtitle = document.getElementById('formSubtitle');
+            if(tab === 'login') { loginForm.classList.remove('hidden'); regForm.classList.add('hidden'); btnLogin.className = "flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 toggle-active shadow-sm"; btnReg.className = "flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 toggle-inactive"; title.innerText = "Welcome Back"; subtitle.innerText = "Enter details to access your account."; } 
+            else { regForm.classList.remove('hidden'); loginForm.classList.add('hidden'); btnReg.className = "flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 toggle-active shadow-sm bg-slate-900"; btnLogin.className = "flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 toggle-inactive"; title.innerText = "Create Account"; subtitle.innerText = "Join the elite developers community."; }
         }
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); const originalText = btn.innerText; btn.innerText = "Processing..."; btn.disabled = true;
-            const name = document.getElementById('regName').value; const email = document.getElementById('regEmail').value; const password = document.getElementById('regPass').value; const country = document.getElementById('regCountry').value;
-            try { const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, country }) }); const data = await res.json();
-                if(data.success) { Swal.fire({title: 'Welcome!', text: 'Account created successfully. Please login.', icon: 'success', confirmButtonColor: '#2563eb', customClass: {popup: 'rounded-2xl'}}); switchTab('login'); document.getElementById('registerForm').reset(); } 
-                else { Swal.fire({title: 'Oops!', text: data.error, icon: 'error', confirmButtonColor: '#2563eb', customClass: {popup: 'rounded-2xl'}}); }
+            e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); const originalText = btn.innerText; btn.innerText = "PROCESSING..."; btn.disabled = true;
+            const name = document.getElementById('regName').value; const email = document.getElementById('regEmail').value; const password = document.getElementById('regPass').value; const country = document.getElementById('regCountry').value; const refCode = document.getElementById('regRef').value;
+            try { const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, country, refCode }) }); const data = await res.json();
+                if(data.success) { Swal.fire({title: 'Welcome!', text: 'Account created successfully.', icon: 'success', confirmButtonColor: '#2563eb', customClass: {popup: 'rounded-3xl'}}); switchTab('login'); document.getElementById('registerForm').reset(); } 
+                else { Swal.fire({title: 'Oops!', text: data.error, icon: 'error', confirmButtonColor: '#2563eb', customClass: {popup: 'rounded-3xl'}}); }
             } catch(err) {} btn.innerText = originalText; btn.disabled = false;
         });
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); const originalText = btn.innerText; btn.innerText = "Authenticating..."; btn.disabled = true;
+            e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); const originalText = btn.innerText; btn.innerText = "AUTHENTICATING..."; btn.disabled = true;
             const email = document.getElementById('logEmail').value; const password = document.getElementById('logPass').value;
             try { const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) }); const data = await res.json();
                 if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); window.location.href = '/'; } 
-                else { Swal.fire({title: 'Access Denied', text: data.error, icon: 'error', confirmButtonColor: '#2563eb', customClass: {popup: 'rounded-2xl'}}); }
+                else { Swal.fire({title: 'Access Denied', text: data.error, icon: 'error', confirmButtonColor: '#2563eb', customClass: {popup: 'rounded-3xl'}}); }
             } catch(err) {} btn.innerText = originalText; btn.disabled = false;
         });
     </script>
