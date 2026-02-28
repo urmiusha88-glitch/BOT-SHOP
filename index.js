@@ -137,7 +137,6 @@ app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.
 app.get('/api/admin/stats', async (req, res) => { const users = await prisma.user.count(); const deposits = await prisma.deposit.findMany({ orderBy: { createdAt: 'desc' }, take: 20, include: { user: true } }); const userList = await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 50 }); const allProducts = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); const promos = await prisma.promo.findMany({ orderBy: { id: 'desc' }}); const recentPurchases = await prisma.purchase.findMany({ take: 30, orderBy: { createdAt: 'desc' }}); let revenue = recentPurchases.reduce((acc, p) => acc + p.pricePaid, 0); res.json({ users, deposits, userList, products: allProducts, promos, revenue }); });
 app.post('/api/admin/deposit/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const result = await processDeposit(parseInt(req.body.id), req.body.action); res.json(result); });
 
-// 🔥 NEW: Admin User Management (Ban & Balance)
 app.post('/api/admin/user/action', async (req, res) => {
     if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
     try {
@@ -164,6 +163,40 @@ app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
 app.get('/maintenance.html', (req, res) => res.sendFile(__dirname + '/maintenance.html'));
 app.get('/auraminato', (req, res) => res.sendFile(__dirname + '/admin.html'));
-app.get('/admin', (req, res) => res.status(403).send("ACCESS DENIED"));
+
+// 🔥 RESTORED BEAUTIFUL ADMIN ACCESS DENIED PAGE
+app.get('/admin', (req, res) => {
+  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Unknown IP';
+  if (ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `🚨 *SECURITY ALERT!*\n\nKew apnar Admin Panel e dhokar chesta koreche!\n\n🌐 *IP:* \`${clientIp}\``, { parse_mode: 'Markdown' }).catch(()=>{});
+  res.status(403).send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Access Denied - Security Alert</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </head>
+    <body class="bg-[#0b1121] h-screen flex flex-col justify-center items-center px-4 text-center selection:bg-red-500 selection:text-white font-sans">
+        <div class="max-w-md w-full bg-slate-800 p-10 rounded-3xl shadow-[0_0_50px_rgba(239,68,68,0.2)] border border-red-500/30 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-red-500 shadow-[0_0_15px_#ef4444]"></div>
+            <div class="w-20 h-20 bg-red-500/10 rounded-full flex justify-center items-center mx-auto mb-6 border border-red-500/20">
+                <i class="fa-solid fa-shield-halved text-4xl text-red-500 animate-pulse"></i>
+            </div>
+            <h1 class="text-3xl font-black text-white mb-2 tracking-wider">ACCESS DENIED</h1>
+            <p class="text-red-400 font-bold mb-6 uppercase text-sm tracking-[0.2em]">Restricted Area</p>
+            <div class="bg-slate-900 rounded-xl p-5 border border-slate-700 mb-8 shadow-inner">
+                <p class="text-slate-400 text-sm font-mono leading-relaxed">
+                    Security protocol triggered.<br>
+                    Your IP address <span class="text-red-400 font-bold px-1">${clientIp}</span> has been logged.
+                </p>
+            </div>
+            <a href="/" class="inline-block w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3.5 px-8 rounded-xl transition-colors shadow-lg active:scale-95">Return to Home</a>
+        </div>
+    </body>
+    </html>
+  `);
+});
 
 const PORT = process.env.PORT || 8080; app.listen(PORT, () => console.log(`Running`)); bot.launch(); process.once('SIGINT', () => bot.stop('SIGINT'));
