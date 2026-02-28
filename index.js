@@ -7,17 +7,20 @@ const prisma = new PrismaClient();
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const app = express();
 
-app.use(express.json({ limit: '10mb' })); // For base64 avatars
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 const ADMIN_ID = process.env.ADMIN_ID; 
 let isMaintenance = false;
 
+// 🔥 Maintenance Middleware
 app.use((req, res, next) => {
-  if (req.path.startsWith('/auraminato') || req.path.startsWith('/api/admin') || req.path === '/admin') return next();
+  // Allow access to admin APIs and admin page even in maintenance
+  if (req.path.startsWith('/api/admin') || req.path === '/admin') return next();
+  
   if (isMaintenance) {
       if (req.path.startsWith('/api/')) return res.status(503).json({ success: false, error: 'Maintenance Mode is ON' });
-      return res.status(503).sendFile(__dirname + '/maintenance.html');
+      return res.status(503).send('<h1 style="text-align:center; margin-top:20%; font-family:sans-serif; color:#ef4444;">⚙️ System is under Maintenance. Please check back later.</h1>');
   }
   next();
 });
@@ -25,7 +28,7 @@ app.use((req, res, next) => {
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 async function getAllRates() { try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); return data.rates; } catch (e) { return { BDT: 120, INR: 83, PKR: 278 }; } }
 
-// --- BOT LOGIC ---
+// --- 🤖 BOT LOGIC ---
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('🛒 1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in USD? (e.g. 15)'); return ctx.wizard.next(); },
@@ -126,17 +129,13 @@ app.get('/api/user/:id', async (req, res) => {
     else res.json({ success: false });
 });
 
-// 🔥 NEW: Update Profile Info (Email, Password, Avatar)
 app.post('/api/user/update', async (req, res) => {
     const { userId, email, password, avatar } = req.body;
     try {
-        const data = {};
-        if (email) data.email = email;
-        if (password) data.password = password;
-        if (avatar !== undefined) data.avatar = avatar; // Allow empty string to remove avatar
+        const data = {}; if (email) data.email = email; if (password) data.password = password; if (avatar !== undefined) data.avatar = avatar;
         await prisma.user.update({ where: { id: parseInt(userId) }, data });
         res.json({ success: true });
-    } catch(e) { res.json({ success: false, error: 'Update failed. Email may exist.' }); }
+    } catch(e) { res.json({ success: false, error: 'Update failed.' }); }
 });
 
 app.post('/api/deposit', async (req, res) => {
@@ -155,13 +154,13 @@ app.post('/api/deposit', async (req, res) => {
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { 
     const recentPurchases = await prisma.purchase.findMany({ take: 30 }); let revenue = recentPurchases.reduce((acc, p) => acc + p.pricePaid, 0);
-    res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany(), promos: await prisma.promo.findMany(), userList: await prisma.user.findMany({ take: 20 }), revenue }); 
+    res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany(), promos: await prisma.promo.findMany(), userList: await prisma.user.findMany({ take: 20, orderBy: { createdAt: 'desc' } }), revenue }); 
 });
 app.post('/api/admin/user/action', async (req, res) => {
     if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
     if(req.body.action === 'ban') { const u = await prisma.user.findUnique({where:{id:parseInt(req.body.id)}}); await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{isBanned:!u.isBanned}}); }
     else if(req.body.action === 'balance') { await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{balanceUsd:parseFloat(req.body.amount)}}); }
-    else if(req.body.action === 'role') { await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{role:req.body.role}}); } // 🔥 Set Admin/User Role
+    else if(req.body.action === 'role') { await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{role:req.body.role}}); }
     res.json({success:true});
 });
 app.post('/api/admin/deposit/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const result = await processDeposit(parseInt(req.body.id), req.body.action); res.json(result); });
@@ -173,9 +172,11 @@ app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({
 app.get('/api/admin/settings', (req, res) => res.json({ isMaintenance }));
 app.post('/api/admin/settings', (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); isMaintenance = req.body.status; res.json({ success: true }); });
 
+// 🔥 Routing Fixed (Admin is now at /admin)
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
-app.get('/auraminato', (req, res) => res.sendFile(__dirname + '/admin.html'));
+app.get('/wp-admin', (req, res) => res.status(403).send("ACCESS DENIED")); // New Hacker Trap
+app.get('/admin', (req, res) => res.sendFile(__dirname + '/admin.html')); // Real Admin Panel
 
 app.listen(8080);
 bot.launch();
