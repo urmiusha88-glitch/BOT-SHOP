@@ -3,142 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA DIGITAL STORE</title>
+    <title>AURA DIGITAL STORE | Premium Marketplace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, boxShadow: { 'neon': '0 0 20px rgba(59, 130, 246, 0.4)' } } } }</script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050b14; color: #e2e8f0; padding-bottom: 80px; }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
+        .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(100px); opacity: 0.15; animation: float 20s infinite ease-in-out alternate; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; }
+        .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: #8b5cf6; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(100px, 50px); } }
         .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .product-card { transition: 0.3s; border-radius: 32px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); }
         .product-card:hover { transform: translateY(-10px); border-color: #3b82f6; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2); }
         .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: load 1.5s infinite; border-radius: 16px; }
         @keyframes load { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+        .prof-tab.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        
+        /* Payment Method Colors */
+        .peer-checked\:border-bkash:checked ~ div { border-color: #e2136e; background-color: rgba(226, 19, 110, 0.1); color: #e2136e; }
+        .peer-checked\:border-nagad:checked ~ div { border-color: #f37021; background-color: rgba(243, 112, 33, 0.1); color: #f37021; }
+        .peer-checked\:border-rocket:checked ~ div { border-color: #8c1596; background-color: rgba(140, 21, 150, 0.1); color: #8c1596; }
     </style>
 </head>
 <body>
+    <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
-    <div class="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 bg-slate-800/90 backdrop-blur-md border border-slate-700 px-4 py-2 rounded-full shadow-lg text-xs font-bold text-slate-300 flex items-center gap-2">
-        <span class="flex h-3 w-3 relative"><span class="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative rounded-full h-3 w-3 bg-emerald-500"></span></span>
-        <span id="vCount" class="text-white font-black">24</span> viewing now
-    </div>
-
-    <nav class="glass sticky top-0 z-50 w-full h-20 flex items-center px-4">
+    <nav class="glass sticky top-0 z-50 w-full h-16 sm:h-20 flex items-center px-4">
         <div class="max-w-7xl mx-auto w-full flex justify-between items-center">
             <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-bolt text-xl"></i></div>
-                <h1 class="text-2xl font-black italic tracking-tighter hidden sm:block">AURA <span class="text-blue-500">DIGITAL</span></h1>
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-neon text-white"><i class="fa-solid fa-bolt text-xl"></i></div>
+                <span class="font-black text-2xl tracking-tighter hidden sm:block">AURA<span class="text-blue-500">DIGITAL</span></span>
             </div>
-            
-            <div id="authSection" class="flex gap-3 items-center"></div>
+            <div id="authSection" class="flex items-center gap-3"></div>
         </div>
     </nav>
 
-    <div class="pt-16 pb-12 text-center px-4">
+    <div class="pt-16 pb-12 text-center relative z-10 px-4">
         <div id="vipBanner" class="hidden max-w-md mx-auto bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 font-black py-2 px-4 rounded-full mb-6 text-xs animate-pulse">👑 VIP ACTIVE: ALL ITEMS ARE FREE!</div>
-        <h1 class="text-4xl sm:text-7xl font-black mb-6 tracking-tight">Premium <span class="text-blue-500">Source</span> Codes</h1>
+        <h1 class="text-5xl sm:text-7xl font-black mb-6 tracking-tight">Premium <span class="text-blue-500">Source</span> Codes</h1>
         <div class="max-w-xl mx-auto"><input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search bots, scripts..." class="w-full bg-slate-800/50 border border-slate-700 rounded-full px-6 py-4 outline-none focus:border-blue-500 font-bold shadow-lg"></div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32" id="product-list">
-        <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
-        <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
         <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
     </div>
 
     <div class="md:hidden fixed bottom-0 left-0 w-full bg-[#0b1121] border-t border-slate-800 h-16 flex justify-around items-center z-50" id="mobileBottomNav"></div>
 
     <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full md:w-[400px] bg-[#0b1121] border-l border-slate-800 z-[70] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl">
-        <div class="p-6 border-b border-slate-800 flex justify-between items-center"><h2 class="text-2xl font-black">Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-800 rounded-full"><i class="fa-solid fa-xmark"></i></button></div>
-        <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+        <div class="p-6 border-b border-slate-800 flex justify-between items-center"><h2 class="text-2xl font-black">Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-800 rounded-full hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
+        <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar"></div>
         <div class="p-6 border-t border-slate-800 bg-slate-900/50">
-            <div class="flex gap-2 mb-4"><input type="text" id="promoInput" placeholder="Promo Code" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 font-bold outline-none"><button onclick="applyPromo()" class="bg-blue-600 text-white font-bold px-4 py-3 rounded-xl text-xs uppercase">Apply</button></div>
-            <div class="flex justify-between items-center mb-4"><span class="font-bold text-slate-400">Total</span><span id="cartTotal" class="text-3xl font-black text-blue-500">$0.00</span></div>
-            <button onclick="checkoutCart()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl uppercase tracking-widest">Secure Checkout</button>
+            <div class="flex gap-2 mb-4"><input type="text" id="promoInput" placeholder="Promo Code" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 font-bold outline-none uppercase"><button onclick="applyPromo()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-3 rounded-xl text-xs uppercase transition-colors">Apply</button></div>
+            <div class="flex justify-between items-center mb-4"><span class="font-bold text-slate-400">Total</span><div class="text-right"><span id="cartOldTotal" class="text-sm text-slate-500 line-through mr-2 hidden"></span><span id="cartTotal" class="text-3xl font-black text-blue-500">$0.00</span></div></div>
+            <button onclick="checkoutCart()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-neon transition-colors">Secure Checkout</button>
         </div>
     </div>
 
-    <div id="profileModal" class="fixed inset-0 bg-black/80 hidden z-[60] justify-center items-center px-4 backdrop-blur-sm">
-        <div class="bg-slate-900 rounded-[32px] w-full max-w-md p-8 text-center relative border border-slate-800">
-            <button onclick="document.getElementById('profileModal').classList.replace('flex','hidden')" class="absolute top-4 right-4 w-10 h-10 bg-slate-800 rounded-full"><i class="fa-solid fa-xmark"></i></button>
-            <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-3xl font-black mb-4" id="profAvatar">U</div>
-            <h3 class="text-2xl font-black mb-1" id="profName">Name</h3>
-            <p class="text-slate-400 font-bold mb-6" id="profEmail">Email</p>
-            <div class="bg-slate-800 p-4 rounded-xl mb-4 text-left border border-slate-700">
-                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Referral Code (Earn $2.00)</p>
-                <p class="text-xl font-mono font-black text-emerald-400" id="profRefCode">---</p>
+    <div id="profileModal" class="fixed inset-0 bg-black/80 hidden z-[80] justify-center items-center px-4 backdrop-blur-sm">
+        <div class="bg-slate-900 rounded-[32px] w-full max-w-2xl max-h-[90vh] flex flex-col relative border border-slate-800 shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+                <h2 class="text-2xl font-black"><i class="fa-solid fa-user-astronaut text-blue-500 mr-2"></i> User Dashboard</h2>
+                <button onclick="closeProfile()" class="w-10 h-10 bg-slate-700 hover:bg-red-500 text-white rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="bg-yellow-900/30 border border-yellow-700/50 p-4 rounded-xl mb-6 text-left">
-                <h4 class="font-black text-yellow-500 mb-2"><i class="fa-solid fa-crown"></i> VIP Membership</h4>
-                <p class="text-xs text-yellow-500/80 mb-3">Claim all products for FREE!</p>
-                <button onclick="buyVip()" id="vipBtn" class="bg-yellow-500 text-black font-black py-2 px-4 rounded-lg text-sm w-full">Buy 30 Days - $30</button>
+            
+            <div class="flex border-b border-slate-800 bg-slate-900 px-6 pt-4 gap-6 overflow-x-auto custom-scrollbar">
+                <button onclick="switchProfTab('overview')" id="tab-overview" class="prof-tab active pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap"><i class="fa-solid fa-id-card mr-1"></i> Profile</button>
+                <button onclick="switchProfTab('orders')" id="tab-orders" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap"><i class="fa-solid fa-layer-group mr-1"></i> Orders / Vault</button>
+                <button onclick="switchProfTab('funds')" id="tab-funds" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap"><i class="fa-solid fa-money-bill-transfer mr-1"></i> Fund History</button>
             </div>
-            <button onclick="window.logout()" class="text-red-500 font-bold text-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
+                <div id="sec-overview" class="space-y-6 text-center animate-[fadeIn_0.3s]">
+                    <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto flex items-center justify-center text-4xl text-white font-black shadow-lg" id="pAvatar">U</div>
+                    <div><h3 class="text-3xl font-black mb-1" id="pName">Name</h3><p class="text-slate-400 font-bold" id="pEmail">Email</p></div>
+                    
+                    <div class="bg-slate-800 p-5 rounded-2xl text-left border border-slate-700 flex justify-between items-center">
+                        <div><p class="text-xs text-slate-400 font-bold uppercase mb-1">Referral Code</p><p class="text-2xl font-mono font-black text-emerald-400" id="pRef">---</p></div>
+                        <div class="text-right"><span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full">Earn $2.00 / Ref</span></div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-yellow-500/30 p-5 rounded-2xl text-left relative overflow-hidden">
+                        <i class="fa-solid fa-crown absolute -bottom-4 -right-4 text-7xl text-yellow-500/10"></i>
+                        <h4 class="font-black text-yellow-500 mb-1 text-lg"><i class="fa-solid fa-star"></i> VIP Membership</h4>
+                        <p class="text-sm text-yellow-500/70 mb-4 font-medium">Claim all store items for $0.00!</p>
+                        <button onclick="buyVip()" id="pBtnVip" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl uppercase tracking-widest shadow-lg transition-colors">Upgrade - $30</button>
+                    </div>
+                    <button onclick="window.logout()" class="text-red-500 font-bold hover:underline"><i class="fa-solid fa-right-from-bracket"></i> Secure Logout</button>
+                </div>
+
+                <div id="sec-orders" class="hidden space-y-4 animate-[fadeIn_0.3s]">
+                    <div id="pOrdersList" class="text-center py-10 text-slate-500 font-bold"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-500 mb-3 block"></i> Loading Vault...</div>
+                </div>
+
+                <div id="sec-funds" class="hidden space-y-4 animate-[fadeIn_0.3s]">
+                    <div id="pFundsList" class="text-center py-10 text-slate-500 font-bold"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-500 mb-3 block"></i> Loading History...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="fundModal" class="fixed inset-0 bg-black/80 hidden z-[90] justify-center items-center px-4 backdrop-blur-sm">
+        <div class="bg-slate-900 rounded-[32px] w-full max-w-md border border-slate-800 shadow-2xl relative overflow-hidden">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+                <h2 class="text-2xl font-black"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i> Add Fund</h2>
+                <button onclick="closeFund()" class="w-10 h-10 bg-slate-700 hover:bg-red-500 text-white rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="depositForm" class="p-6 space-y-5">
+                <div>
+                    <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Select Method</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()">
+                            <div class="py-3 text-center border-2 border-slate-700 rounded-xl font-black text-slate-500 peer-checked:border-bkash transition-all text-xs uppercase tracking-widest">bKash</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()">
+                            <div class="py-3 text-center border-2 border-slate-700 rounded-xl font-black text-slate-500 peer-checked:border-nagad transition-all text-xs uppercase tracking-widest">Nagad</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="method" value="rocket" class="peer sr-only" onchange="updateFundUI()">
+                            <div class="py-3 text-center border-2 border-slate-700 rounded-xl font-black text-slate-500 peer-checked:border-rocket transition-all text-xs uppercase tracking-widest">Rocket</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Amount (USD)</label>
+                        <input type="number" step="0.01" id="fUsd" oninput="calcBDT()" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500" placeholder="$0.00">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pay (BDT)</label>
+                        <input type="text" id="fBdt" disabled class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl text-emerald-400" value="0">
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Send Money To:</p>
+                    <div onclick="copyNumber()" class="bg-slate-900 border border-slate-700 px-4 py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors group">
+                        <span id="fNumber" class="font-mono text-xl font-black text-white tracking-widest">01846849460</span>
+                        <i class="fa-regular fa-copy text-slate-500 group-hover:text-blue-500"></i>
+                    </div>
+                    <p class="text-xs text-slate-500 font-bold mt-3 text-center">Send exactly <b id="fBdtTxt" class="text-white">0</b> BDT. Then submit TrxID below.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" id="fSender" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500" placeholder="Your Sender Number">
+                    <input type="text" id="fTrx" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black uppercase tracking-widest outline-none focus:border-blue-500" placeholder="Transaction ID (TrxID)">
+                </div>
+
+                <button type="submit" id="fBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Submit Request</button>
+            </form>
         </div>
     </div>
 
     <script>
-        let currentUser = null; try { const s = localStorage.getItem('user'); if(s) currentUser = JSON.parse(s); } catch(e){}
-        let allProducts = []; let cart = []; let activePromo = 0; let activePromoCode = '';
-
-        // Generate Random Viewers
-        setInterval(() => { document.getElementById('vCount').innerText = Math.floor(Math.random()*40)+15; }, 5000);
+        let user = JSON.parse(localStorage.getItem('user'));
+        let allProducts = []; let cart = []; let activePromo = 0; let activePromoCode = ''; let currentRate = 120; // Default BDT rate
 
         async function init() {
-            renderAuth(); // Render buttons immediately (Fixes missing login button)
-            if(currentUser && currentUser.id) {
+            renderAuth(); // Render buttons immediately
+            try { const r = await fetch('/api/rate'); const d = await r.json(); currentRate = d.rates?.BDT || 120; } catch(e){}
+            
+            if(user) {
                 try {
-                    const res = await fetch('/api/user/' + currentUser.id);
+                    const res = await fetch('/api/user/' + user.id);
                     const data = await res.json();
-                    if(data.success) { currentUser = {...currentUser, ...data}; localStorage.setItem('user', JSON.stringify(currentUser)); renderAuth(); }
+                    if(data.success) { user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); }
                     else if(data.banned) { Swal.fire('Banned', 'Account suspended.', 'error').then(()=>window.logout()); }
                 } catch(e) {}
             }
             loadProducts();
         }
 
+        // 🔥 FIXED RENDER AUTH BUTTONS (No more Dummy Swal alerts)
         function renderAuth() {
-            const authDiv = document.getElementById('authSection');
+            const authDiv = document.getElementById('authSection'); 
             const mobNav = document.getElementById('mobileBottomNav');
             
-            if(currentUser) {
-                const bal = currentUser.balanceUsd.toFixed(2);
-                if(currentUser.isVip) document.getElementById('vipBanner').classList.remove('hidden');
+            if(user) {
+                const bal = user.balanceUsd.toFixed(2);
+                if(user.isVip) document.getElementById('vipBanner').classList.remove('hidden');
                 
+                // Desktop Buttons
                 authDiv.innerHTML = `
-                    <button onclick="Swal.fire('Vault', 'Go to profile to view Vault', 'info')" class="hidden sm:block bg-purple-600/20 text-purple-400 px-4 py-2 rounded-full font-bold text-sm"><i class="fa-solid fa-layer-group"></i> Vault</button>
-                    <div class="hidden sm:flex bg-slate-800 px-4 py-2 rounded-full font-black border border-slate-700 text-blue-400">$${bal}</div>
-                    <button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center"><i class="fa-solid fa-cart-shopping"></i></button>
-                    <button onclick="openProfile()" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700"><i class="fa-solid fa-user"></i></button>
+                    <button onclick="openFund()" class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-full font-black border border-emerald-500/30 shadow-sm hover:bg-emerald-600/40 transition-colors mr-2"><i class="fa-solid fa-plus mr-1"></i> Fund</button>
+                    <button onclick="openProfileDashboard('orders')" class="hidden sm:block bg-purple-600/20 text-purple-400 px-4 py-2 rounded-full font-bold text-sm mr-2 hover:bg-purple-600/40 transition-colors"><i class="fa-solid fa-layer-group mr-1"></i> Vault</button>
+                    <div class="hidden sm:flex bg-slate-800 px-4 py-2 rounded-full font-black border border-slate-700 text-blue-400 shadow-neon mr-2">$${bal}</div>
+                    <button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 hover:bg-blue-500 transition-colors rounded-full flex justify-center items-center shadow-neon mr-2"><i class="fa-solid fa-cart-shopping"></i></button>
+                    <button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 transition-colors rounded-full flex justify-center items-center border border-slate-700"><i class="fa-solid fa-user"></i></button>
                 `;
+                // Mobile Buttons
                 mobNav.innerHTML = `
                     <button onclick="location.reload()" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px] mt-1 font-bold">Home</span></button>
-                    <button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center"><i class="fa-solid fa-cart-shopping text-xl"></i><span class="text-[10px] mt-1 font-bold">Cart</span></button>
-                    <button onclick="Swal.fire('Add Fund', 'Go to Dashboard', 'info')" class="text-emerald-400 flex flex-col items-center"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1 font-bold">$${bal}</span></button>
-                    <button onclick="openProfile()" class="text-slate-400 flex flex-col items-center"><i class="fa-solid fa-user text-xl"></i><span class="text-[10px] mt-1 font-bold">Profile</span></button>
+                    <button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center hover:text-blue-400"><i class="fa-solid fa-cart-shopping text-xl"></i><span class="text-[10px] mt-1 font-bold">Cart</span></button>
+                    <button onclick="openFund()" class="text-emerald-400 flex flex-col items-center hover:text-emerald-300"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1 font-bold">$${bal}</span></button>
+                    <button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center hover:text-white"><i class="fa-solid fa-user text-xl"></i><span class="text-[10px] mt-1 font-bold">Profile</span></button>
                 `;
             } else {
-                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest">Login</button>`;
-                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest">Login / Register</button>`;
+                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-neon transition-colors">Login</button>`;
+                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-neon">Login / Register</button>`;
             }
         }
 
         async function loadProducts() {
-            const res = await fetch('/api/products');
-            allProducts = await res.json();
-            renderProducts(allProducts);
+            try {
+                const res = await fetch('/api/products');
+                allProducts = await res.json();
+                renderProducts(allProducts);
+            } catch(e) {
+                document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-400 font-bold py-10">Error loading products.</div>';
+            }
         }
 
         function renderProducts(list) {
             const container = document.getElementById('product-list');
-            if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-400 font-bold py-10">No products found.</div>';
-            
+            if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10">No products found.</div>';
             container.innerHTML = list.map(p => {
-                let pPrice = currentUser?.isVip ? 'FREE' : `$${p.price}`;
+                let pPrice = user?.isVip ? 'FREE' : `$${p.price}`;
                 return `
                 <div class="product-card p-6 flex flex-col justify-between">
                     <div>
@@ -155,61 +247,151 @@
             }).join('');
         }
 
-        function filterProducts() { const q = document.getElementById('searchInput').value.toLowerCase(); const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q)); renderProducts(filtered); }
-        function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
-        
-        function addToCart(id, name, price) {
-            if(!currentUser) return location.href='/login';
-            cart.push({id, name, price: parseFloat(price)}); renderCart();
-            Swal.fire({toast:true, position:'top-end', icon:'success', title:'Added to Cart', showConfirmButton:false, timer:1500});
-        }
-        function removeFromCart(index) { cart.splice(index, 1); renderCart(); }
+        function filterProducts() { const q = document.getElementById('searchInput').value.toLowerCase(); renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q))); }
 
+        // --- CART SYSTEM ---
+        function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
+        function addToCart(id, name, price) { if(!user) return location.href='/login'; cart.push({id, name, price: parseFloat(price)}); renderCart(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Added to Cart', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'}); }
+        function removeFromCart(index) { cart.splice(index, 1); renderCart(); }
+        
         function renderCart() {
             const container = document.getElementById('cartItemsContainer');
             if(cart.length === 0) { container.innerHTML = '<p class="text-center text-slate-500 font-bold mt-10">Cart is empty</p>'; document.getElementById('cartTotal').innerText = '$0.00'; return; }
             let sum = 0;
-            container.innerHTML = cart.map((i, index) => { sum += i.price; return `<div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center"><div><p class="font-bold text-sm">${i.name}</p><p class="text-blue-500 font-black">$${currentUser.isVip ? '0.00' : i.price}</p></div><button onclick="removeFromCart(${index})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div>`; }).join('');
-            if(currentUser.isVip) sum = 0; else if(activePromo > 0) sum = sum * (1 - (activePromo/100));
+            container.innerHTML = cart.map((i, index) => { sum += i.price; return `<div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center border border-slate-700"><div><p class="font-bold text-sm">${i.name}</p><p class="text-blue-500 font-black">$${user.isVip ? '0.00' : i.price}</p></div><button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button></div>`; }).join('');
+            if(user.isVip) sum = 0; else if(activePromo > 0) sum = sum * (1 - (activePromo/100));
             document.getElementById('cartTotal').innerText = `$${sum.toFixed(2)}`;
         }
-
+        
         async function applyPromo() {
             const code = document.getElementById('promoInput').value; if(!code) return;
             const res = await fetch('/api/promo', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({code}) });
             const data = await res.json();
-            if(data.success) { activePromo = data.discount; activePromoCode = code; renderCart(); Swal.fire({toast:true, position:'top-end', icon:'success', title:`${data.discount}% OFF Applied!`}); }
-            else Swal.fire({toast:true, position:'top-end', icon:'error', title:data.error});
-        }
-
-        async function checkoutCart() {
-            if(cart.length === 0) return; if(!currentUser) return location.href='/login';
-            Swal.fire({title: 'Processing...', didOpen: ()=>Swal.showLoading()});
-            const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: currentUser.id, cartItems: cart.map(i=>i.id), promoCode: activePromoCode}) });
-            const data = await res.json();
-            if(data.success) {
-                currentUser.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(currentUser));
-                cart = []; activePromo = 0; activePromoCode = ''; toggleCart(); renderAuth(); renderCart();
-                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-                Swal.fire('Success! 🎉', 'Items added to Vault.', 'success');
-            } else Swal.fire('Error', data.error, 'error');
-        }
-
-        function openProfile() {
-            document.getElementById('profAvatar').innerText = currentUser.name.charAt(0);
-            document.getElementById('profName').innerText = currentUser.name;
-            document.getElementById('profEmail').innerText = currentUser.email;
-            document.getElementById('profRefCode').innerText = currentUser.refCode;
-            if(currentUser.isVip) { document.getElementById('vipBtn').innerText = "VIP ACTIVE"; document.getElementById('vipBtn').disabled = true; document.getElementById('vipBtn').classList.add('opacity-50'); }
-            document.getElementById('profileModal').classList.replace('hidden', 'flex');
+            if(data.success) { activePromo = data.discount; activePromoCode = code; renderCart(); Swal.fire({toast:true, position:'top-end', icon:'success', title:`${data.discount}% OFF Applied!`, background:'#1e293b', color:'#fff'}); }
+            else Swal.fire({toast:true, position:'top-end', icon:'error', title:data.error, background:'#1e293b', color:'#fff'});
         }
         
-        async function buyVip() {
-            const res = await fetch('/api/buy-vip', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId: currentUser.id}) });
+        async function checkoutCart() {
+            if(cart.length === 0 || !user) return;
+            Swal.fire({title: 'Processing...', didOpen: ()=>Swal.showLoading(), background:'#1e293b', color:'#fff', allowOutsideClick: false});
+            const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, cartItems: cart.map(i=>i.id), promoCode: activePromoCode}) });
             const data = await res.json();
-            if(data.success){ currentUser.balanceUsd = data.newBalance; currentUser.isVip = true; localStorage.setItem('user', JSON.stringify(currentUser)); location.reload(); } 
-            else Swal.fire('Error', data.error, 'error');
+            if(data.success) {
+                user.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(user));
+                cart = []; activePromo = 0; toggleCart(); renderAuth(); renderCart();
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                Swal.fire({title:'Success! 🎉', text:'Items added to Vault.', icon:'success', background:'#1e293b', color:'#fff', confirmButtonText: 'View Vault'}).then((result) => { if(result.isConfirmed) openProfileDashboard('orders'); });
+            } else Swal.fire({title:'Error', text:data.error, icon:'error', background:'#1e293b', color:'#fff'});
         }
+
+        // --- SUPER PROFILE DASHBOARD ---
+        async function openProfileDashboard(defaultTab = 'overview') {
+            if(!user) return location.href='/login';
+            document.getElementById('pAvatar').innerText = user.name.charAt(0).toUpperCase();
+            document.getElementById('pName').innerText = user.name;
+            document.getElementById('pEmail').innerText = user.email;
+            document.getElementById('pRef').innerText = user.refCode || '---';
+            if(user.isVip) { document.getElementById('pBtnVip').innerText = "VIP ACTIVE"; document.getElementById('pBtnVip').disabled = true; document.getElementById('pBtnVip').classList.add('opacity-50', 'cursor-not-allowed'); }
+            
+            document.getElementById('profileModal').classList.replace('hidden', 'flex');
+            switchProfTab(defaultTab);
+            
+            // Fetch Vault (Orders)
+            fetch('/api/library/' + user.id).then(r=>r.json()).then(data => {
+                const libHTML = data.length === 0 ? '<p class="text-center text-slate-500 py-10">Vault is empty.</p>' : data.map(p => `
+                    <div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 mb-3">
+                        <div class="flex items-center gap-4"><div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div><div><h4 class="font-bold text-sm">${p.product.name}</h4><p class="text-[10px] text-slate-400">Paid: $${p.pricePaid}</p></div></div>
+                        <a href="${p.product.driveLink}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition-colors">Access</a>
+                    </div>
+                `).join('');
+                document.getElementById('pOrdersList').innerHTML = libHTML;
+            });
+
+            // Fetch Deposit History
+            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => {
+                const hisHTML = data.length === 0 ? '<p class="text-center text-slate-500 py-10">No transactions found.</p>' : data.map(d => {
+                    let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow';
+                    return `
+                    <div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 mb-3">
+                        <div><p class="font-black text-sm uppercase">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-400 font-mono mt-1">${d.trxId}</p></div>
+                        <span class="bg-${color}-500/10 text-${color}-400 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span>
+                    </div>`;
+                }).join('');
+                document.getElementById('pFundsList').innerHTML = hisHTML;
+            });
+        }
+
+        function closeProfile() { document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
+
+        function switchProfTab(tab) {
+            document.querySelectorAll('.prof-tab').forEach(b => { b.classList.remove('active', 'text-blue-500'); b.classList.add('text-slate-500'); });
+            document.getElementById('tab-'+tab).classList.add('active', 'text-blue-500'); document.getElementById('tab-'+tab).classList.remove('text-slate-500');
+            document.getElementById('sec-overview').classList.add('hidden'); document.getElementById('sec-orders').classList.add('hidden'); document.getElementById('sec-funds').classList.add('hidden');
+            document.getElementById('sec-'+tab).classList.remove('hidden');
+        }
+
+        async function buyVip() {
+            if(user.balanceUsd < 30) return Swal.fire({title:'Insufficient Funds', icon:'error', background:'#1e293b', color:'#fff'});
+            Swal.fire({title: 'Processing...', didOpen: ()=>Swal.showLoading(), background:'#1e293b', color:'#fff'});
+            const res = await fetch('/api/buy-vip', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId: user.id}) });
+            const data = await res.json();
+            if(data.success){ user.balanceUsd = data.newBalance; user.isVip = true; localStorage.setItem('user', JSON.stringify(user)); location.reload(); } 
+        }
+
+        // --- ADD FUND SYSTEM ---
+        function openFund() {
+            if(!user) return location.href='/login';
+            document.getElementById('fundModal').classList.replace('hidden', 'flex');
+            updateFundUI(); // Set correct number immediately
+        }
+        function closeFund() { document.getElementById('fundModal').classList.replace('flex', 'hidden'); }
+        
+        function updateFundUI() {
+            const method = document.querySelector('input[name="method"]:checked').value;
+            let num = '';
+            if(method === 'bkash') num = '01846849460'; 
+            else if(method === 'nagad') num = '01846849460'; 
+            else if(method === 'rocket') num = '018468494606';
+            document.getElementById('fNumber').innerText = num;
+        }
+
+        function calcBDT() {
+            const usd = parseFloat(document.getElementById('fUsd').value) || 0;
+            const bdt = Math.round(usd * currentRate);
+            document.getElementById('fBdt').value = bdt;
+            document.getElementById('fBdtTxt').innerText = bdt;
+        }
+
+        function copyNumber() {
+            navigator.clipboard.writeText(document.getElementById('fNumber').innerText);
+            Swal.fire({toast:true, position:'top-end', icon:'success', title:'Number Copied!', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'});
+        }
+
+        document.getElementById('depositForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const amountBdt = parseFloat(document.getElementById('fBdt').value);
+            const senderNumber = document.getElementById('fSender').value;
+            const trxId = document.getElementById('fTrx').value;
+            if(amountBdt <= 0) return Swal.fire({title:'Error', text:'Enter a valid amount', icon:'error', background:'#1e293b', color:'#fff'});
+            
+            const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            try {
+                const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) });
+                const data = await res.json();
+                if(data.success) { 
+                    closeFund(); 
+                    Swal.fire({title:'Request Sent!', text:'Admin will review it shortly. Track it in your Profile > Fund History.', icon:'success', background:'#1e293b', color:'#fff'}).then(() => {
+                        openProfileDashboard('funds'); // Auto open history to see pending request
+                    });
+                    document.getElementById('depositForm').reset(); 
+                    document.getElementById('fBdt').value = '0';
+                    document.getElementById('fBdtTxt').innerText = '0';
+                } 
+                else Swal.fire({title:'Error', text:data.error, icon:'error', background:'#1e293b', color:'#fff'});
+            } catch(e) { console.log(e); }
+            btn.innerHTML = 'SUBMIT REQUEST';
+        });
 
         window.logout = function() { localStorage.removeItem('user'); location.href='/login'; }
         init();
