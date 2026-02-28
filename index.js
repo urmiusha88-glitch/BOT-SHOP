@@ -13,14 +13,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 const ADMIN_ID = process.env.ADMIN_ID; 
 let isMaintenance = false;
 
-// 🔥 Maintenance Middleware
+// 🔥 Maintenance Middleware (Loads your maintenance.html)
 app.use((req, res, next) => {
-  // Allow access to admin APIs and admin page even in maintenance
   if (req.path.startsWith('/api/admin') || req.path === '/admin') return next();
   
   if (isMaintenance) {
       if (req.path.startsWith('/api/')) return res.status(503).json({ success: false, error: 'Maintenance Mode is ON' });
-      return res.status(503).send('<h1 style="text-align:center; margin-top:20%; font-family:sans-serif; color:#ef4444;">⚙️ System is under Maintenance. Please check back later.</h1>');
+      return res.status(503).sendFile(__dirname + '/maintenance.html');
   }
   next();
 });
@@ -50,7 +49,7 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
 );
 const stage = new Scenes.Stage([addProductWizard]); bot.use(session()); bot.use(stage.middleware());
 
-bot.start((ctx) => { ctx.reply(`🌟 *Welcome to AURA DIGITAL STORE* 🌟\nYour ID: \`${ctx.from.id}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🌐 Visit Website', url: 'https://onontorshop.up.railway.app/' }]] }}); });
+bot.start((ctx) => { ctx.reply(`🌟 *Welcome to AURA DIGITAL STORE* 🌟\nYour ID: \`${ctx.from.id}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🌐 Visit Website', url: 'https://bot-shop-production.up.railway.app/' }]] }}); });
 bot.command('addproduct', (ctx) => { if (ctx.from.id.toString() !== ADMIN_ID) return; ctx.scene.enter('ADD_PRODUCT_SCENE'); });
 
 async function processDeposit(id, action) {
@@ -172,11 +171,10 @@ app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({
 app.get('/api/admin/settings', (req, res) => res.json({ isMaintenance }));
 app.post('/api/admin/settings', (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); isMaintenance = req.body.status; res.json({ success: true }); });
 
-// 🔥 Routing Fixed (Admin is now at /admin)
+// 🔥 Routing
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
-app.get('/wp-admin', (req, res) => res.status(403).send("ACCESS DENIED")); // New Hacker Trap
-app.get('/admin', (req, res) => res.sendFile(__dirname + '/admin.html')); // Real Admin Panel
+app.get('/admin', (req, res) => res.sendFile(__dirname + '/admin.html'));
 
 app.listen(8080);
 bot.launch();
