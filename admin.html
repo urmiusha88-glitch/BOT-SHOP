@@ -10,55 +10,108 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #050b14; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        body { background-color: #050b14; color: #e2e8f0; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .tab-btn.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #60a5fa; padding-left: 1.5rem; }
+        .glow-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); } .glow-btn:hover { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); transform: translateY(-3px); }
+        .glow-input { transition: all 0.3s; } .glow-input:focus { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); border-color: #3b82f6; background: rgba(15,23,42,0.9); }
+        .tab-btn { transition: all 0.3s; } .tab-btn.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #60a5fa; padding-left: 1.5rem; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
+        .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); }
+        
         .badge-admin { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
         .badge-vip { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
         .badge-basic { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid #64748b; }
     </style>
 </head>
-<body class="h-screen overflow-hidden">
-    <div id="loginSection" class="h-screen flex justify-center items-center">
-        <div class="glass-panel p-12 rounded-[40px] text-center w-full max-w-md">
-            <h2 class="text-4xl font-black mb-8 text-white">Admin Core</h2>
-            <input type="password" id="adminPass" class="w-full px-6 py-5 bg-slate-900/80 border border-slate-700 rounded-2xl mb-6 text-white text-center text-xl outline-none" placeholder="••••••••">
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase">Authenticate</button>
+<body class="h-screen overflow-hidden selection:bg-blue-500 selection:text-white bg-grid relative">
+    
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none"></div>
+
+    <div id="loginSection" class="h-screen flex justify-center items-center relative z-50 backdrop-blur-sm">
+        <div class="glass-panel p-12 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-full max-w-md text-center relative border border-slate-700/50">
+            <h2 class="text-4xl font-black mb-8 text-white tracking-tight">Admin Core</h2>
+            <input type="password" id="adminPass" class="w-full px-6 py-5 bg-slate-900/80 border border-slate-700 rounded-2xl mb-6 text-white glow-input outline-none font-bold text-center tracking-[0.3em] text-xl" placeholder="••••••••">
+            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-black glow-btn tracking-widest uppercase border border-white/10">Authenticate</button>
         </div>
     </div>
 
-    <div id="dashSection" class="hidden flex h-screen">
-        <div class="w-80 glass-panel border-r border-slate-800/80 flex flex-col p-8 space-y-2">
-            <h2 class="text-3xl font-black mb-12 text-white">AURA <span class="text-blue-500">DIGITAL</span></h2>
-            <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 uppercase text-sm mb-1"><i class="fa-solid fa-chart-pie mr-4"></i> Overview</button>
-            <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 uppercase text-sm mb-1"><i class="fa-solid fa-box-open mr-4"></i> Products</button>
-            <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 uppercase text-sm mb-1"><i class="fa-solid fa-money-bill-transfer mr-4"></i> Deposits</button>
-            <button onclick="showTab('users', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 uppercase text-sm mb-1"><i class="fa-solid fa-users mr-4"></i> Users</button>
+    <div id="dashSection" class="hidden flex h-screen relative z-10">
+        <div class="w-80 glass-panel border-r border-slate-800/80 flex flex-col p-8 space-y-2 shadow-2xl relative overflow-hidden">
+            <h2 class="text-3xl font-black mb-12 text-white tracking-tighter mt-2 relative z-10">AURA <span class="text-blue-500">DIGITAL</span></h2>
+            <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
+            <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-box-open mr-4 w-5"></i> Products</button>
+            <button onclick="showTab('promo', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-ticket mr-4 w-5"></i> Promos</button>
+            <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-money-bill-transfer mr-4 w-5"></i> Deposits</button>
+            <button onclick="showTab('users', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-users mr-4 w-5"></i> Users</button>
+            <button onclick="showTab('notices', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-tower-broadcast mr-4 w-5"></i> Broadcast</button>
         </div>
 
-        <div class="flex-1 p-10 overflow-y-auto">
-            <div id="statsTab" class="tab-content"><h1 class="text-4xl font-black mb-10 text-white">Dashboard</h1><div class="grid grid-cols-2 gap-8"><div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-black mb-1 uppercase text-xs">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div><div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-black mb-1 uppercase text-xs">Total Revenue</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">$0</h2></div></div></div>
+        <div class="flex-1 p-10 overflow-y-auto custom-scrollbar">
             
-            <div id="productsTab" class="tab-content hidden"><h1 class="text-4xl font-black mb-10 text-white">Products</h1><div class="glass-panel rounded-[32px] overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs uppercase"><th class="p-6">Title</th><th class="p-6">Price</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-700/30"></tbody></table></div></div>
-            
-            <div id="depositsTab" class="tab-content hidden"><h1 class="text-4xl font-black mb-10 text-white">Deposits</h1><div class="glass-panel rounded-[32px] overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs uppercase"><th class="p-6">User</th><th class="p-6">TrxID/Method</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-700/30"></tbody></table></div></div>
-            
-            <div id="usersTab" class="tab-content hidden">
-                <div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black text-white">Users</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl text-white outline-none"></div>
+            <div id="statsTab" class="tab-content animate-[fadeIn_0.4s_ease-out]">
+                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Command Center</h1>
+                
+                <div class="glass-panel p-6 rounded-3xl mb-8 flex justify-between items-center border border-red-500/20 bg-red-500/5">
+                    <div>
+                        <h3 class="font-bold text-white text-lg"><i class="fa-solid fa-triangle-exclamation text-red-500 mr-2"></i> Maintenance Mode</h3>
+                        <p class="text-slate-400 text-xs mt-1">If enabled, users will see the maintenance.html page.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="maintenanceToggle" class="sr-only peer" onchange="toggleMaintenance()">
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-500"></div>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 mb-8">
+                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div>
+                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Revenue</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">$0</h2></div>
+                </div>
+                <div class="glass-panel p-8 rounded-[32px]"><h3 class="font-bold text-white mb-4">Sales Analytics</h3><canvas id="revenueChart" height="100"></canvas></div>
+            </div>
+
+            <div id="promoTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
+                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Promo Codes</h1>
+                <div class="glass-panel p-8 rounded-[32px] mb-8"><div class="flex gap-4"><input type="text" id="prCode" placeholder="Code (e.g. EID20)" class="flex-1 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none uppercase font-bold"><input type="number" id="prDisc" placeholder="Discount %" class="w-32 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><button onclick="addPromo()" class="bg-blue-600 text-white px-8 font-black rounded-xl hover:bg-blue-500">Create</button></div></div>
+                <div class="glass-panel rounded-[32px] overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase"><th class="p-6">Code</th><th class="p-6">Discount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="promoListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
+            </div>
+
+            <div id="productsTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
+                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Product Control</h1>
+                <div class="glass-panel p-8 rounded-[32px] mb-8">
+                    <div class="grid grid-cols-2 gap-4 mb-4"><input type="text" id="pName" placeholder="Product Title" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><input type="text" id="pPrice" placeholder="Price (USD)" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><input type="number" id="pStock" placeholder="Stock Qty" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><input type="text" id="pAbilities" placeholder="Short Description" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><input type="text" id="pLink" placeholder="Google Drive Link" class="col-span-2 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"></div>
+                    <button onclick="addProductWeb()" class="bg-blue-600 text-white px-8 py-3 font-black rounded-xl">Publish</button>
+                </div>
+                <div class="glass-panel rounded-[32px] overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-[0.2em] uppercase font-black"><th class="p-6">Title</th><th class="p-6">Price</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-700/30"></tbody></table></div>
+            </div>
+
+            <div id="depositsTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
+                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Deposit Queue</h1>
+                <div class="glass-panel rounded-[32px] overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID / Method</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
+            </div>
+
+            <div id="usersTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
+                <div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black text-white tracking-tight">User Base</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search user..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl text-white outline-none font-bold w-72"></div>
                 <div class="glass-panel rounded-[32px] overflow-hidden">
-                    <table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs uppercase"><th class="p-6">Name</th><th class="p-6">Email</th><th class="p-6">Balance</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-700/30"></tbody></table>
+                    <table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name</th><th class="p-6">Email / Ref</th><th class="p-6">Balance</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-700/30"></tbody></table>
                 </div>
             </div>
+
+            <div id="noticesTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
+                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Broadcast System</h1>
+                <div class="flex gap-4 mb-8"><input type="text" id="noticeInput" class="flex-1 px-6 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none font-bold" placeholder="Announcement..."><button onclick="addNotice()" class="bg-blue-600 text-white px-8 font-black rounded-xl">Transmit</button></div>
+                <div id="noticeList" class="space-y-4"></div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        let pass = sessionStorage.getItem('adminPass'); let globalUsers = [];
+        let pass = sessionStorage.getItem('adminPass'); let globalUsers = []; let chartInstance = null;
         if(pass) checkAuth();
 
-        async function login() { pass = document.getElementById('adminPass').value; const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else alert('Denied'); }
-        async function checkAuth() { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashSection').classList.remove('hidden'); loadAllData(); }
-        function showTab(tabId, btn) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); btn.classList.add('active'); }
+        async function login() { pass = document.getElementById('adminPass').value; const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title:'Denied'}); } }
+        async function checkAuth() { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashSection').classList.remove('hidden'); loadAllData(); loadSettings(); }
+        function showTab(tabId, btnElement) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); if(btnElement) btnElement.classList.add('active'); }
         
         function getBadge(role, isVip) {
             if(role === 'ADMIN') return '<span class="px-2 py-0.5 rounded text-[10px] font-black badge-admin ml-2">ADMIN</span>';
@@ -66,33 +119,57 @@
             return '<span class="px-2 py-0.5 rounded text-[10px] font-black badge-basic ml-2">BASIC</span>';
         }
 
+        async function loadSettings() {
+            const res = await fetch('/api/admin/settings'); const data = await res.json();
+            document.getElementById('maintenanceToggle').checked = data.isMaintenance;
+        }
+
+        async function toggleMaintenance() {
+            const status = document.getElementById('maintenanceToggle').checked;
+            await fetch('/api/admin/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ password: pass, status }) });
+            Swal.fire({toast:true, position:'top-end', icon:'success', title: status ? 'Maintenance ON' : 'Maintenance OFF', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'});
+        }
+
         async function loadAllData() {
             const res = await fetch('/api/admin/stats'); const data = await res.json();
             document.getElementById('statUsers').innerText = data.users; document.getElementById('statRev').innerText = "$" + data.revenue.toFixed(2);
             globalUsers = data.userList; renderUsers(globalUsers);
-            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400 font-mono">${d.trxId}<br><span class="text-blue-400 font-black text-xs uppercase">${d.method}</span></td><td class="p-6 font-black text-emerald-400">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg font-bold text-xs mr-2">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg font-bold text-xs">Reject</button>` : `<span class="text-[10px]">${d.status}</span>`}</td></tr>`).join('');
-            document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold">${p.name}</td><td class="p-6 text-blue-400 font-black">$${p.price.replace(/[^0-9.]/g, '')}</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+            
+            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400 font-mono">${d.trxId}<br><span class="text-blue-400 font-black text-xs uppercase">${d.method}</span></td><td class="p-6 font-black text-emerald-400 text-lg">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg font-bold text-xs mr-2 hover:bg-emerald-500 hover:text-white">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-500 hover:text-white">Reject</button>` : `<span class="font-black text-[10px] text-slate-500">${d.status}</span>`}</td></tr>`).join('');
+            document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${p.name}</td><td class="p-6 text-blue-400 font-black text-lg">$${p.price.replace(/[^0-9.]/g, '')}</td><td class="p-6 font-bold ${p.stock > 0 ? 'text-emerald-400' : 'text-red-400'}">${p.stock}</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+            document.getElementById('promoListBody').innerHTML = data.promos.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-black text-blue-400 text-xl">${p.code}</td><td class="p-6 text-white font-bold text-lg">${p.discount}%</td><td class="p-6 text-right"><button onclick="deletePromo(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+            const nRes = await fetch('/api/notices'); const notices = await nRes.json(); document.getElementById('noticeList').innerHTML = notices.map(n => `<div class="glass-panel p-6 rounded-2xl flex justify-between items-center"><span class="text-white font-bold">${n.text}</span> <button onclick="deleteNotice(${n.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
+            
+            const ctx = document.getElementById('revenueChart').getContext('2d'); if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, { type: 'line', data: { labels: ['M','T','W','T','F','S','S'], datasets: [{ label: 'Sales', data: [10,25,12,30,15,40,22], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, scales: { y: { display: false }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
         }
 
-        function filterUsers() { const q = document.getElementById('userSearch').value.toLowerCase(); renderUsers(globalUsers.filter(u => u.firstName.toLowerCase().includes(q))); }
+        function filterUsers() { const query = document.getElementById('userSearch').value.toLowerCase(); const filtered = globalUsers.filter(u => u.firstName.toLowerCase().includes(query) || (u.email && u.email.toLowerCase().includes(query))); renderUsers(filtered); }
+        
         function renderUsers(users) { 
             document.getElementById('userListBody').innerHTML = users.map(u => `
             <tr class="hover:bg-slate-800/20 ${u.isBanned ? 'opacity-50' : ''}">
-                <td class="p-6 font-bold text-white flex items-center">${u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover mr-3 border border-slate-600">` : `<div class="w-8 h-8 rounded-full bg-slate-700 mr-3 flex items-center justify-center">${u.firstName.charAt(0)}</div>`} ${u.firstName} ${getBadge(u.role, u.isVip)} <br> ${u.isBanned?'<span class="text-red-500 ml-2">BANNED</span>':''}</td>
-                <td class="p-6 text-sm text-slate-400">${u.email}</td><td class="p-6 text-emerald-400 font-black">$${u.balanceUsd.toFixed(2)}</td>
+                <td class="p-6 font-bold text-white flex items-center">${u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover mr-3 border border-slate-600">` : `<div class="w-8 h-8 rounded-full bg-slate-700 mr-3 flex items-center justify-center">${u.firstName.charAt(0)}</div>`} ${u.firstName} ${getBadge(u.role, u.isVip)} <br> ${u.isBanned?'<span class="text-[10px] text-red-500 font-black ml-11">BANNED</span>':''}</td>
+                <td class="p-6 text-sm text-slate-400">${u.email}<br><span class="text-[10px] text-blue-400">Ref: ${u.refCode}</span></td>
+                <td class="p-6 text-emerald-400 font-black text-xl">$${u.balanceUsd.toFixed(2)}</td>
                 <td class="p-6 text-right">
-                    <button onclick="editBalance(${u.id}, ${u.balanceUsd})" class="bg-blue-500/20 text-blue-400 p-2 rounded-lg mr-2" title="Edit Balance"><i class="fa-solid fa-wallet"></i></button>
-                    <button onclick="toggleAdmin(${u.id}, '${u.role}')" class="bg-purple-500/20 text-purple-400 p-2 rounded-lg mr-2" title="Toggle Admin Role"><i class="fa-solid fa-user-shield"></i></button>
-                    <button onclick="toggleBan(${u.id}, ${u.isBanned})" class="${u.isBanned?'bg-red-500 text-white':'bg-red-500/10 text-red-400'} p-2 rounded-lg"><i class="fa-solid fa-ban"></i></button>
+                    <button onclick="editBalance(${u.id}, ${u.balanceUsd})" class="bg-blue-500/20 text-blue-400 p-2 rounded-lg mr-2 hover:bg-blue-500 hover:text-white transition-colors" title="Edit Balance"><i class="fa-solid fa-wallet"></i></button>
+                    <button onclick="toggleAdmin(${u.id}, '${u.role}')" class="bg-purple-500/20 text-purple-400 p-2 rounded-lg mr-2 hover:bg-purple-600 hover:text-white transition-colors" title="Toggle Admin Role"><i class="fa-solid fa-user-shield"></i></button>
+                    <button onclick="toggleBan(${u.id}, ${u.isBanned})" class="${u.isBanned?'bg-red-500 text-white':'bg-red-500/10 text-red-400'} p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="${u.isBanned?'Unban User':'Ban User'}"><i class="fa-solid fa-ban"></i></button>
                 </td>
             </tr>`).join(''); 
         }
 
-        async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Balance', input: 'number', inputValue: currentBalance, showCancelButton: true }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); } }
+        async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Balance', input: 'number', inputValue: currentBalance, inputAttributes: { step: '0.01' }, showCancelButton: true }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', showConfirmButton:false, timer:1500}); } }
         async function toggleAdmin(id, currentRole) { const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN'; if(confirm(`Change role to ${newRole}?`)) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'role', id, role: newRole})}); loadAllData(); } }
         async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban user?' : 'BAN this user?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
-        async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
+        async function addProductWeb() { const name = document.getElementById('pName').value; const price = document.getElementById('pPrice').value; const stock = document.getElementById('pStock').value; const abilities = document.getElementById('pAbilities').value; const driveLink = document.getElementById('pLink').value; if(!name) return; await fetch('/api/admin/product', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, name, price, stock, abilities, driveLink}) }); loadAllData(); }
         async function deleteProduct(id) { if(confirm('Delete?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
+        async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
+        async function addNotice() { const text = document.getElementById('noticeInput').value; if(!text) return; await fetch('/api/admin/notice', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, text}) }); document.getElementById('noticeInput').value=''; loadAllData(); }
+        async function deleteNotice(id) { await fetch('/api/admin/notice/delete/'+id, { method:'POST' }); loadAllData(); }
+        async function addPromo() { const code = document.getElementById('prCode').value; const discount = document.getElementById('prDisc').value; if(!code || !discount) return; await fetch('/api/admin/promo', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, code, discount}) }); document.getElementById('prCode').value=''; document.getElementById('prDisc').value=''; loadAllData(); }
+        async function deletePromo(id) { await fetch('/api/admin/promo/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); }
     </script>
 </body>
 </html>
