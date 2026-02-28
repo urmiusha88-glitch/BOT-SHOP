@@ -58,9 +58,7 @@ app.post('/api/checkout', async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: parseInt(userId) }, include: { purchases: true } });
     if (!user) return res.json({ success: false, error: 'User not found' });
     
-    // VIP Check
     const isVipActive = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date();
-    
     let discountMulti = 1;
     if(promoCode && !isVipActive) {
         const p = await prisma.promo.findUnique({ where: { code: promoCode } });
@@ -106,14 +104,33 @@ app.post('/api/register', async (req, res) => {
     
     if(refCode) {
         const referrer = await prisma.user.findUnique({ where: { refCode: refCode.toUpperCase() }});
-        if(referrer) await prisma.user.update({ where: { id: referrer.id }, data: { balanceUsd: { increment: 2.0 } } }); // Give $2 Bonus
+        if(referrer) await prisma.user.update({ where: { id: referrer.id }, data: { balanceUsd: { increment: 2.0 } } }); 
     }
     res.json({ success: true }); 
   } catch (e) { res.status(400).json({ success: false, error: 'Email exists' }); } 
 });
 
-app.post('/api/login', async (req, res) => { const user = await prisma.user.findUnique({ where: { email: req.body.email } }); if (user && user.password === req.body.password) { const isVipActive = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date(); res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceUsd: user.balanceUsd, country: user.country, refCode: user.refCode, isVip: isVipActive } }); } else res.status(401).json({ success: false, error: 'Invalid login' }); });
-app.get('/api/user/:id', async (req, res) => { const user = await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } }); if (user) { const isVipActive = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date(); res.json({ success: true, balanceUsd: user.balanceUsd, country: user.country, refCode: user.refCode, isVip: isVipActive }); } else res.json({ success: false }); });
+// ✅ OLD USER FIX IN LOGIN & FETCH
+app.post('/api/login', async (req, res) => { 
+  const user = await prisma.user.findUnique({ where: { email: req.body.email } }); 
+  if (user && user.password === req.body.password) { 
+    let userRef = user.refCode;
+    if(!userRef) { userRef = generateRefCode(); await prisma.user.update({where: {id: user.id}, data: {refCode: userRef}}); }
+    const isVipActive = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date(); 
+    res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceUsd: user.balanceUsd, country: user.country, refCode: userRef, isVip: isVipActive } }); 
+  } else res.status(401).json({ success: false, error: 'Invalid login' }); 
+});
+
+app.get('/api/user/:id', async (req, res) => { 
+  const user = await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } }); 
+  if (user) { 
+    let userRef = user.refCode;
+    if(!userRef) { userRef = generateRefCode(); await prisma.user.update({where: {id: user.id}, data: {refCode: userRef}}); }
+    const isVipActive = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date(); 
+    res.json({ success: true, balanceUsd: user.balanceUsd, country: user.country, refCode: userRef, isVip: isVipActive }); 
+  } else res.json({ success: false }); 
+});
+
 app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
 
 app.post('/api/deposit', async (req, res) => {
@@ -134,11 +151,8 @@ app.get('/api/admin/stats', async (req, res) => {
   const userList = await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 20 }); 
   const allProducts = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); 
   const promos = await prisma.promo.findMany({ orderBy: { id: 'desc' }});
-  
-  // Graphical Revenue Data (Last 7 Sales)
   const recentPurchases = await prisma.purchase.findMany({ take: 30, orderBy: { createdAt: 'desc' }});
   let revenue = recentPurchases.reduce((acc, p) => acc + p.pricePaid, 0);
-
   res.json({ users, deposits, userList, products: allProducts, promos, revenue }); 
 });
 app.post('/api/admin/deposit/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const deposit = await prisma.deposit.findUnique({ where: { id: parseInt(req.body.id) }, include: { user: true } }); if (deposit && deposit.status === 'PENDING') { if (req.body.action === 'APPROVE') { const rates = await getAllRates(); const userRate = deposit.user.country === 'IN' ? rates.INR : (deposit.user.country === 'PK' ? rates.PKR : rates.BDT); const usdAmount = deposit.amountBdt / userRate; await prisma.user.update({ where: { id: deposit.userId }, data: { balanceUsd: { increment: usdAmount } } }); await prisma.deposit.update({ where: { id: parseInt(req.body.id) }, data: { status: 'APPROVED' } }); } else { await prisma.deposit.update({ where: { id: parseInt(req.body.id) }, data: { status: 'REJECTED' } }); } } res.json({success:true}); });
