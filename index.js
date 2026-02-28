@@ -62,6 +62,7 @@ app.post('/api/checkout', async (req, res) => {
   const { userId, cartItems, promoCode } = req.body;
   try {
     const user = await prisma.user.findUnique({ where: { id: parseInt(userId) }, include: { purchases: true } });
+    if(user.isBanned) return res.json({ success: false, error: 'Account banned!' });
     const isVipActive = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date();
     let discountMulti = 1;
     if(promoCode && !isVipActive) { const p = await prisma.promo.findUnique({ where: { code: promoCode } }); if(p && p.isActive) discountMulti = 1 - (p.discount / 100); }
@@ -102,6 +103,7 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => { 
   const user = await prisma.user.findUnique({ where: { email: req.body.email } }); 
   if (user && user.password === req.body.password) { 
+    if(user.isBanned) return res.status(403).json({ success: false, error: 'Your account is banned by Admin.' });
     let userRef = user.refCode; if(!userRef) { userRef = generateRefCode(); await prisma.user.update({where: {id: user.id}, data: {refCode: userRef}}); }
     const isVipActive = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date(); 
     res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceUsd: user.balanceUsd, country: user.country, refCode: userRef, isVip: isVipActive } }); 
@@ -111,6 +113,7 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/user/:id', async (req, res) => { 
   const user = await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } }); 
   if (user) { 
+    if(user.isBanned) return res.json({ success: false, banned: true });
     let userRef = user.refCode; if(!userRef) { userRef = generateRefCode(); await prisma.user.update({where: {id: user.id}, data: {refCode: userRef}}); }
     const isVipActive = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date(); 
     res.json({ success: true, balanceUsd: user.balanceUsd, country: user.country, refCode: userRef, isVip: isVipActive }); 
@@ -131,8 +134,23 @@ app.post('/api/deposit', async (req, res) => {
 
 // --- ADMIN APIs ---
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true, token: 'auth' }); else res.status(401).json({ success: false }); });
-app.get('/api/admin/stats', async (req, res) => { const users = await prisma.user.count(); const deposits = await prisma.deposit.findMany({ orderBy: { createdAt: 'desc' }, take: 20, include: { user: true } }); const userList = await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 20 }); const allProducts = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); const promos = await prisma.promo.findMany({ orderBy: { id: 'desc' }}); const recentPurchases = await prisma.purchase.findMany({ take: 30, orderBy: { createdAt: 'desc' }}); let revenue = recentPurchases.reduce((acc, p) => acc + p.pricePaid, 0); res.json({ users, deposits, userList, products: allProducts, promos, revenue }); });
+app.get('/api/admin/stats', async (req, res) => { const users = await prisma.user.count(); const deposits = await prisma.deposit.findMany({ orderBy: { createdAt: 'desc' }, take: 20, include: { user: true } }); const userList = await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 50 }); const allProducts = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); const promos = await prisma.promo.findMany({ orderBy: { id: 'desc' }}); const recentPurchases = await prisma.purchase.findMany({ take: 30, orderBy: { createdAt: 'desc' }}); let revenue = recentPurchases.reduce((acc, p) => acc + p.pricePaid, 0); res.json({ users, deposits, userList, products: allProducts, promos, revenue }); });
 app.post('/api/admin/deposit/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const result = await processDeposit(parseInt(req.body.id), req.body.action); res.json(result); });
+
+// 🔥 NEW: Admin User Management (Ban & Balance)
+app.post('/api/admin/user/action', async (req, res) => {
+    if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
+    try {
+        if(req.body.action === 'ban') {
+            const u = await prisma.user.findUnique({where: {id: parseInt(req.body.id)}});
+            await prisma.user.update({where: {id: parseInt(req.body.id)}, data: {isBanned: !u.isBanned}});
+        } else if(req.body.action === 'balance') {
+            await prisma.user.update({where: {id: parseInt(req.body.id)}, data: {balanceUsd: parseFloat(req.body.amount)}});
+        }
+        res.json({success: true});
+    } catch(e) { res.json({success: false}); }
+});
+
 app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({ data: { text: req.body.text } }); res.json({ success: true }); });
 app.post('/api/admin/notice/delete/:id', async (req, res) => { await prisma.notice.delete({ where: { id: parseInt(req.params.id) } }); res.json({ success: true }); });
 app.get('/api/admin/settings', (req, res) => res.json({ isMaintenance }));
