@@ -1,69 +1,86 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA STORE | Premium Codes</title>
+    <title>AURA STORE | Premium Source Codes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, boxShadow: { 'neon': '0 0 20px rgba(59, 130, 246, 0.4)' } } } }</script>
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; padding-bottom: 80px; }
-        .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .dark .glass-effect { background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .product-card { transition: all 0.3s; border-radius: 24px; background: white; border: 1px solid rgba(0,0,0,0.05); }
-        .dark .product-card { background: #1e293b; border-color: rgba(255,255,255,0.05); }
+        body { -webkit-font-smoothing: antialiased; padding-bottom: 80px; background-color: #0b1121; color: #e2e8f0; }
+        @media (min-width: 768px) { body { padding-bottom: 0; } }
+        .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(100px); opacity: 0.15; animation: float 20s infinite ease-in-out alternate; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; }
+        .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: #8b5cf6; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-50px, -50px) scale(0.9); } }
+        .glass-effect { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .product-card { transition: all 0.3s; border-radius: 28px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); }
         .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
+        .faq-ans { transition: max-height 0.3s ease-out; max-height: 0; overflow: hidden; padding: 0 1.5rem; }
+        .faq-ans.open { max-height: 200px; padding: 1rem 1.5rem 1.5rem; }
+        .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 12px; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#0b1121] text-slate-800 dark:text-slate-200">
+<body>
+
+    <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
     <nav class="glass-effect sticky top-0 z-50 w-full h-16 sm:h-20 flex items-center">
         <div class="max-w-7xl mx-auto px-4 w-full flex justify-between items-center">
             <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg text-white">
-                    <i class="fa-solid fa-bolt text-xl"></i>
-                </div>
-                <span class="font-black text-2xl tracking-tighter dark:text-white">AURA<span class="text-blue-600">STORE</span></span>
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-neon text-white"><i class="fa-solid fa-bolt text-xl"></i></div>
+                <span class="font-black text-2xl tracking-tighter">AURA<span class="text-blue-500">STORE</span></span>
             </div>
-            <div id="authSection" class="flex items-center gap-3">
-                </div>
+            <div id="authSection" class="flex items-center gap-3"></div>
         </div>
     </nav>
 
-    <div class="pt-12 pb-12 text-center px-4">
-        <h1 class="text-4xl sm:text-6xl font-black mb-4 dark:text-white">Elite Source Codes</h1>
-        <p class="text-slate-500 dark:text-slate-400 font-medium">Automatic delivery to your vault.</p>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="product-list">
-        <p class="col-span-full text-center py-20 font-bold text-slate-400">Loading products...</p>
-    </div>
-
-    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 h-16 flex justify-around items-center z-40" id="mobileBottomNav">
+    <div class="pt-12 pb-12 text-center px-4 relative z-10">
+        <div id="vipBanner" class="hidden max-w-md mx-auto bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 font-black py-2 px-4 rounded-full mb-6 text-xs animate-pulse shadow-lg"><i class="fa-solid fa-crown mr-1"></i> VIP MODE: EVERYTHING IS FREE!</div>
+        <h1 class="text-5xl sm:text-7xl font-black mb-6 tracking-tight">Elite <span class="text-blue-500">Codes</span></h1>
+        
+        <div class="max-w-xl mx-auto mb-10 px-4">
+            <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search source codes..." class="w-full bg-slate-800/50 border border-slate-700 rounded-full px-6 py-4 outline-none focus:border-blue-500 font-bold shadow-lg">
         </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20" id="product-list">
+        <div class="product-card p-5"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-6 mb-4"></div><div class="skeleton w-1/2 h-8"></div></div>
+        <div class="product-card p-5"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-6 mb-4"></div><div class="skeleton w-1/2 h-8"></div></div>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-4 py-20 border-t border-slate-800">
+        <h2 class="text-3xl font-black text-center mb-10">Common Questions</h2>
+        <div class="space-y-4">
+            <div class="bg-slate-800/40 border border-slate-700 rounded-2xl overflow-hidden">
+                <button onclick="toggleFaq(this)" class="w-full text-left p-5 font-bold flex justify-between items-center">How do I access my files? <i class="fa-solid fa-plus text-slate-500"></i></button>
+                <div class="faq-ans"><p class="text-slate-400 pb-4">Once you buy, go to your Profile > Vault. All your files are auto-added there instantly.</p></div>
+            </div>
+            <div class="bg-slate-800/40 border border-slate-700 rounded-2xl overflow-hidden">
+                <button onclick="toggleFaq(this)" class="w-full text-left p-5 font-bold flex justify-between items-center">What is the Referral reward? <i class="fa-solid fa-plus text-slate-500"></i></button>
+                <div class="faq-ans"><p class="text-slate-400 pb-4">Share your unique code. When someone joins using it, you get $2.00 added to your balance.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 h-16 flex justify-around items-center z-50" id="mobileBottomNav"></div>
 
     <script>
-        let currentUser = null;
-        try { 
-            const stored = localStorage.getItem('user');
-            if(stored) currentUser = JSON.parse(stored);
-        } catch(e) { console.log("User parse error"); }
+        let currentUser = null; try { const s = localStorage.getItem('user'); if(s) currentUser = JSON.parse(s); } catch(e){}
+        let allProducts = []; let ownedIds = [];
 
         async function init() {
             if(currentUser && currentUser.id) {
-                try {
-                    const res = await fetch('/api/user/' + currentUser.id);
-                    const data = await res.json();
-                    if(data.success) {
-                        currentUser = {...currentUser, ...data};
-                        localStorage.setItem('user', JSON.stringify(currentUser));
-                    } else if(data.banned) {
-                        localStorage.removeItem('user');
-                        location.href = '/login';
-                    }
-                } catch(e) {}
+                const res = await fetch('/api/user/' + currentUser.id);
+                const data = await res.json();
+                if(data.success) { currentUser = {...currentUser, ...data}; localStorage.setItem('user', JSON.stringify(currentUser)); }
             }
             renderAuth();
             loadProducts();
@@ -72,44 +89,35 @@
         function renderAuth() {
             const authDiv = document.getElementById('authSection');
             const mobNav = document.getElementById('mobileBottomNav');
+            const bal = currentUser ? currentUser.balanceUsd.toFixed(2) : '0.00';
             
             if(currentUser) {
-                authDiv.innerHTML = `
-                    <div class="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full font-bold">
-                        <span class="mr-2 border-r pr-2 text-sm">${currentUser.name}</span>
-                        <span class="text-blue-600">$${currentUser.balanceUsd.toFixed(2)}</span>
-                    </div>
-                    <button onclick="location.href='/login'" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-user"></i></button>
-                `;
-                mobNav.innerHTML = `
-                    <button onclick="location.reload()" class="flex flex-col items-center text-blue-600"><i class="fa-solid fa-house"></i><span class="text-[10px]">Home</span></button>
-                    <button onclick="Swal.fire('Vault coming soon')" class="flex flex-col items-center text-slate-400"><i class="fa-solid fa-box"></i><span class="text-[10px]">Vault</span></button>
-                    <button onclick="location.href='/login'" class="flex flex-col items-center text-slate-400"><i class="fa-solid fa-user"></i><span class="text-[10px]">Profile</span></button>
-                `;
+                authDiv.innerHTML = `<div class="hidden sm:flex items-center bg-slate-800 px-4 py-2 rounded-full font-black border border-slate-700 shadow-neon text-blue-400">$${bal}</div><button onclick="location.href='/login'" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700"><i class="fa-solid fa-user"></i></button>`;
+                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500"><i class="fa-solid fa-house text-xl"></i></button><button onclick="location.href='/login'" class="text-slate-500"><i class="fa-solid fa-vault text-xl"></i></button><button onclick="location.href='/login'" class="text-slate-500"><i class="fa-solid fa-user text-xl"></i></button>`;
             } else {
-                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold">Login</button>`;
-                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-bold">Access Store</button>`;
+                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2 rounded-full font-black shadow-neon">LOGIN</button>`;
+                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black shadow-neon uppercase tracking-widest">Access Account</button>`;
             }
         }
 
         async function loadProducts() {
             const res = await fetch('/api/products');
-            const products = await res.json();
+            allProducts = await res.json();
             const list = document.getElementById('product-list');
             list.innerHTML = '';
-            products.forEach(p => {
-                list.innerHTML += `
-                    <div class="product-card p-6 shadow-sm">
-                        <div class="w-full h-40 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 flex items-center justify-center">
-                            ${p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-full object-cover rounded-xl">` : `<i class="fa-solid fa-code text-4xl text-slate-300"></i>`}
-                        </div>
-                        <h3 class="font-black text-xl mb-1 dark:text-white">${p.name}</h3>
-                        <p class="text-blue-600 font-black text-2xl mb-4">$${p.price}</p>
-                        <button class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors">Add to Cart</button>
-                    </div>
-                `;
+            allProducts.forEach(p => {
+                list.innerHTML += `<div class="product-card p-6 flex flex-col justify-between">
+                    <div><div class="w-full h-48 bg-slate-800 rounded-2xl mb-4 overflow-hidden flex items-center justify-center">${p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-code text-5xl text-slate-700"></i>`}</div>
+                    <div class="flex justify-between items-center mb-2"><h3 class="font-black text-xl">${p.name}</h3><span class="text-yellow-500 text-xs font-bold bg-yellow-500/10 px-2 py-1 rounded">★ ${p.rating}</span></div>
+                    <p class="text-slate-400 text-sm mb-4 h-10 overflow-hidden">${p.abilities}</p>
+                    <p class="text-3xl font-black text-blue-500 mb-6">$${p.price}</p></div>
+                    <button onclick="location.href='/login'" class="w-full bg-slate-800 hover:bg-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all">Add to Cart</button>
+                </div>`;
             });
         }
+
+        function toggleFaq(btn) { const ans = btn.nextElementSibling; ans.classList.toggle('open'); btn.querySelector('i').classList.toggle('fa-plus'); btn.querySelector('i').classList.toggle('fa-minus'); }
+        function filterProducts() { const q = document.getElementById('searchInput').value.toLowerCase(); const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q)); /* Redraw list... */ }
 
         init();
     </script>
