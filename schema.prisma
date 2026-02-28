@@ -31,7 +31,7 @@ model User {
   refCode      String?    @unique 
   isVip        Boolean    @default(false)
   vipExpiry    DateTime?
-  isBanned     Boolean    @default(false) // 🔥 NEW: Ban System
+  isBanned     Boolean    @default(false)
   deposits     Deposit[] 
   purchases    Purchase[] 
   createdAt    DateTime   @default(now())
