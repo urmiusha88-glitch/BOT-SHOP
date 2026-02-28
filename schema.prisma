@@ -28,9 +28,10 @@ model User {
   firstName    String?
   country      String     @default("BD") 
   balanceUsd   Float      @default(0.0) 
-  refCode      String?    @unique   // <--- FIXED: Made optional for old users
+  refCode      String?    @unique 
   isVip        Boolean    @default(false)
   vipExpiry    DateTime?
+  isBanned     Boolean    @default(false) // 🔥 NEW: Ban System
   deposits     Deposit[] 
   purchases    Purchase[] 
   createdAt    DateTime   @default(now())
