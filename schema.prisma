@@ -15,6 +15,7 @@ model Product {
   imageId   String?  
   driveLink String?  
   stock     Int        @default(1)
+  rating    Float      @default(5.0) 
   createdAt DateTime   @default(now())
   purchases Purchase[] 
 }
@@ -27,9 +28,19 @@ model User {
   firstName    String?
   country      String     @default("BD") 
   balanceUsd   Float      @default(0.0) 
+  refCode      String     @unique 
+  isVip        Boolean    @default(false)
+  vipExpiry    DateTime?
   deposits     Deposit[] 
   purchases    Purchase[] 
   createdAt    DateTime   @default(now())
+}
+
+model Promo {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  discount  Int      
+  isActive  Boolean  @default(true)
 }
 
 model Deposit {
