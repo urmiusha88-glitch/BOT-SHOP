@@ -11,6 +11,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const ADMIN_ID = process.env.ADMIN_ID; 
+let isMaintenance = false; // 🔥 Maintenance Variable
+
+// 🔥 Maintenance Middleware (Blocks users, allows Admin)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/auraminato') || req.path.startsWith('/api/admin') || req.path === '/admin') return next();
+  if (isMaintenance) {
+      if (req.path.startsWith('/api/')) return res.status(503).json({ success: false, error: 'Maintenance Mode is ON' });
+      return res.status(503).sendFile(__dirname + '/maintenance.html');
+  }
+  next();
+});
 
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -19,7 +30,7 @@ async function getAllRates() {
   catch (e) { return { BDT: 120, INR: 83, PKR: 278 }; }
 }
 
-// --- 🤖 BOT LOGIC (100% FIXED) ---
+// --- 🤖 BOT LOGIC ---
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('🛒 1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in USD? (e.g. 15)'); return ctx.wizard.next(); },
@@ -44,15 +55,9 @@ const stage = new Scenes.Stage([addProductWizard]);
 bot.use(session()); bot.use(stage.middleware());
 
 bot.start((ctx) => {
-    ctx.reply(`🌟 *Welcome to AURA DIGITAL STORE* 🌟\n\nHello ${ctx.from.first_name}!\nYour Telegram ID: \`${ctx.from.id}\`\n\nWe provide Premium Digital Products with Auto-Delivery.`, {
+    ctx.reply(`🌟 *Welcome to AURA DIGITAL STORE* 🌟\n\nHello ${ctx.from.first_name}!\nYour Telegram ID: \`${ctx.from.id}\``, {
         parse_mode: 'Markdown',
-        reply_markup: {
-            inline_keyboard: [
-                [{ text: '🌐 Visit Website', url: 'https://onontorshop.up.railway.app/' }],
-                [{ text: '📦 View Products', callback_data: 'bot_products' }],
-                [{ text: '👨‍💻 Support', url: 'https://t.me/minato_namikaze143' }]
-            ]
-        }
+        reply_markup: { inline_keyboard: [[{ text: '🌐 Visit Website', url: 'https://onontorshop.up.railway.app/' }], [{ text: '📦 View Products', callback_data: 'bot_products' }]] }
     });
 });
 
@@ -61,7 +66,7 @@ bot.action('bot_products', async (ctx) => {
     if(products.length === 0) return ctx.answerCbQuery('Store is empty!', { show_alert: true });
     let txt = '🔥 *Latest Products:*\n\n';
     products.forEach(p => txt += `▪️ *${p.name}* - $${p.price}\n`);
-    ctx.reply(txt + '\n_Visit our website to purchase!_', { parse_mode: 'Markdown' });
+    ctx.reply(txt, { parse_mode: 'Markdown' });
     ctx.answerCbQuery();
 });
 
@@ -70,7 +75,6 @@ bot.command('addproduct', (ctx) => {
     ctx.scene.enter('ADD_PRODUCT_SCENE');
 });
 
-// Admin Deposit Approval Logic
 async function processDeposit(id, action) {
   const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } });
   if (dep && dep.status === 'PENDING') {
@@ -93,11 +97,9 @@ app.get('/api/notices', async (req, res) => res.json(await prisma.notice.findMan
 app.get('/api/products', async (req, res) => res.json(await prisma.product.findMany({ orderBy: { createdAt: 'desc' } })));
 app.get('/api/photo/:fileId', async (req, res) => { try { const link = await bot.telegram.getFileLink(req.params.fileId); res.redirect(link.href); } catch(e) { res.status(404).send('Not found'); } });
 
-// Promo & VIP
 app.post('/api/promo', async (req, res) => { const p = await prisma.promo.findUnique({ where: { code: req.body.code.toUpperCase() } }); if(p && p.isActive) res.json({ success: true, discount: p.discount }); else res.json({ success: false, error: 'Invalid Code!' }); });
 app.post('/api/buy-vip', async (req, res) => { const u = await prisma.user.findUnique({ where: { id: parseInt(req.body.userId) } }); if(!u || u.balanceUsd < 30) return res.json({ success: false, error: 'Insufficient funds.' }); const expiry = new Date(); expiry.setDate(expiry.getDate() + 30); await prisma.user.update({ where: { id: u.id }, data: { balanceUsd: { decrement: 30 }, isVip: true, vipExpiry: expiry } }); res.json({ success: true, newBalance: u.balanceUsd - 30 }); });
 
-// Checkout
 app.post('/api/checkout', async (req, res) => {
     const { userId, cartItems, promoCode } = req.body;
     try {
@@ -124,15 +126,15 @@ app.post('/api/checkout', async (req, res) => {
 });
 
 app.get('/api/library/:userId', async (req, res) => { res.json(await prisma.purchase.findMany({ where: { userId: parseInt(req.params.userId) }, include: { product: true }, orderBy: { createdAt: 'desc' } })); });
+app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
 
-// Register with Referral Bonus
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password, country, refCode } = req.body;
         await prisma.user.create({ data: { firstName: name, email, password, country, refCode: generateRefCode() } });
         if(refCode) { 
             const r = await prisma.user.findUnique({where:{refCode:refCode.toUpperCase()}}); 
-            if(r) await prisma.user.update({where:{id:r.id}, data:{balanceUsd:{increment:2.0}}}); // Give $2 Bonus
+            if(r) await prisma.user.update({where:{id:r.id}, data:{balanceUsd:{increment:2.0}}}); 
         }
         res.json({ success: true });
     } catch(e) { res.status(400).json({ success: false, error: 'Email exists' }); }
@@ -156,39 +158,47 @@ app.post('/api/deposit', async (req, res) => {
     const { userId, method, amountBdt, senderNumber, trxId } = req.body;
     try {
         const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } });
-        bot.telegram.sendMessage(ADMIN_ID, `💰 *New Deposit*\nUser ID: ${userId}\nAmt: ${amountBdt} BDT\nTrx: ${trxId}`, {
+        const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
+        if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ${amountBdt} BDT\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, {
+            parse_mode: 'Markdown',
             reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] }
         });
         res.json({ success: true });
-    } catch(e) { res.json({ success: false, error: 'TrxID exists' }); }
+    } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); }
 });
-
-app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
 
 // --- ADMIN APIs ---
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { 
     const recentPurchases = await prisma.purchase.findMany({ take: 30 });
     let revenue = recentPurchases.reduce((acc, p) => acc + p.pricePaid, 0);
-    res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 10 }), products: await prisma.product.findMany(), promos: await prisma.promo.findMany(), userList: await prisma.user.findMany({ take: 20 }), revenue }); 
+    res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20 }), products: await prisma.product.findMany(), promos: await prisma.promo.findMany(), userList: await prisma.user.findMany({ take: 20 }), revenue }); 
 });
 app.post('/api/admin/user/action', async (req, res) => {
+    if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
     if(req.body.action === 'ban') { const u = await prisma.user.findUnique({where:{id:parseInt(req.body.id)}}); await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{isBanned:!u.isBanned}}); }
     else if(req.body.action === 'balance') { await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{balanceUsd:parseFloat(req.body.amount)}}); }
     res.json({success:true});
 });
-app.post('/api/admin/deposit/action', async (req, res) => { const result = await processDeposit(parseInt(req.body.id), req.body.action); res.json(result); });
+app.post('/api/admin/deposit/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const result = await processDeposit(parseInt(req.body.id), req.body.action); res.json(result); });
 app.post('/api/admin/product', async (req, res) => { try { const { name, price, abilities, stock, driveLink } = req.body; await prisma.product.create({ data: { name, price, abilities, stock: parseInt(stock), driveLink } }); res.json({ success: true }); } catch(e) { res.status(500).json({ success: false }); } });
 app.delete('/api/admin/product/:id', async (req, res) => { try { await prisma.product.delete({ where: { id: parseInt(req.params.id) } }); res.json({ success: true }); } catch(e) { res.status(500).json({ success: false }); } });
 app.post('/api/admin/promo', async (req, res) => { await prisma.promo.create({ data: { code: req.body.code.toUpperCase(), discount: parseInt(req.body.discount) } }); res.json({success:true}); });
 app.delete('/api/admin/promo/:id', async (req, res) => { await prisma.promo.delete({ where: { id: parseInt(req.params.id) } }); res.json({success:true}); });
 app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({ data: { text: req.body.text } }); res.json({ success: true }); });
 
+// 🔥 Maintenance Settings API
+app.get('/api/admin/settings', (req, res) => res.json({ isMaintenance }));
+app.post('/api/admin/settings', (req, res) => { 
+    if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' });
+    isMaintenance = req.body.status; 
+    res.json({ success: true }); 
+});
+
 // Routing
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
 app.get('/auraminato', (req, res) => res.sendFile(__dirname + '/admin.html'));
-app.get('/admin', (req, res) => res.status(403).send("ACCESS DENIED"));
 
 app.listen(8080);
 bot.launch();
