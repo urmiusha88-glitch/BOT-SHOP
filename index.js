@@ -13,7 +13,6 @@ app.use(express.urlencoded({ extended: true }));
 const ADMIN_ID = process.env.ADMIN_ID; 
 let isMaintenance = false;
 
-// Middleware
 app.use((req, res, next) => {
   if (req.path.startsWith('/auraminato') || req.path.startsWith('/api/admin') || req.path === '/admin') return next();
   if (isMaintenance) return res.status(503).sendFile(__dirname + '/maintenance.html');
@@ -31,21 +30,21 @@ const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpper
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('🛒 1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in USD? (e.g. 15)'); return ctx.wizard.next(); },
-  (ctx) => { ctx.wizard.state.price = ctx.message.text; ctx.reply('🪄 3. Abilities/Description?'); return ctx.wizard.next(); },
-  (ctx) => { ctx.wizard.state.abilities = ctx.message.text; ctx.reply('📦 4. Stock Count? (e.g. 10)'); return ctx.wizard.next(); },
-  (ctx) => { ctx.wizard.state.stock = parseInt(ctx.message.text) || 1; ctx.reply('📸 5. Send a Photo of the product:'); return ctx.wizard.next(); },
+  (ctx) => { ctx.wizard.state.price = ctx.message.text; ctx.reply('🪄 3. Description?'); return ctx.wizard.next(); },
+  (ctx) => { ctx.wizard.state.abilities = ctx.message.text; ctx.reply('📦 4. Stock Count?'); return ctx.wizard.next(); },
+  (ctx) => { ctx.wizard.state.stock = parseInt(ctx.message.text) || 1; ctx.reply('📸 5. Send Product Photo:'); return ctx.wizard.next(); },
   (ctx) => {
     if (!ctx.message.photo) return ctx.reply('❌ Please send a valid photo!');
     ctx.wizard.state.imageId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-    ctx.reply('🔗 6. Google Drive / Download Link:'); return ctx.wizard.next();
+    ctx.reply('🔗 6. Download Link:'); return ctx.wizard.next();
   },
   async (ctx) => {
     ctx.wizard.state.driveLink = ctx.message.text;
     const { name, price, abilities, stock, imageId, driveLink } = ctx.wizard.state;
     try {
       await prisma.product.create({ data: { name, price, abilities, stock, imageId, driveLink } });
-      ctx.reply(`✅ *Success!*\nProduct "${name}" is now live in AURA STORE.`, { parse_mode: 'Markdown' });
-    } catch (e) { ctx.reply('❌ Database Error.'); }
+      ctx.reply(`✅ *Product Published Successfully!*`, { parse_mode: 'Markdown' });
+    } catch (e) { ctx.reply('❌ Error saving to database.'); }
     return ctx.scene.leave();
   }
 );
@@ -53,35 +52,40 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
 const stage = new Scenes.Stage([addProductWizard]);
 bot.use(session()); bot.use(stage.middleware());
 
-// --- BOT COMMANDS ---
 bot.start((ctx) => {
-    ctx.reply(`🌟 *AURA STORE OFFICIAL* 🌟\n\nHello ${ctx.from.first_name}!\nYour Telegram ID: \`${ctx.from.id}\``, {
+    ctx.reply(`🌟 *Welcome to AURA DIGITAL STORE* 🌟\nYour Telegram ID: \`${ctx.from.id}\``, {
         parse_mode: 'Markdown',
-        reply_markup: {
-            inline_keyboard: [
-                [{ text: '🌐 Open Web Store', url: 'https://onontorshop.up.railway.app/' }],
-                [{ text: '📦 View Recent', callback_data: 'bot_products' }],
-                [{ text: '👨‍💻 Admin', url: 'https://t.me/minato_namikaze143' }]
-            ]
-        }
+        reply_markup: { inline_keyboard: [[{ text: '🌐 Visit Website', url: 'https://onontorshop.up.railway.app/' }]] }
     });
 });
 
 bot.command('addproduct', (ctx) => {
-    if (ctx.from.id.toString() !== ADMIN_ID) return ctx.reply('🚫 Unauthorized.');
+    if (ctx.from.id.toString() !== ADMIN_ID) return;
     ctx.scene.enter('ADD_PRODUCT_SCENE');
 });
 
-bot.action('bot_products', async (ctx) => {
-    const products = await prisma.product.findMany({ take: 5, orderBy: { createdAt: 'desc' } });
-    if(products.length === 0) return ctx.answerCbQuery('Store is empty!');
-    let txt = '🔥 *Latest Source Codes:*\n\n';
-    products.forEach(p => txt += `▪️ ${p.name} - $${p.price}\n`);
-    ctx.reply(txt, { parse_mode: 'Markdown' });
-    ctx.answerCbQuery();
-});
+// --- ADMIN DEPOSIT PROCESS ---
+async function processDeposit(id, action) {
+  const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } });
+  if (dep && dep.status === 'PENDING') {
+    if (action === 'APPROVE') {
+      const rates = await getAllRates();
+      const userRate = dep.user.country === 'IN' ? rates.INR : (dep.user.country === 'PK' ? rates.PKR : rates.BDT);
+      const usdAmount = dep.amountBdt / userRate; 
+      await prisma.user.update({ where: { id: dep.userId }, data: { balanceUsd: { increment: usdAmount } } });
+      await prisma.deposit.update({ where: { id }, data: { status: 'APPROVED' } });
+      return { success: true, msg: `Approved: $${usdAmount.toFixed(2)}` };
+    } else {
+      await prisma.deposit.update({ where: { id }, data: { status: 'REJECTED' } });
+      return { success: true, msg: 'Rejected' };
+    }
+  } return { success: false, msg: 'Error' };
+}
 
-// --- APIs ---
+bot.action(/approve_(.+)/, async (ctx) => { const res = await processDeposit(parseInt(ctx.match[1]), 'APPROVE'); ctx.editMessageText(`✅ ${res.msg}`); });
+bot.action(/reject_(.+)/, async (ctx) => { const res = await processDeposit(parseInt(ctx.match[1]), 'REJECT'); ctx.editMessageText(`❌ ${res.msg}`); });
+
+// --- PUBLIC APIs ---
 app.get('/api/rate', async (req, res) => res.json({ rates: await getAllRates() }));
 app.get('/api/notices', async (req, res) => res.json(await prisma.notice.findMany({ where: { isActive: true } })));
 app.get('/api/products', async (req, res) => res.json(await prisma.product.findMany({ orderBy: { createdAt: 'desc' } })));
@@ -94,19 +98,18 @@ app.post('/api/checkout', async (req, res) => {
       if(user.isBanned) return res.status(403).json({ success: false, error: 'BANNED' });
       const isVip = user.isVip && user.vipExpiry && new Date(user.vipExpiry) > new Date();
       let disc = 1;
-      if(promoCode && !isVip) { const p = await prisma.promo.findUnique({ where: { code: promoCode.toUpperCase() } }); if(p) disc = 1 - (p.discount/100); }
+      if(promoCode) { const p = await prisma.promo.findUnique({ where: { code: promoCode.toUpperCase() } }); if(p) disc = 1 - (p.discount/100); }
       
-      let total = 0; let items = [];
+      let total = 0; let itemsToBuy = [];
       for (let pId of [...new Set(cartItems)]) {
         const prod = await prisma.product.findUnique({ where: { id: parseInt(pId) } });
-        if(!prod || prod.stock <= 0) continue;
-        if(user.purchases.some(p => p.productId === prod.id)) continue;
+        if(!prod || prod.stock <= 0 || user.purchases.some(p => p.productId === prod.id)) continue;
         let pPrice = isVip ? 0 : parseFloat(prod.price) * disc;
-        total += pPrice; items.push(prod);
+        total += pPrice; itemsToBuy.push(prod);
       }
-      if(user.balanceUsd < total) return res.json({ success: false, error: 'Insufficient Balance' });
+      if(user.balanceUsd < total) return res.json({ success: false, error: 'Insufficient Funds' });
       await prisma.user.update({ where: { id: user.id }, data: { balanceUsd: { decrement: total } } });
-      for (let itm of items) {
+      for (let itm of itemsToBuy) {
           await prisma.purchase.create({ data: { userId: user.id, productId: itm.id, pricePaid: isVip?0:parseFloat(itm.price)*disc } });
           await prisma.product.update({ where: { id: itm.id }, data: { stock: { decrement: 1 } } });
       }
@@ -120,7 +123,7 @@ app.post('/api/register', async (req, res) => {
         await prisma.user.create({ data: { firstName: name, email, password, country, refCode: generateRefCode() } });
         if(refCode) { const r = await prisma.user.findUnique({where:{refCode:refCode.toUpperCase()}}); if(r) await prisma.user.update({where:{id:r.id}, data:{balanceUsd:{increment:2.0}}}); }
         res.json({ success: true });
-    } catch(e) { res.status(400).json({ success: false, error: 'Email exists' }); }
+    } catch(e) { res.status(400).json({ success: false, error: 'User exists' }); }
 });
 
 app.post('/api/login', async (req, res) => {
@@ -141,13 +144,15 @@ app.post('/api/deposit', async (req, res) => {
     const { userId, method, amountBdt, senderNumber, trxId } = req.body;
     try {
         const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } });
-        bot.telegram.sendMessage(ADMIN_ID, `💰 *Deposit Alert*\nUser ID: ${userId}\nAmt: ${amountBdt} BDT\nTrx: ${trxId}`, {
+        bot.telegram.sendMessage(ADMIN_ID, `💰 *NEW DEPOSIT*\nUser: ${userId}\nAmt: ${amountBdt} BDT\nTrx: ${trxId}`, {
             reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] }
         });
         res.json({ success: true });
-    } catch(e) { res.json({ success: false, error: 'TrxID used' }); }
+    } catch(e) { res.json({ success: false, error: 'TrxID exists' }); }
 });
 
+// Admin Stats
+app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 10 }), products: await prisma.product.findMany(), revenue: 0, promos: await prisma.promo.findMany() }); });
 app.post('/api/admin/user/action', async (req, res) => {
     if(req.body.action === 'ban') { const u = await prisma.user.findUnique({where:{id:parseInt(req.body.id)}}); await prisma.user.update({where:{id:parseInt(req.body.id)}, data:{isBanned:!u.isBanned}}); }
@@ -158,7 +163,7 @@ app.post('/api/admin/user/action', async (req, res) => {
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
 app.get('/auraminato', (req, res) => res.sendFile(__dirname + '/admin.html'));
-app.get('/admin', (req, res) => res.status(403).sendFile(__dirname + '/admin_blocked.html'));
 
-app.listen(8080);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log(`Server Live on ${PORT}`));
 bot.launch();
