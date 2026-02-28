@@ -28,7 +28,7 @@ model User {
   firstName    String?
   country      String     @default("BD") 
   balanceUsd   Float      @default(0.0) 
-  refCode      String     @unique 
+  refCode      String?    @unique 
   isVip        Boolean    @default(false)
   vipExpiry    DateTime?
   deposits     Deposit[] 
