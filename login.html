@@ -7,57 +7,81 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #050b14; color: white; }
-        .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); outline: none; }
-        .input-box:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.2); }
-        .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; }
+        body { font-family: 'Inter', sans-serif; background: #050b14; color: white; overflow: hidden; }
+        .split-left { background: linear-gradient(45deg, #2563eb, #7c3aed); }
+        .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; color: white; outline: none; }
+        .input-box:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.3); }
+        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        .tab-inactive { color: #64748b; }
+        @media (max-width: 1024px) { .split-left { height: 25vh; } .split-right { height: 75vh; border-radius: 40px 40px 0 0; margin-top: -40px; background: #0b1121; } }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center p-6 bg-[#050b14]">
-    <div class="w-full max-w-md bg-[#0b1121] p-8 rounded-[32px] border border-slate-800 shadow-2xl">
-        <div class="text-center mb-10">
-            <h1 class="text-3xl font-black italic">AURA <span class="text-blue-500">DIGITAL</span></h1>
-        </div>
+<body class="h-screen w-full flex flex-col lg:flex-row">
 
-        <div class="flex gap-6 mb-8 border-b border-slate-800">
-            <button id="loginTab" onclick="switchTab('login')" class="pb-2 font-bold tab-active">Login</button>
-            <button id="regTab" onclick="switchTab('reg')" class="pb-2 font-bold text-slate-500">Register</button>
+    <div class="split-left w-full lg:w-1/2 flex flex-col justify-center p-12 relative overflow-hidden">
+        <div class="relative z-10 text-center lg:text-left">
+            <h1 class="text-4xl lg:text-6xl font-black mb-2 tracking-tighter">AURA <span class="text-blue-200">DIGITAL</span></h1>
+            <p class="text-blue-100 font-medium opacity-80">Premium Marketplace Access.</p>
         </div>
+    </div>
 
-        <div id="loginSection" class="space-y-4">
-            <input type="email" id="lEmail" placeholder="Email" class="input-box w-full p-4 rounded-2xl font-bold">
-            <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-2xl font-bold">
-            <button onclick="handleLogin()" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest mt-4">Login</button>
-        </div>
-
-        <div id="regSection" class="hidden space-y-4">
-            <input type="text" id="rName" placeholder="Full Name" class="input-box w-full p-4 rounded-2xl font-bold">
-            <input type="email" id="rEmail" placeholder="Email" class="input-box w-full p-4 rounded-2xl font-bold">
-            <input type="password" id="rPass" placeholder="Password" class="input-box w-full p-4 rounded-2xl font-bold">
-            <div class="grid grid-cols-2 gap-2">
-                <select id="rCountry" class="input-box p-4 rounded-2xl font-bold text-slate-400"><option value="BD">BD</option><option value="IN">IN</option></select>
-                <input type="text" id="rRef" placeholder="Ref Code" class="input-box p-4 rounded-2xl font-bold">
+    <div class="split-right w-full lg:w-1/2 flex justify-center items-start lg:items-center p-8 z-10 bg-[#0b1121] overflow-y-auto">
+        <div class="w-full max-w-md mt-6 lg:mt-0">
+            
+            <div class="flex gap-6 mb-8 border-b border-slate-800">
+                <button id="loginTab" onclick="switchTab('login')" class="pb-2 font-bold tab-active">Login</button>
+                <button id="regTab" onclick="switchTab('reg')" class="pb-2 font-bold tab-inactive">Register</button>
             </div>
-            <button onclick="handleRegister()" class="w-full bg-slate-100 text-black py-4 rounded-2xl font-black uppercase tracking-widest mt-4">Create Account</button>
+
+            <div id="loginSection" class="space-y-4">
+                <h2 class="text-2xl font-bold mb-4">Welcome Back</h2>
+                <input type="email" id="lEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 py-4 rounded-xl font-black tracking-widest uppercase hover:bg-blue-500 transition-colors">Enter Vault</button>
+            </div>
+
+            <div id="regSection" class="hidden space-y-4">
+                <h2 class="text-2xl font-bold mb-4">Create Account</h2>
+                <input type="text" id="rName" placeholder="Full Name" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="email" id="rEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="password" id="rPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="rCountry" class="input-box p-4 rounded-xl font-bold text-slate-400">
+                        <option value="BD">Bangladesh</option><option value="IN">India</option>
+                    </select>
+                    <input type="text" id="rRef" placeholder="Referral Code (Opt)" class="input-box p-4 rounded-xl font-bold uppercase text-emerald-400">
+                </div>
+                <button onclick="handleRegister()" class="w-full bg-slate-100 text-slate-900 hover:bg-white py-4 rounded-xl font-black tracking-widest uppercase transition-colors">Sign Up</button>
+            </div>
+
         </div>
     </div>
 
     <script>
         function switchTab(t) {
-            document.getElementById('loginSection').classList.toggle('hidden', t === 'reg');
-            document.getElementById('regSection').classList.toggle('hidden', t === 'login');
-            document.getElementById('loginTab').className = t === 'login' ? 'pb-2 font-bold tab-active' : 'pb-2 font-bold text-slate-500';
-            document.getElementById('regTab').className = t === 'reg' ? 'pb-2 font-bold tab-active' : 'pb-2 font-bold text-slate-500';
+            if(t === 'login') {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('regSection').classList.add('hidden');
+                document.getElementById('loginTab').className = 'pb-2 font-bold tab-active';
+                document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive';
+            } else {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('regSection').classList.remove('hidden');
+                document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive';
+                document.getElementById('regTab').className = 'pb-2 font-bold tab-active';
+            }
         }
 
         async function handleLogin() {
             const email = document.getElementById('lEmail').value;
             const password = document.getElementById('lPass').value;
+            if(!email || !password) return;
             const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email, password}) });
             const data = await res.json();
             if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); location.href = '/'; }
-            else Swal.fire('Error', 'Login failed', 'error');
+            else Swal.fire('Error', data.error || 'Invalid credentials', 'error');
         }
 
         async function handleRegister() {
@@ -66,10 +90,16 @@
             const password = document.getElementById('rPass').value;
             const country = document.getElementById('rCountry').value;
             const refCode = document.getElementById('rRef').value;
+            if(!name || !email || !password) return;
+            
             const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password, country, refCode}) });
             const data = await res.json();
-            if(data.success) { Swal.fire('Success', 'Account Created! Please Login.', 'success'); switchTab('login'); }
-            else Swal.fire('Error', data.error || 'Failed', 'error');
+            if(data.success) { 
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); // Celebration!
+                Swal.fire('Success', 'Account Created! Please Login.', 'success'); 
+                switchTab('login'); 
+            }
+            else Swal.fire('Error', data.error || 'Registration failed', 'error');
         }
     </script>
 </body>
