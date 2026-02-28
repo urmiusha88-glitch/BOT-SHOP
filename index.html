@@ -26,11 +26,9 @@
         .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
         .prof-tab.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
-        
         .badge-admin { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
         .badge-vip { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
         .badge-basic { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid #64748b; }
-        
         .theme-bkash { background: linear-gradient(135deg, #e2136e, #b30b54); }
         .theme-nagad { background: linear-gradient(135deg, #f37021, #d65b15); }
         .theme-rocket { background: linear-gradient(135deg, #8c1596, #6b0c73); }
@@ -41,6 +39,11 @@
 </head>
 <body>
     <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
+
+    <div class="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 bg-slate-800/90 backdrop-blur-md border border-slate-700 px-4 py-2 rounded-full shadow-lg text-xs font-bold text-slate-300 flex items-center gap-2">
+        <span class="flex h-3 w-3 relative"><span class="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative rounded-full h-3 w-3 bg-emerald-500"></span></span>
+        <span id="vCount" class="text-white font-black">24</span> viewing now
+    </div>
 
     <nav class="glass sticky top-0 z-50 w-full h-16 sm:h-20 flex items-center px-4">
         <div class="max-w-7xl mx-auto w-full flex justify-between items-center">
@@ -54,12 +57,22 @@
 
     <div class="pt-16 pb-12 text-center relative z-10 px-4">
         <div id="vipBanner" class="hidden max-w-md mx-auto bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 font-black py-2 px-4 rounded-full mb-6 text-xs animate-pulse">👑 VIP ACTIVE: ALL ITEMS ARE FREE!</div>
-        <h1 class="text-5xl sm:text-7xl font-black mb-6 tracking-tight">Premium <span class="text-blue-500">Source</span> Codes</h1>
+        <h1 class="text-4xl sm:text-7xl font-black mb-6 tracking-tight">Premium <span class="text-blue-500">Source</span> Codes</h1>
         <div class="max-w-xl mx-auto"><input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search bots, scripts..." class="w-full bg-slate-800/50 border border-slate-700 rounded-full px-6 py-4 outline-none focus:border-blue-500 font-bold shadow-lg"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32" id="product-list">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10" id="product-list">
         <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
+        <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
+        <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 py-10 relative z-10 border-t border-slate-800 pb-32">
+        <div class="flex flex-wrap justify-center gap-8 text-center">
+            <div class="flex flex-col items-center max-w-[150px]"><div class="w-16 h-16 rounded-full bg-blue-900/30 text-blue-500 flex justify-center items-center text-2xl mb-3 shadow-inner"><i class="fa-solid fa-bolt"></i></div><h4 class="font-black text-white text-sm">Instant Delivery</h4><p class="text-xs text-slate-500 mt-1">Files sent to your Vault</p></div>
+            <div class="flex flex-col items-center max-w-[150px]"><div class="w-16 h-16 rounded-full bg-emerald-900/30 text-emerald-500 flex justify-center items-center text-2xl mb-3 shadow-inner"><i class="fa-solid fa-shield-halved"></i></div><h4 class="font-black text-white text-sm">100% Secure</h4><p class="text-xs text-slate-500 mt-1">Verified safe transaction</p></div>
+            <div class="flex flex-col items-center max-w-[150px]"><div class="w-16 h-16 rounded-full bg-purple-900/30 text-purple-500 flex justify-center items-center text-2xl mb-3 shadow-inner"><i class="fa-solid fa-headset"></i></div><h4 class="font-black text-white text-sm">Priority Support</h4><p class="text-xs text-slate-500 mt-1">Direct via Telegram</p></div>
+        </div>
     </div>
 
     <div class="md:hidden fixed bottom-0 left-0 w-full bg-[#0b1121] border-t border-slate-800 h-16 flex justify-around items-center z-50" id="mobileBottomNav"></div>
@@ -77,7 +90,7 @@
     <div id="profileModal" class="fixed inset-0 bg-black/80 hidden z-[80] justify-center items-center px-4 backdrop-blur-sm">
         <div class="bg-slate-900 rounded-[32px] w-full max-w-2xl max-h-[90vh] flex flex-col relative border border-slate-800 shadow-2xl overflow-hidden">
             <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
-                <h2 class="text-2xl font-black"><i class="fa-solid fa-user-astronaut text-blue-500 mr-2"></i> User Dashboard</h2>
+                <h2 class="text-2xl font-black"><i class="fa-solid fa-user-astronaut text-blue-500 mr-2"></i> Dashboard</h2>
                 <button onclick="closeProfile()" class="w-10 h-10 bg-slate-700 hover:bg-red-500 text-white rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
@@ -95,12 +108,10 @@
                         <h3 class="text-3xl font-black flex items-center justify-center gap-2" id="pNameContainer"></h3>
                         <p class="text-slate-400 font-bold" id="pEmail">Email</p>
                     </div>
-                    
                     <div class="bg-slate-800 p-5 rounded-2xl text-left border border-slate-700 flex justify-between items-center">
                         <div><p class="text-xs text-slate-400 font-bold uppercase mb-1">Referral Code</p><p class="text-2xl font-mono font-black text-emerald-400" id="pRef">---</p></div>
-                        <div class="text-right"><span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full">Earn $2.00 / Ref</span></div>
+                        <div class="text-right"><span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Earn $2.00 / Ref</span></div>
                     </div>
-                    
                     <div class="bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-yellow-500/30 p-5 rounded-2xl text-left relative overflow-hidden">
                         <i class="fa-solid fa-crown absolute -bottom-4 -right-4 text-7xl text-yellow-500/10"></i>
                         <h4 class="font-black text-yellow-500 mb-1 text-lg"><i class="fa-solid fa-star"></i> VIP Membership</h4>
@@ -109,10 +120,8 @@
                     </div>
                     <button onclick="window.logout()" class="text-red-500 font-bold hover:underline"><i class="fa-solid fa-right-from-bracket"></i> Secure Logout</button>
                 </div>
-
                 <div id="sec-orders" class="hidden space-y-4 animate-[fadeIn_0.3s]"><div id="pOrdersList"></div></div>
                 <div id="sec-funds" class="hidden space-y-4 animate-[fadeIn_0.3s]"><div id="pFundsList"></div></div>
-                
                 <div id="sec-settings" class="hidden space-y-5 animate-[fadeIn_0.3s] text-left">
                     <h3 class="font-black text-xl mb-4">Edit Profile</h3>
                     <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Avatar Image URL</label><input type="text" id="setAvatar" placeholder="https://example.com/photo.jpg" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500"><button onclick="removeAvatar()" class="text-xs text-red-500 mt-2 font-bold hover:underline">Remove Picture</button></div>
@@ -130,7 +139,6 @@
                 <h2 class="text-2xl font-black flex items-center gap-2"><i id="fundIcon" class="fa-solid fa-wallet"></i> <span id="fundTitle">Add Fund</span></h2>
                 <button onclick="closeFund()" class="w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
             <form id="depositForm" class="p-6 space-y-5 bg-slate-900">
                 <div>
                     <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Select Method</label>
@@ -140,12 +148,10 @@
                         <label class="cursor-pointer"><input type="radio" name="method" value="rocket" class="peer sr-only" onchange="updateFundUI()"><div class="py-3 text-center border-2 border-slate-700 rounded-xl font-black text-slate-500 peer-checked:border-rocket transition-all text-xs uppercase tracking-widest">Rocket</div></label>
                     </div>
                 </div>
-
                 <div class="flex gap-4">
                     <div class="flex-1"><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Add (USD)</label><input type="number" step="0.01" id="fUsd" oninput="calcBDT()" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500" placeholder="$0.00"></div>
                     <div class="flex-1"><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pay (BDT)</label><input type="text" id="fBdt" disabled class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl text-white" value="0"></div>
                 </div>
-
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
                     <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Send Money To:</p>
                     <div onclick="copyNumber()" class="bg-slate-900 border border-slate-700 px-4 py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors group">
@@ -154,7 +160,6 @@
                     </div>
                     <p class="text-xs text-slate-500 font-bold mt-3 text-center">Send exactly <b id="fBdtTxt" class="text-white">0</b> BDT to the number above.</p>
                 </div>
-
                 <div class="space-y-3">
                     <input type="text" id="fSender" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500" placeholder="Sender Number">
                     <input type="text" id="fTrx" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black uppercase tracking-widest outline-none focus:border-blue-500" placeholder="TrxID">
@@ -188,6 +193,7 @@
                 } catch(e) {}
             }
             loadProducts();
+            setInterval(() => { document.getElementById('vCount').innerText = Math.floor(Math.random()*40)+15; }, 5000);
         }
 
         function renderAuth() {
@@ -203,9 +209,10 @@
                         <span class="mr-2 pr-2 border-r border-slate-600 text-sm flex items-center">${user.firstName} ${getBadge(user.role, user.isVip)}</span>
                         <span class="text-blue-400">$${bal}</span>
                     </div>
-                    <button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-neon mr-2"><i class="fa-solid fa-cart-shopping"></i></button>
-                    <button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700 overflow-hidden">${avHtml}</button>
+                    <button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-neon mr-2 hover:bg-blue-500 transition-colors"><i class="fa-solid fa-cart-shopping"></i></button>
+                    <button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700 overflow-hidden hover:bg-slate-700 transition-colors">${avHtml}</button>
                 `;
+                
                 mobNav.innerHTML = `
                     <button onclick="location.reload()" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px] mt-1 font-bold">Home</span></button>
                     <button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center hover:text-blue-400"><i class="fa-solid fa-cart-shopping text-xl"></i><span class="text-[10px] mt-1 font-bold">Cart</span></button>
@@ -213,24 +220,18 @@
                     <button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center hover:text-white"><div class="w-6 h-6 bg-slate-800 rounded-full overflow-hidden border border-slate-600 flex justify-center items-center">${avHtml}</div><span class="text-[10px] mt-1 font-bold">Profile</span></button>
                 `;
             } else {
-                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-neon">Login</button>`;
-                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-neon">Login / Register</button>`;
+                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-neon hover:bg-blue-500 transition-colors">Login</button>`;
+                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-neon hover:bg-blue-500 transition-colors">Login / Register</button>`;
             }
         }
 
-        // 🔥 FIXED: Product Loading UI Crash Protection
         async function loadProducts() {
             try { 
                 const res = await fetch('/api/products'); 
                 const data = await res.json();
-                if(Array.isArray(data)) {
-                    allProducts = data;
-                    renderProducts(allProducts); 
-                } else {
-                    document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-500 font-bold py-10">⚠️ System is under maintenance or offline.</div>';
-                }
-            } 
-            catch(e) { document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-400 font-bold py-10">Error loading products.</div>'; }
+                if(Array.isArray(data)) { allProducts = data; renderProducts(allProducts); } 
+                else { document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10">Products currently unavailable.</div>'; }
+            } catch(e) { document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-400 font-bold py-10">Error loading products.</div>'; }
         }
 
         function renderProducts(list) {
@@ -238,14 +239,26 @@
             if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10">No products found.</div>';
             container.innerHTML = list.map(p => {
                 let pPrice = user?.isVip ? 'FREE' : `$${p.price}`;
-                return `<div class="product-card p-6 flex flex-col justify-between"><div><div class="w-full h-48 bg-slate-800 rounded-2xl mb-4 flex items-center justify-center overflow-hidden relative">${p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-code text-5xl text-slate-700"></i>`}<div class="absolute top-2 right-2 bg-black/60 backdrop-blur px-2 py-1 rounded border border-white/10 text-yellow-400 text-[10px] font-black">★ ${p.rating}</div></div><h3 class="text-2xl font-black mb-2">${p.name}</h3><p class="text-slate-400 text-xs mb-4 line-clamp-2">${p.abilities}</p><p class="text-3xl font-black text-blue-500 mb-6">${pPrice}</p></div><button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-slate-800 hover:bg-blue-600 py-4 rounded-2xl font-black uppercase text-xs transition-colors"><i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart</button></div>`;
+                return `
+                <div class="product-card p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="w-full h-48 bg-slate-800 rounded-2xl mb-4 flex items-center justify-center overflow-hidden relative">
+                            ${p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-code text-5xl text-slate-700"></i>`}
+                            <div class="absolute top-2 right-2 bg-black/60 backdrop-blur px-2 py-1 rounded border border-white/10 text-yellow-400 text-[10px] font-black">★ ${p.rating}</div>
+                        </div>
+                        <h3 class="text-2xl font-black mb-2">${p.name}</h3>
+                        <p class="text-slate-400 text-xs mb-4 line-clamp-2">${p.abilities}</p>
+                        <p class="text-3xl font-black text-blue-500 mb-6">${pPrice}</p>
+                    </div>
+                    <button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-slate-800 hover:bg-blue-600 py-4 rounded-2xl font-black uppercase text-xs transition-colors"><i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart</button>
+                </div>`;
             }).join('');
         }
 
         function filterProducts() { const q = document.getElementById('searchInput').value.toLowerCase(); renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q))); }
 
         function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
-        function addToCart(id, name, price) { if(!user) return location.href='/login'; cart.push({id, name, price: parseFloat(price)}); renderCart(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Added', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'}); }
+        function addToCart(id, name, price) { if(!user) return location.href='/login'; cart.push({id, name, price: parseFloat(price)}); renderCart(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Added to Cart', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'}); }
         function removeFromCart(index) { cart.splice(index, 1); renderCart(); }
         
         function renderCart() {
