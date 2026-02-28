@@ -27,12 +27,10 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
         .prof-tab.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
         
-        /* 🔥 GLOWING BADGES */
         .badge-admin { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
         .badge-vip { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
-        .badge-basic { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid #64748b; box-shadow: 0 0 10px rgba(100, 116, 139, 0.3); }
-
-        /* 🔥 DYNAMIC GATEWAY THEMES */
+        .badge-basic { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid #64748b; }
+        
         .theme-bkash { background: linear-gradient(135deg, #e2136e, #b30b54); }
         .theme-nagad { background: linear-gradient(135deg, #f37021, #d65b15); }
         .theme-rocket { background: linear-gradient(135deg, #8c1596, #6b0c73); }
@@ -107,7 +105,7 @@
                         <i class="fa-solid fa-crown absolute -bottom-4 -right-4 text-7xl text-yellow-500/10"></i>
                         <h4 class="font-black text-yellow-500 mb-1 text-lg"><i class="fa-solid fa-star"></i> VIP Membership</h4>
                         <p class="text-sm text-yellow-500/70 mb-4 font-medium">Claim all store items for $0.00!</p>
-                        <button onclick="buyVip()" id="pBtnVip" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl uppercase tracking-widest shadow-lg">Upgrade - $30</button>
+                        <button onclick="buyVip()" id="pBtnVip" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl uppercase tracking-widest shadow-lg transition-colors">Upgrade - $30</button>
                     </div>
                     <button onclick="window.logout()" class="text-red-500 font-bold hover:underline"><i class="fa-solid fa-right-from-bracket"></i> Secure Logout</button>
                 </div>
@@ -117,19 +115,9 @@
                 
                 <div id="sec-settings" class="hidden space-y-5 animate-[fadeIn_0.3s] text-left">
                     <h3 class="font-black text-xl mb-4">Edit Profile</h3>
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Profile Picture (Image URL)</label>
-                        <input type="text" id="setAvatar" placeholder="https://example.com/photo.jpg" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500">
-                        <button onclick="removeAvatar()" class="text-xs text-red-500 mt-2 font-bold hover:underline">Remove Picture</button>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Change Email</label>
-                        <input type="email" id="setEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Change Password</label>
-                        <input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500">
-                    </div>
+                    <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Avatar Image URL</label><input type="text" id="setAvatar" placeholder="https://example.com/photo.jpg" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500"><button onclick="removeAvatar()" class="text-xs text-red-500 mt-2 font-bold hover:underline">Remove Picture</button></div>
+                    <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email</label><input type="email" id="setEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500"></div>
+                    <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Password</label><input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500"></div>
                     <button onclick="saveSettings()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest transition-colors mt-4">Save Changes</button>
                 </div>
             </div>
@@ -154,14 +142,8 @@
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Add (USD)</label>
-                        <input type="number" step="0.01" id="fUsd" oninput="calcBDT()" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500" placeholder="$0.00">
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pay (BDT)</label>
-                        <input type="text" id="fBdt" disabled class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl text-white" value="0">
-                    </div>
+                    <div class="flex-1"><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Add (USD)</label><input type="number" step="0.01" id="fUsd" oninput="calcBDT()" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500" placeholder="$0.00"></div>
+                    <div class="flex-1"><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pay (BDT)</label><input type="text" id="fBdt" disabled class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl text-white" value="0"></div>
                 </div>
 
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
@@ -183,7 +165,8 @@
     </div>
 
     <script>
-        let user = JSON.parse(localStorage.getItem('user'));
+        let user = null; 
+        try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){}
         let allProducts = []; let cart = []; let activePromo = 0; let activePromoCode = ''; let currentRate = 120;
 
         function getBadge(role, isVip) {
@@ -193,9 +176,10 @@
         }
 
         async function init() {
-            renderAuth(); 
+            try { renderAuth(); } catch(e){} 
             try { const r = await fetch('/api/rate'); const d = await r.json(); currentRate = d.rates?.BDT || 120; } catch(e){}
-            if(user) {
+            
+            if(user && user.id) {
                 try {
                     const res = await fetch('/api/user/' + user.id);
                     const data = await res.json();
@@ -224,9 +208,9 @@
                 `;
                 mobNav.innerHTML = `
                     <button onclick="location.reload()" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px] mt-1 font-bold">Home</span></button>
-                    <button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center"><i class="fa-solid fa-cart-shopping text-xl"></i><span class="text-[10px] mt-1 font-bold">Cart</span></button>
-                    <button onclick="openFund()" class="text-emerald-400 flex flex-col items-center"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1 font-bold">$${bal}</span></button>
-                    <button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center"><div class="w-6 h-6 bg-slate-800 rounded-full overflow-hidden border border-slate-600 flex justify-center items-center">${avHtml}</div><span class="text-[10px] mt-1 font-bold">Profile</span></button>
+                    <button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center hover:text-blue-400"><i class="fa-solid fa-cart-shopping text-xl"></i><span class="text-[10px] mt-1 font-bold">Cart</span></button>
+                    <button onclick="openFund()" class="text-emerald-400 flex flex-col items-center hover:text-emerald-300"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1 font-bold">$${bal}</span></button>
+                    <button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center hover:text-white"><div class="w-6 h-6 bg-slate-800 rounded-full overflow-hidden border border-slate-600 flex justify-center items-center">${avHtml}</div><span class="text-[10px] mt-1 font-bold">Profile</span></button>
                 `;
             } else {
                 authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-neon">Login</button>`;
@@ -234,8 +218,18 @@
             }
         }
 
+        // 🔥 FIXED: Product Loading UI Crash Protection
         async function loadProducts() {
-            try { const res = await fetch('/api/products'); allProducts = await res.json(); renderProducts(allProducts); } 
+            try { 
+                const res = await fetch('/api/products'); 
+                const data = await res.json();
+                if(Array.isArray(data)) {
+                    allProducts = data;
+                    renderProducts(allProducts); 
+                } else {
+                    document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-500 font-bold py-10">⚠️ System is under maintenance or offline.</div>';
+                }
+            } 
             catch(e) { document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-400 font-bold py-10">Error loading products.</div>'; }
         }
 
@@ -287,8 +281,8 @@
             
             document.getElementById('profileModal').classList.replace('hidden', 'flex'); switchProfTab(defaultTab);
             
-            fetch('/api/library/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pOrdersList').innerHTML = data.length === 0 ? '<p class="text-center text-slate-500 py-10">Vault is empty.</p>' : data.map(p => `<div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 mb-3"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div><div><h4 class="font-bold text-sm">${p.product.name}</h4><p class="text-[10px] text-slate-400">Paid: $${p.pricePaid}</p></div></div><a href="${p.product.driveLink}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition-colors">Access</a></div>`).join(''); });
-            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = data.length === 0 ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 mb-3"><div><p class="font-black text-sm uppercase">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-400 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-400 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span></div>`; }).join(''); });
+            fetch('/api/library/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pOrdersList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">Vault is empty.</p>' : data.map(p => `<div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 mb-3"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div><div><h4 class="font-bold text-sm">${p.product.name}</h4><p class="text-[10px] text-slate-400">Paid: $${p.pricePaid}</p></div></div><a href="${p.product.driveLink}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition-colors">Access</a></div>`).join(''); });
+            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 mb-3"><div><p class="font-black text-sm uppercase">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-400 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-400 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span></div>`; }).join(''); });
         }
         function closeProfile() { document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
         function switchProfTab(tab) { document.querySelectorAll('.prof-tab').forEach(b => { b.classList.remove('active', 'text-blue-500'); b.classList.add('text-slate-500'); }); document.getElementById('tab-'+tab).classList.add('active', 'text-blue-500'); document.getElementById('tab-'+tab).classList.remove('text-slate-500'); document.getElementById('sec-overview').classList.add('hidden'); document.getElementById('sec-orders').classList.add('hidden'); document.getElementById('sec-funds').classList.add('hidden'); document.getElementById('sec-settings').classList.add('hidden'); document.getElementById('sec-'+tab).classList.remove('hidden'); }
