@@ -3,270 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA STORE | Premium Source Codes</title>
+    <title>AURA STORE | Premium Codes</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, boxShadow: { 'neon': '0 0 20px rgba(59, 130, 246, 0.5)' } } } }</script>
     <style>
-        body { -webkit-font-smoothing: antialiased; padding-bottom: 80px; } @media (min-width: 768px) { body { padding-bottom: 0; } }
-        .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
-        .blob { position: absolute; filter: blur(90px); opacity: 0.4; animation: float 20s infinite ease-in-out alternate; }
-        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; } .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: #8b5cf6; animation-delay: -5s; }
-        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-50px, -50px) scale(0.9); } }
-        .dark .blob { opacity: 0.15; }
-        .glass-effect { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.3); } .dark .glass-effect { background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .product-card { transition: all 0.3s; border: 1px solid rgba(0,0,0,0.05); border-radius: 28px; background: rgba(255,255,255,0.9); } .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); }
-        .dark .product-card { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); } .dark .product-card:hover { box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2); }
-        .glow-btn { transition: all 0.3s; border-radius: 16px; } .glow-btn:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); transform: translateY(-2px); }
-        .modal-glass { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); } .dark .modal-glass { background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(59, 130, 246, 0.2); }
-        .drawer-open { transform: translateX(0%); } .drawer-closed { transform: translateX(100%); }
-        .filter-btn.active { background: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 0 15px rgba(37,99,235,0.4); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; } .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
-        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 12px; } .dark .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; } @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .toast-enter { animation: toastIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; } .toast-leave { animation: toastOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; } @keyframes toastIn { from { transform: translateX(-100%) scale(0.9); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } } @keyframes toastOut { from { transform: translateX(0) scale(1); opacity: 1; } to { transform: translateX(-100%) scale(0.9); opacity: 0; } }
-        .faq-ans { transition: max-height 0.3s ease-out, padding 0.3s ease; max-height: 0; overflow: hidden; padding: 0 1.5rem; } .faq-ans.open { max-height: 200px; padding: 1rem 1.5rem 1.5rem; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; padding-bottom: 80px; }
+        .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dark .glass-effect { background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .product-card { transition: all 0.3s; border-radius: 24px; background: white; border: 1px solid rgba(0,0,0,0.05); }
+        .dark .product-card { background: #1e293b; border-color: rgba(255,255,255,0.05); }
+        .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#0b1121] text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-[#0b1121] text-slate-800 dark:text-slate-200">
 
-    <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
-    <div id="noticeBanner" class="hidden bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 text-white text-sm font-bold py-2 overflow-hidden whitespace-nowrap relative z-50"><div class="inline-block animate-[marquee_15s_linear_infinite] w-full"><span id="noticeText" class="pl-[100%]"></span></div></div>
-
-    <div id="liveToastContainer" class="fixed bottom-24 md:bottom-8 left-4 md:left-8 z-[100] flex flex-col gap-3 pointer-events-none"></div>
-
-    <nav class="glass-effect sticky w-full z-40 top-0 transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 sm:h-20 items-center">
-                <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex justify-center items-center shadow-neon"><i class="fa-solid fa-bolt text-white text-xl sm:text-2xl"></i></div>
-                    <span class="font-black text-2xl sm:text-3xl tracking-tight dark:text-white">AURA<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-400">STORE</span></span>
+    <nav class="glass-effect sticky top-0 z-50 w-full h-16 sm:h-20 flex items-center">
+        <div class="max-w-7xl mx-auto px-4 w-full flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg text-white">
+                    <i class="fa-solid fa-bolt text-xl"></i>
                 </div>
-                <div class="hidden md:flex items-center space-x-3" id="desktopAuthSection"></div>
-                <div class="md:hidden flex items-center"><button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 flex justify-center items-center"><i id="themeIconMobile" class="fa-solid fa-moon"></i></button></div>
+                <span class="font-black text-2xl tracking-tighter dark:text-white">AURA<span class="text-blue-600">STORE</span></span>
             </div>
+            <div id="authSection" class="flex items-center gap-3">
+                </div>
         </div>
     </nav>
 
-    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center h-[72px] shadow-[0_-10px_30px_rgba(0,0,0,0.05)]" id="mobileBottomNav"></div>
-
-    <div class="hidden md:flex fixed bottom-28 right-8 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-full shadow-lg text-sm font-bold text-slate-600 dark:text-slate-300 items-center gap-2 transition-all">
-        <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span>
-        <span id="vCount" class="text-slate-900 dark:text-white font-black">24</span> viewing now
+    <div class="pt-12 pb-12 text-center px-4">
+        <h1 class="text-4xl sm:text-6xl font-black mb-4 dark:text-white">Elite Source Codes</h1>
+        <p class="text-slate-500 dark:text-slate-400 font-medium">Automatic delivery to your vault.</p>
     </div>
 
-    <div class="hidden md:flex fixed bottom-8 right-8 z-50 flex-col gap-4">
-        <a href="https://t.me/minato_namikaze143" target="_blank" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 w-14 h-14 rounded-full shadow-xl flex justify-center items-center text-2xl hover:scale-110 transition-transform"><i class="fa-brands fa-telegram"></i></a>
-        <button onclick="toggleCart()" class="bg-gradient-to-br from-blue-600 to-purple-600 text-white w-16 h-16 rounded-[24px] shadow-neon flex justify-center items-center text-2xl hover:scale-110 transition-transform relative">
-            <i class="fa-solid fa-cart-shopping"></i><span id="cartBadgeDesk" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-black w-7 h-7 rounded-full flex justify-center items-center border-[3px] border-white dark:border-[#0b1121] hidden shadow-sm">0</span>
-        </button>
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="product-list">
+        <p class="col-span-full text-center py-20 font-bold text-slate-400">Loading products...</p>
     </div>
 
-    <div class="pt-12 sm:pt-24 pb-8 sm:pb-12 text-center px-4 relative z-10">
-        <div id="vipBanner" class="hidden max-w-md mx-auto bg-gradient-to-r from-amber-200 to-yellow-400 text-slate-900 font-black py-2 px-4 rounded-full mb-6 text-sm shadow-lg border border-yellow-300 animate-pulse"><i class="fa-solid fa-crown mr-1"></i> VIP MODE ACTIVE: ALL ITEMS FREE!</div>
-        <h1 class="text-4xl sm:text-7xl font-black mb-4 sm:mb-6 text-slate-900 dark:text-white tracking-tight leading-tight">Elite <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-500 drop-shadow-sm">Source Codes</span></h1>
-        
-        <div class="max-w-2xl mx-auto px-2 sm:px-0 mt-8">
-            <div class="relative group mb-6">
-                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none"><i class="fa-solid fa-magnifying-glass text-slate-400"></i></div>
-                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search scripts..." class="w-full pl-12 pr-6 py-4 rounded-full border-2 border-slate-200 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md text-slate-800 dark:text-white focus:outline-none focus:border-blue-500 shadow-sm font-bold text-base sm:text-lg">
-            </div>
-            <div class="flex flex-wrap justify-center gap-2" id="filterContainer">
-                <button onclick="setFilter('all', this)" class="filter-btn active px-5 py-2 rounded-full font-bold border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur transition-all text-xs sm:text-sm uppercase tracking-wide text-slate-600 dark:text-slate-300">All</button>
-                <button onclick="setFilter('bot', this)" class="filter-btn px-5 py-2 rounded-full font-bold border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur transition-all text-xs sm:text-sm uppercase tracking-wide text-slate-600 dark:text-slate-300">Bots</button>
-                <button onclick="setFilter('script', this)" class="filter-btn px-5 py-2 rounded-full font-bold border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur transition-all text-xs sm:text-sm uppercase tracking-wide text-slate-600 dark:text-slate-300">Scripts</button>
-            </div>
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 h-16 flex justify-around items-center z-40" id="mobileBottomNav">
         </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 relative z-10">
-        <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
-            <div class="product-card p-5"><div class="skeleton w-full h-48 sm:h-56 mb-4"></div><div class="skeleton w-3/4 h-6 mb-4"></div><div class="skeleton w-1/3 h-8 mb-6"></div><div class="skeleton w-full h-12 rounded-[16px]"></div></div>
-            <div class="product-card p-5"><div class="skeleton w-full h-48 sm:h-56 mb-4"></div><div class="skeleton w-3/4 h-6 mb-4"></div><div class="skeleton w-1/3 h-8 mb-6"></div><div class="skeleton w-full h-12 rounded-[16px]"></div></div>
-        </div>
-    </div>
-
-    <div class="max-w-5xl mx-auto px-4 py-10 relative z-10 border-t border-slate-200 dark:border-slate-800 mt-10">
-        <div class="flex flex-wrap justify-center gap-8 text-center">
-            <div class="flex flex-col items-center max-w-[150px]"><div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex justify-center items-center text-2xl mb-3 shadow-inner"><i class="fa-solid fa-bolt"></i></div><h4 class="font-black dark:text-white text-sm">Instant Delivery</h4><p class="text-xs text-slate-500 mt-1">Codes auto-added to your Vault</p></div>
-            <div class="flex flex-col items-center max-w-[150px]"><div class="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex justify-center items-center text-2xl mb-3 shadow-inner"><i class="fa-solid fa-shield-halved"></i></div><h4 class="font-black dark:text-white text-sm">100% Secure</h4><p class="text-xs text-slate-500 mt-1">Verified safe transaction</p></div>
-            <div class="flex flex-col items-center max-w-[150px]"><div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex justify-center items-center text-2xl mb-3 shadow-inner"><i class="fa-solid fa-headset"></i></div><h4 class="font-black dark:text-white text-sm">Priority Support</h4><p class="text-xs text-slate-500 mt-1">Direct via Telegram</p></div>
-        </div>
-    </div>
-
-    <div class="max-w-3xl mx-auto px-4 py-10 relative z-10 pb-32">
-        <h2 class="text-3xl font-black text-center mb-8 dark:text-white">Frequently Asked Questions</h2>
-        <div class="space-y-4">
-            <div class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
-                <button onclick="toggleFaq(this)" class="w-full text-left p-5 font-bold flex justify-between items-center dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">How do I get my product? <i class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i></button>
-                <div class="faq-ans bg-slate-50 dark:bg-slate-900/50"><p class="text-sm text-slate-600 dark:text-slate-400">After successful payment, the file link is automatically added to your "Vault". Just click Access and download.</p></div>
-            </div>
-            <div class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
-                <button onclick="toggleFaq(this)" class="w-full text-left p-5 font-bold flex justify-between items-center dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">How does the Referral system work? <i class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i></button>
-                <div class="faq-ans bg-slate-50 dark:bg-slate-900/50"><p class="text-sm text-slate-600 dark:text-slate-400">Share your Referral code from the Profile section. If a new user signs up using your code, you instantly get a $2.00 bonus in your wallet!</p></div>
-            </div>
-            <div class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
-                <button onclick="toggleFaq(this)" class="w-full text-left p-5 font-bold flex justify-between items-center dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">What is VIP Membership? <i class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i></button>
-                <div class="faq-ans bg-slate-50 dark:bg-slate-900/50"><p class="text-sm text-slate-600 dark:text-slate-400">VIP costs $30 for 30 days. While active, you can claim EVERY single product in the store for $0 (Free).</p></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="cartOverlay" class="fixed inset-0 bg-black/60 z-[60] hidden opacity-0 transition-opacity backdrop-blur-sm" onclick="toggleCart()"></div>
-    <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full sm:w-[420px] modal-glass z-[70] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl border-l border-white/20 dark:border-slate-700/50 sm:rounded-l-[32px]">
-        <div class="p-6 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50"><h2 class="text-2xl font-black dark:text-white tracking-tight"><i class="fa-solid fa-cart-shopping text-blue-500 mr-2"></i> Cart</h2><button onclick="toggleCart()" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></div>
-        <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
-        <div class="p-6 border-t border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-900 pb-12 sm:pb-8">
-            <div class="flex gap-2 mb-4"><input type="text" id="promoInput" placeholder="Promo Code" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 font-bold text-sm outline-none focus:border-blue-500 uppercase"><button onclick="applyPromo()" class="bg-slate-900 dark:bg-slate-700 text-white font-bold px-4 py-3 rounded-xl text-xs uppercase tracking-widest hover:bg-blue-600 transition-colors">Apply</button></div>
-            <div class="flex justify-between items-center mb-5 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700"><span class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-widest">Total</span><div class="text-right"><span id="cartOldTotal" class="text-sm font-bold text-slate-400 line-through hidden mr-2"></span><span id="cartTotal" class="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-400">$0.00</span></div></div>
-            <button onclick="checkoutCart()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black py-4 rounded-[16px] glow-btn text-base sm:text-lg tracking-widest uppercase">Checkout <i class="fa-solid fa-lock ml-2"></i></button>
-        </div>
-    </div>
-
-    <div id="profileModal" class="fixed inset-0 bg-black/70 hidden z-[60] justify-center items-center px-4 backdrop-blur-md">
-        <div class="modal-glass rounded-[32px] w-full max-w-md shadow-neon p-6 sm:p-8 transform transition-all border border-slate-200 dark:border-slate-700 mt-10 sm:mt-0 text-center relative overflow-hidden">
-            <button onclick="closeProfile()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-red-500 z-10"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto flex justify-center items-center text-4xl text-white font-black mb-4 shadow-lg relative z-10" id="profAvatar">U</div>
-            <h3 class="font-black text-3xl dark:text-white tracking-tight mb-1 relative z-10" id="profName">Name</h3>
-            <p class="text-slate-500 font-bold mb-6 relative z-10" id="profEmail">Email</p>
-
-            <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl mb-4 border border-slate-200 dark:border-slate-700 text-left relative z-10">
-                <p class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Your Referral Code</p>
-                <div class="flex justify-between items-center"><span class="font-mono text-xl font-black text-blue-600 dark:text-blue-400" id="profRefCode">---</span><span class="text-xs font-bold text-emerald-500 bg-emerald-100 dark:bg-emerald-500/10 px-2 py-1 rounded">Earn $2.00</span></div>
-            </div>
-            <div class="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-yellow-900/40 dark:to-amber-900/40 p-5 rounded-2xl border border-yellow-300 dark:border-yellow-700/50 mb-6 text-left relative overflow-hidden z-10">
-                <i class="fa-solid fa-crown absolute -bottom-4 -right-4 text-7xl text-yellow-500/20"></i>
-                <h4 class="font-black text-yellow-700 dark:text-yellow-500 text-lg mb-1"><i class="fa-solid fa-star mr-1"></i> VIP Membership</h4>
-                <p class="text-xs text-yellow-600 dark:text-yellow-600/80 font-bold mb-4">Claim ALL products for FREE!</p>
-                <button onclick="buyVip()" id="vipBtn" class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-2.5 px-6 rounded-xl text-sm uppercase tracking-widest shadow-md transition-colors w-full relative z-10">Buy 30 Days - $30</button>
-            </div>
-            <button onclick="window.logout()" class="text-red-500 font-bold text-sm hover:underline relative z-10"><i class="fa-solid fa-right-from-bracket mr-1"></i> Secure Logout</button>
-        </div>
-    </div>
-
-    <div id="libraryModal" class="fixed inset-0 bg-black/70 hidden z-[60] justify-center items-center px-4 backdrop-blur-md"><div class="modal-glass rounded-[32px] w-full max-w-3xl shadow-neon p-6 sm:p-10 transform transition-all border border-slate-200 dark:border-slate-700 max-h-[85vh] flex flex-col mt-10 sm:mt-0"><div class="flex justify-between items-center mb-6 border-b border-slate-200 dark:border-slate-700 pb-5"><h3 class="font-black text-2xl sm:text-4xl dark:text-white tracking-tight"><i class="fa-solid fa-layer-group text-purple-500 mr-3"></i>My Vault</h3><button onclick="closeLibrary()" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="overflow-y-auto pr-2 flex-1 space-y-4 custom-scrollbar" id="libraryList"></div></div></div>
-    <div id="historyModal" class="fixed inset-0 bg-black/70 hidden z-[60] justify-center items-center px-4 backdrop-blur-md"><div class="modal-glass rounded-[32px] w-full max-w-xl shadow-neon p-6 sm:p-10 transform transition-all border border-slate-200 dark:border-slate-700 mt-10 sm:mt-0"><div class="flex justify-between items-center mb-6 pb-5 border-b border-slate-200 dark:border-slate-700"><h3 class="font-black text-2xl sm:text-3xl dark:text-white tracking-tight"><i class="fa-solid fa-clock-rotate-left text-blue-500 mr-2"></i>History</h3><button onclick="closeHistory()" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="max-h-[60vh] sm:max-h-80 overflow-y-auto space-y-3 pr-2 custom-scrollbar" id="historyList"></div></div></div>
-    <div id="modalOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[60] flex justify-center items-center px-4 transition-all duration-300 opacity-0 pointer-events-none"><div id="addFundModal" class="modal-glass rounded-[40px] w-full max-w-md transition-all duration-300 transform scale-95 overflow-hidden border border-white/20 dark:border-slate-700 shadow-[0_0_60px_rgba(0,0,0,0.5)] mt-10 sm:mt-0"><div id="modalHeader" class="p-6 sm:p-8 flex justify-between items-center text-white transition-all duration-500 shadow-md"><h3 class="font-black text-2xl tracking-wide"><i class="fa-solid fa-wallet mr-2"></i> Top Up</h3><button onclick="closeModal()" class="w-8 h-8 rounded-full bg-white/20 flex justify-center items-center text-white hover:bg-white hover:text-black transition-all"><i class="fa-solid fa-xmark"></i></button></div><form id="depositForm" class="p-6 sm:p-8 space-y-5"><div><label class="block font-black text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest text-[10px]">Method</label><div id="gatewayOptions" class="grid grid-cols-3 gap-2"></div></div><div class="flex gap-4"><div class="flex-1"><label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Add (USD)</label><input type="number" step="0.01" id="usdAmount" oninput="calcLocal()" required class="block w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900/50 dark:text-white font-black text-xl outline-none focus:border-blue-500"></div><div class="flex-1"><label id="localCurrencyLabel" class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Equivalent</label><input type="text" id="localAmount" disabled class="block w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800 font-black text-xl text-blue-600 dark:text-blue-400" value="0"></div></div><div id="instructionBox" class="p-5 rounded-2xl text-sm border shadow-sm"><p class="font-black mb-2 text-sm"><i class="fa-solid fa-circle-info mr-1"></i> Send to <span class="gateway-name"></span>:</p><b id="gatewayNumberContainer" class="gateway-number text-base px-4 py-2 rounded-xl flex justify-between items-center mt-2 shadow-inner border font-mono tracking-wider cursor-pointer transition-colors"></b><p class="font-bold mt-2 text-slate-600 dark:text-slate-400">Amount: <b id="insAmount" class="text-lg text-slate-900 dark:text-white">0</b> <span class="localCodeText text-[10px] uppercase"></span></p></div><div class="space-y-3"><input type="text" id="senderNumber" required class="block w-full px-5 py-3.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900/50 dark:text-white font-bold outline-none focus:border-blue-500 text-sm" placeholder="Your Phone Number"><input type="text" id="trxId" required class="block w-full px-5 py-3.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900/50 dark:text-white uppercase font-black tracking-widest outline-none focus:border-blue-500 text-sm" placeholder="TrxID"></div><button type="submit" id="submitBtn" class="w-full font-black py-4 rounded-xl shadow-neon text-sm sm:text-base text-white transform active:scale-95 transition-all glow-btn uppercase tracking-widest border border-white/20 mt-2">Confirm Request</button></form></div></div>
 
     <script>
-        window.logout = function() { localStorage.removeItem('user'); sessionStorage.removeItem('user'); window.location.href = '/'; };
-        let currentUser = null; try { const stored = localStorage.getItem('user'); if(stored) currentUser = JSON.parse(stored); } catch(e) { localStorage.removeItem('user'); }
-        let cart = JSON.parse(localStorage.getItem('cart')) || []; let liveRates = {}; let allProducts = []; let currentFilter = 'all'; let ownedProductIds = []; let activePromo = 0; let activePromoCode = '';
-        const currMap = { 'BD': { code: 'BDT', symbol: '৳' }, 'IN': { code: 'INR', symbol: '₹' }, 'PK': { code: 'PKR', symbol: '₨' }, 'US': { code: 'USD', symbol: '$' } };
-
-        if(localStorage.getItem('theme') === 'dark') { document.documentElement.classList.add('dark'); document.getElementById('themeIconMobile').classList.replace('fa-moon', 'fa-sun'); document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun'); }
-        function toggleDarkMode() { const html = document.documentElement; const icM = document.getElementById('themeIconMobile'); const icD = document.getElementById('themeIcon'); if(html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); if(icM) icM.classList.replace('fa-sun', 'fa-moon'); if(icD) icD.classList.replace('fa-sun', 'fa-moon'); } else { html.classList.add('dark'); localStorage.setItem('theme', 'dark'); if(icM) icM.classList.replace('fa-moon', 'fa-sun'); if(icD) icD.classList.replace('fa-moon', 'fa-sun'); } }
-        function toggleFaq(btn) { const ans = btn.nextElementSibling; const icon = btn.querySelector('i'); if (ans.classList.contains('open')) { ans.classList.remove('open'); icon.style.transform = 'rotate(0deg)'; } else { document.querySelectorAll('.faq-ans').forEach(a => a.classList.remove('open')); document.querySelectorAll('.fa-chevron-down').forEach(i => i.style.transform = 'rotate(0deg)'); ans.classList.add('open'); icon.style.transform = 'rotate(180deg)'; } }
+        let currentUser = null;
+        try { 
+            const stored = localStorage.getItem('user');
+            if(stored) currentUser = JSON.parse(stored);
+        } catch(e) { console.log("User parse error"); }
 
         async function init() {
-            try { const res = await fetch('/api/rate'); const data = await res.json(); liveRates = data.rates || {}; } catch(e) { console.log('Rates unavailable'); }
-            
-            checkAuth(); // Call immediately to unhide Login buttons early
-            
-            if(currentUser && currentUser.id) { 
-                try { 
-                    const res = await fetch('/api/user/' + currentUser.id); 
-                    if(res.ok) { 
-                        const data = await res.json(); 
-                        if(data.success) { Object.assign(currentUser, data); localStorage.setItem('user', JSON.stringify(currentUser)); await fetchOwnedProducts(); checkAuth(); } 
-                        else if(data.banned) { Swal.fire('Banned', 'Your account has been banned by the Administrator.', 'error').then(()=>window.logout()); } 
-                        else { window.logout(); } 
-                    } else { window.logout(); }
-                } catch(e) { console.log('User fetch failed'); } 
+            if(currentUser && currentUser.id) {
+                try {
+                    const res = await fetch('/api/user/' + currentUser.id);
+                    const data = await res.json();
+                    if(data.success) {
+                        currentUser = {...currentUser, ...data};
+                        localStorage.setItem('user', JSON.stringify(currentUser));
+                    } else if(data.banned) {
+                        localStorage.removeItem('user');
+                        location.href = '/login';
+                    }
+                } catch(e) {}
             }
-            
-            loadProducts(); loadNotices(); updateCartBadge(); if(currentUser) renderGateways();
-            setInterval(() => { const vCount = document.getElementById('vCount'); if(vCount) vCount.innerText = Math.floor(Math.random() * (55 - 15 + 1)) + 15; }, 8000);
-            setTimeout(showRandomSaleToast, 5000);
-        }
-        
-        async function fetchOwnedProducts() { try { const res = await fetch('/api/library/' + currentUser.id); const purchases = await res.json(); ownedProductIds = purchases.map(p => p.productId); } catch(e) {} }
-        async function loadNotices() { const res = await fetch('/api/notices'); const data = await res.json(); if(data && data.length > 0) { document.getElementById('noticeBanner').classList.remove('hidden'); document.getElementById('noticeText').innerText = "📢 ALERT: " + data.map(n => n.text).join('  |  '); } }
-
-        function checkAuth() {
-            const deskAuth = document.getElementById('desktopAuthSection'); const mobAuth = document.getElementById('mobileBottomNav');
-            if (currentUser) {
-                const bal = currentUser.balanceUsd ? currentUser.balanceUsd.toFixed(2) : '0.00';
-                if(currentUser.isVip) document.getElementById('vipBanner').classList.remove('hidden');
-                if(deskAuth) deskAuth.innerHTML = `<button onclick="openLibrary()" class="text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-purple-200 transition-colors mr-2 shadow-sm border border-purple-200 dark:border-purple-800"><i class="fa-solid fa-layer-group mr-2"></i>Vault</button><div class="flex items-center bg-white dark:bg-slate-800 rounded-full pl-4 pr-1.5 py-1.5 shadow-sm border border-slate-200 dark:border-slate-700 mr-2"><span class="text-sm font-bold border-r border-slate-200 dark:border-slate-600 pr-3 mr-2">${currentUser.name} ${currentUser.isVip?'<i class="fa-solid fa-crown text-yellow-500"></i>':''}</span><span class="text-blue-600 dark:text-blue-400 font-black tracking-wide">$${bal}</span></div><button onclick="openModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-5 rounded-full text-sm glow-btn active:scale-95 shadow-neon"><i class="fa-solid fa-plus mr-1.5"></i>Fund</button><button onclick="openProfile()" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 ml-2 shadow-sm"><i class="fa-solid fa-user"></i></button><button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 flex items-center justify-center ml-2"><i id="themeIcon" class="fa-solid fa-moon"></i></button>`;
-                if(mobAuth) mobAuth.innerHTML = `<button onclick="window.scrollTo(0,0)" class="bottom-nav-item flex flex-col items-center text-blue-600 dark:text-blue-400 w-1/5"><i class="fa-solid fa-house text-xl mb-1 bottom-nav-icon"></i><span class="text-[10px] font-bold">Home</span></button><button onclick="openLibrary()" class="bottom-nav-item flex flex-col items-center text-slate-400 hover:text-purple-500 w-1/5"><i class="fa-solid fa-layer-group text-xl mb-1 bottom-nav-icon"></i><span class="text-[10px] font-bold">Vault</span></button><button onclick="toggleCart()" class="bottom-nav-item flex flex-col items-center text-slate-400 hover:text-blue-500 w-1/5 relative"><div class="absolute top-0 right-2 w-2 h-2 bg-red-500 rounded-full hidden" id="cartDotMob"></div><i class="fa-solid fa-cart-shopping text-xl mb-1 bottom-nav-icon"></i><span class="text-[10px] font-bold">Cart</span></button><button onclick="openModal()" class="bottom-nav-item flex flex-col items-center text-slate-400 hover:text-emerald-500 w-1/5"><i class="fa-solid fa-wallet text-xl mb-1 bottom-nav-icon"></i><span class="text-[10px] font-bold">$${bal}</span></button><button onclick="openProfile()" class="bottom-nav-item flex flex-col items-center text-slate-400 hover:text-slate-700 dark:hover:text-white w-1/5"><i class="fa-solid fa-user text-xl mb-1 bottom-nav-icon"></i><span class="text-[10px] font-bold">Profile</span></button>`;
-            } else { 
-                if(deskAuth) deskAuth.innerHTML = `<button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 flex items-center justify-center mr-3"><i id="themeIcon" class="fa-solid fa-moon"></i></button><a href="/login" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-6 rounded-full shadow-neon glow-btn tracking-widest uppercase text-xs">Join Now</a>`; 
-                if(mobAuth) mobAuth.innerHTML = `<a href="/login" class="w-[90%] bg-blue-600 text-white font-black py-3.5 rounded-xl text-center shadow-neon uppercase tracking-widest text-sm">Login / Register</a>`;
-            }
+            renderAuth();
+            loadProducts();
         }
 
-        function setFilter(type, btn) { currentFilter = type; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-blue-600', 'text-white', 'border-blue-600', 'shadow-neon')); btn.classList.add('active'); btn.classList.replace('bg-white/80', 'bg-blue-600'); btn.classList.replace('text-slate-600', 'text-white'); filterProducts(); }
-        function filterProducts() { const query = document.getElementById('searchInput').value.toLowerCase(); const filtered = allProducts.filter(p => { const matchSearch = p.name.toLowerCase().includes(query) || p.abilities.toLowerCase().includes(query); const matchFilter = currentFilter === 'all' ? true : p.name.toLowerCase().includes(currentFilter) || p.abilities.toLowerCase().includes(currentFilter); return matchSearch && matchFilter; }); renderProducts(filtered); }
-        async function loadProducts() { const res = await fetch('/api/products'); allProducts = await res.json(); filterProducts(); }
-        
-        function renderProducts(products) {
-            const list = document.getElementById('product-list'); list.innerHTML = '';
-            if(!products || products.length === 0) return list.innerHTML = '<div class="col-span-full text-center py-10"><p class="text-slate-500 font-bold text-lg">No products found.</p></div>';
-            const userCode = currentUser && currentUser.country ? currentUser.country : 'US'; const curr = currMap[userCode] || currMap['US']; const rate = liveRates[curr.code] || 1;
+        function renderAuth() {
+            const authDiv = document.getElementById('authSection');
+            const mobNav = document.getElementById('mobileBottomNav');
+            
+            if(currentUser) {
+                authDiv.innerHTML = `
+                    <div class="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full font-bold">
+                        <span class="mr-2 border-r pr-2 text-sm">${currentUser.name}</span>
+                        <span class="text-blue-600">$${currentUser.balanceUsd.toFixed(2)}</span>
+                    </div>
+                    <button onclick="location.href='/login'" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-user"></i></button>
+                `;
+                mobNav.innerHTML = `
+                    <button onclick="location.reload()" class="flex flex-col items-center text-blue-600"><i class="fa-solid fa-house"></i><span class="text-[10px]">Home</span></button>
+                    <button onclick="Swal.fire('Vault coming soon')" class="flex flex-col items-center text-slate-400"><i class="fa-solid fa-box"></i><span class="text-[10px]">Vault</span></button>
+                    <button onclick="location.href='/login'" class="flex flex-col items-center text-slate-400"><i class="fa-solid fa-user"></i><span class="text-[10px]">Profile</span></button>
+                `;
+            } else {
+                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold">Login</button>`;
+                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-bold">Access Store</button>`;
+            }
+        }
 
+        async function loadProducts() {
+            const res = await fetch('/api/products');
+            const products = await res.json();
+            const list = document.getElementById('product-list');
+            list.innerHTML = '';
             products.forEach(p => {
-                const usdPrice = parseFloat(p.price.replace(/[^0-9.]/g, '')) || 0; const localPrice = Math.round(usdPrice * rate); const pStock = p.stock || 0;
-                const isOwned = ownedProductIds.includes(p.id); const isOutOfStock = pStock <= 0; 
-                let stockBadge = isOwned ? `<span class="bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-[10px] font-black"><i class="fa-solid fa-check mr-1"></i>OWNED</span>` : isOutOfStock ? `<span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-[10px] font-black">SOLD OUT</span>` : `<span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black">STOCK: ${pStock}</span>`;
-                let btnHtml = isOwned ? `<button disabled class="w-full bg-slate-100 text-slate-400 font-black py-4 rounded-[16px] text-sm cursor-not-allowed">Already in Vault</button>` : isOutOfStock ? `<button disabled class="w-full bg-slate-900 text-white font-black py-4 rounded-[16px] text-sm opacity-50 cursor-not-allowed">Unavailable</button>` : `<button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${usdPrice})" class="w-full bg-slate-900 text-white font-black py-4 rounded-[16px] text-sm glow-btn hover:bg-blue-600"><i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart</button>`;
-                
-                list.innerHTML += `<div class="product-card p-5 flex flex-col justify-between"><div class="cursor-pointer"><div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-[20px] mb-4 flex items-center justify-center text-slate-300 relative overflow-hidden">${p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-code text-5xl"></i>`}<div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur text-yellow-400 text-xs font-black px-2 py-1 rounded-lg"><i class="fa-solid fa-star"></i> ${p.rating.toFixed(1)}</div></div><div class="flex justify-between items-start mb-2"><h2 class="text-xl font-black dark:text-white">${p.name}</h2>${stockBadge}</div><div class="mb-4 mt-2 flex items-baseline"><span class="text-3xl font-black text-blue-600 dark:text-blue-400">${currentUser?.isVip ? 'FREE' : curr.symbol+localPrice}</span><span class="text-xs font-bold text-slate-400 ml-2 line-through ${currentUser?.isVip ? '' : 'hidden'}">USD $${usdPrice}</span></div><div class="text-sm text-slate-600 dark:text-slate-300 mb-6 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-[16px] min-h-[70px]"><i class="fa-solid fa-wand-magic-sparkles text-blue-500 mr-2"></i> ${p.abilities}</div></div>${btnHtml}</div>`;
+                list.innerHTML += `
+                    <div class="product-card p-6 shadow-sm">
+                        <div class="w-full h-40 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 flex items-center justify-center">
+                            ${p.imageId ? `<img src="/api/photo/${p.imageId}" class="w-full h-full object-cover rounded-xl">` : `<i class="fa-solid fa-code text-4xl text-slate-300"></i>`}
+                        </div>
+                        <h3 class="font-black text-xl mb-1 dark:text-white">${p.name}</h3>
+                        <p class="text-blue-600 font-black text-2xl mb-4">$${p.price}</p>
+                        <button class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors">Add to Cart</button>
+                    </div>
+                `;
             });
         }
-
-        const fakeNames = ["Rahim", "John", "Sarah", "Mahmud", "David", "Nisha", "Arafat", "Chris"];
-        function showRandomSaleToast() {
-            if(allProducts.length === 0) return;
-            const product = allProducts[Math.floor(Math.random() * allProducts.length)]; const name = fakeNames[Math.floor(Math.random() * fakeNames.length)];
-            const toast = document.createElement('div'); toast.className = 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl shadow-xl flex items-center gap-3 toast-enter w-64';
-            toast.innerHTML = `<div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex justify-center items-center text-blue-600"><i class="fa-solid fa-bag-shopping"></i></div><div><p class="text-xs text-slate-500 font-bold">${name} just bought</p><p class="text-sm font-black dark:text-white truncate w-40">${product.name}</p></div>`;
-            document.getElementById('liveToastContainer').appendChild(toast);
-            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 500); }, 4000);
-            setTimeout(showRandomSaleToast, Math.floor(Math.random() * 15000) + 10000);
-        }
-
-        function toggleCart() { const d = document.getElementById('cartDrawer'); const o = document.getElementById('cartOverlay'); if(d.classList.contains('drawer-closed')) { d.classList.replace('drawer-closed', 'drawer-open'); o.classList.remove('hidden'); setTimeout(()=>o.classList.remove('opacity-0'),10); renderCart(); } else { d.classList.replace('drawer-open', 'drawer-closed'); o.classList.add('opacity-0'); setTimeout(()=>o.classList.add('hidden'),300); } }
-        function updateCartBadge() { const dBadge = document.getElementById('cartBadgeDesk'); const mBadge = document.getElementById('cartDotMob'); if(cart.length > 0) { if(dBadge) {dBadge.classList.remove('hidden'); dBadge.innerText = cart.length;} if(mBadge) mBadge.classList.remove('hidden'); } else { if(dBadge) dBadge.classList.add('hidden'); if(mBadge) mBadge.classList.add('hidden'); } }
-        function addToCart(id, name, priceUsd) { if(!currentUser) return window.location.href='/login'; if(cart.find(item => item.id === id)) return Swal.fire({toast:true, position:'top-end', icon:'info', title:'Already in cart', showConfirmButton:false, timer:2000}); cart.push({id, name, priceUsd}); localStorage.setItem('cart', JSON.stringify(cart)); updateCartBadge(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Added', showConfirmButton:false, timer:2000}); }
-        function removeFromCart(id) { cart = cart.filter(item => item.id !== id); localStorage.setItem('cart', JSON.stringify(cart)); updateCartBadge(); renderCart(); }
-        
-        async function applyPromo() { if(currentUser.isVip) return Swal.fire({toast:true, position:'top-end', icon:'info', title:'VIP is active. Items already free!', showConfirmButton:false, timer:3000}); const code = document.getElementById('promoInput').value; if(!code) return; const res = await fetch('/api/promo', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({code}) }); const data = await res.json(); if(data.success) { activePromo = data.discount; activePromoCode = code; renderCart(); Swal.fire({toast:true, position:'top-end', icon:'success', title:`${data.discount}% Discount!`, showConfirmButton:false, timer:2000}); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title:data.error, showConfirmButton:false, timer:2000}); } }
-
-        function renderCart() { 
-            const c = document.getElementById('cartItemsContainer'); const t = document.getElementById('cartTotal'); const ot = document.getElementById('cartOldTotal');
-            if(cart.length === 0) { c.innerHTML = '<div class="text-center text-slate-400 mt-20"><p class="font-bold">Your cart is empty.</p></div>'; t.innerText = '$0.00'; ot.classList.add('hidden'); return; } 
-            let sum = 0; c.innerHTML = cart.map(i => { sum += i.priceUsd; return `<div class="flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm mb-3"><div><h4 class="font-black text-slate-800 dark:text-white text-sm">${i.name}</h4><p class="text-blue-500 font-black mt-1">$${currentUser.isVip ? '0.00' : i.priceUsd}</p></div><button onclick="removeFromCart(${i.id})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash text-sm"></i></button></div>`; }).join(''); 
-            if(currentUser.isVip) { t.innerText = '$0.00'; ot.innerText = `$${sum.toFixed(2)}`; ot.classList.remove('hidden'); } else if(activePromo > 0) { const newSum = sum * (1 - (activePromo/100)); t.innerText = `$${newSum.toFixed(2)}`; ot.innerText = `$${sum.toFixed(2)}`; ot.classList.remove('hidden'); } else { t.innerText = '$' + sum.toFixed(2); ot.classList.add('hidden'); }
-        }
-
-        async function checkoutCart() { 
-            if(cart.length === 0) return; if(!currentUser) return window.location.href='/login'; 
-            let totalCost = cart.reduce((sum, item) => sum + item.priceUsd, 0); 
-            if(currentUser.isVip) totalCost = 0; else if(activePromo > 0) totalCost = totalCost * (1 - (activePromo/100));
-            if(currentUser.balanceUsd < totalCost) return Swal.fire({ title: 'Insufficient Funds', html: `<p>You need <b class="text-blue-500">$${totalCost.toFixed(2)}</b>.</p>`, icon: 'warning', confirmButtonText: 'Top Up Now'}).then(r => { if(r.isConfirmed){ toggleCart(); openModal(); }}); 
-            Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading(), allowOutsideClick: false}); 
-            const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, cartItems: cart.map(i=>i.id), promoCode: activePromoCode }) }); const data = await res.json(); 
-            if(data.success) { Object.assign(currentUser, {balanceUsd: data.newBalance}); localStorage.setItem('user', JSON.stringify(currentUser)); await fetchOwnedProducts(); checkAuth(); loadProducts(); cart = []; activePromo = 0; activePromoCode = ''; localStorage.removeItem('cart'); updateCartBadge(); toggleCart(); confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3b82f6', '#8b5cf6', '#10b981'] }); Swal.fire({ title: 'Success! 🎉', icon: 'success', confirmButtonText: 'View Vault' }).then(() => openLibrary()); } 
-            else { Swal.fire({title: 'Failed', text: data.error, icon: 'error'}); } 
-        }
-        
-        function openProfile() { if(!currentUser) return; document.getElementById('profAvatar').innerText = currentUser.name.charAt(0).toUpperCase(); document.getElementById('profName').innerText = currentUser.name; document.getElementById('profEmail').innerText = currentUser.email; document.getElementById('profRefCode').innerText = currentUser.refCode; if(currentUser.isVip) { document.getElementById('vipBtn').innerText = "VIP ACTIVE"; document.getElementById('vipBtn').disabled = true; document.getElementById('vipBtn').classList.add('opacity-50'); } document.getElementById('profileModal').classList.replace('hidden', 'flex'); }
-        function closeProfile() { document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
-        
-        async function buyVip() { if(currentUser.balanceUsd < 30) return Swal.fire('Insufficient Funds', 'You need $30 to buy VIP.', 'error'); Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading()}); const res = await fetch('/api/buy-vip', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId: currentUser.id}) }); const data = await res.json(); if(data.success){ Object.assign(currentUser, {balanceUsd: data.newBalance, isVip: true}); localStorage.setItem('user', JSON.stringify(currentUser)); closeProfile(); checkAuth(); loadProducts(); renderCart(); confetti({particleCount: 200, spread: 100}); Swal.fire('VIP Activated! 👑', 'All products are FREE for 30 days.', 'success'); } else Swal.fire('Error', data.error, 'error'); }
-
-        async function openLibrary() { document.getElementById('libraryModal').classList.replace('hidden', 'flex'); const list = document.getElementById('libraryList'); list.innerHTML = '<p class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-4xl text-purple-500"></i></p>'; const res = await fetch('/api/library/' + currentUser.id); const purchases = await res.json(); if(purchases.length === 0) return list.innerHTML = '<div class="text-center py-10"><p class="text-slate-500 font-bold">Your vault is empty.</p></div>'; list.innerHTML = purchases.map(p => `<div class="p-4 border border-slate-200 dark:border-slate-700 rounded-[20px] flex justify-between items-center bg-white dark:bg-slate-800"><div class="flex items-center gap-4"><i class="fa-solid fa-code text-3xl text-purple-400"></i><div><h4 class="font-black text-lg dark:text-white">${p.product.name}</h4><p class="text-[10px] font-black text-slate-400">Paid $${p.pricePaid}</p></div></div><a href="${p.product.driveLink}" target="_blank" class="bg-purple-100 text-purple-600 px-6 py-3 rounded-xl font-black text-xs uppercase shadow-sm">Access</a></div>`).join(''); } function closeLibrary() { document.getElementById('libraryModal').classList.replace('flex', 'hidden'); }
-        function openHistory() { document.getElementById('historyModal').classList.replace('hidden', 'flex'); const list = document.getElementById('historyList'); list.innerHTML = '<p class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500"></i></p>'; fetch('/api/history/' + currentUser.id).then(r=>r.json()).then(deposits => { if(!deposits || deposits.length===0) return list.innerHTML = '<div class="text-center py-10"><p class="text-slate-500 font-bold">No records found.</p></div>'; list.innerHTML = deposits.map(d => `<div class="p-4 border border-slate-200 dark:border-slate-700 rounded-[20px] flex justify-between items-center bg-white dark:bg-slate-800 mb-3"><div class="font-black text-sm uppercase dark:text-white">${d.method} <span class="text-blue-500 ml-2">৳${d.amountBdt}</span></div><span class="px-3 py-1 text-[10px] font-black uppercase rounded-full ${d.status==='APPROVED'?'bg-emerald-100 text-emerald-600':d.status==='REJECTED'?'bg-red-100 text-red-600':'bg-orange-100 text-orange-600'}">${d.status}</span></div>`).join(''); }); } function closeHistory() { document.getElementById('historyModal').classList.replace('flex', 'hidden'); }
-
-        const overlay = document.getElementById('modalOverlay'); const modal = document.getElementById('addFundModal'); function openModal() { overlay.classList.remove('opacity-0', 'pointer-events-none'); modal.classList.remove('scale-95'); updateTheme(); } function closeModal() { overlay.classList.add('opacity-0', 'pointer-events-none'); modal.classList.add('scale-95'); } function calcLocal() { const usd = parseFloat(document.getElementById('usdAmount').value) || 0; const code = (currMap[currentUser?currentUser.country:'BD'] || currMap['US']).code; const localVal = Math.round(usd * (liveRates[code] || 1)); document.getElementById('localAmount').value = localVal; document.getElementById('insAmount').innerText = localVal; }
-        function copyPayNum(number) { navigator.clipboard.writeText(number); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Number Copied!', showConfirmButton:false, timer:1500, customClass: {popup: 'rounded-3xl'}}); }
-
-        function renderGateways() { if(!currentUser) return; const country = currentUser.country || 'BD'; const gatewayDiv = document.getElementById('gatewayOptions'); const code = (currMap[country] || currMap['US']).code; document.getElementById('localCurrencyLabel').innerText = `Equivalent`; document.querySelectorAll('.localCodeText').forEach(el => el.innerText = code); const createRadio = (val, label, theme, no) => `<label class="cursor-pointer"><input type="radio" name="method" value="${val}" class="peer sr-only" ${no===1?'checked':''} onchange="updateTheme()"><div class="py-2 px-1 border-2 border-slate-200 dark:border-slate-700 rounded-[16px] text-center peer-checked:${theme} font-black text-slate-400 dark:text-slate-500 transition-all text-xs uppercase">${label}</div></label>`; if (country === 'IN') { gatewayDiv.innerHTML = createRadio('upi','UPI','theme-upi',1) + createRadio('paytm','Paytm','theme-paytm',0); } else { gatewayDiv.innerHTML = createRadio('bkash','bKash','theme-bkash',1) + createRadio('nagad','Nagad','theme-nagad',0) + createRadio('rocket','Rocket','theme-rocket',0); } }
-        function updateTheme() { const methodInput = document.querySelector('input[name="method"]:checked'); if(!methodInput) return; const method = methodInput.value; const header = document.getElementById('modalHeader'); const box = document.getElementById('instructionBox'); const btn = document.getElementById('submitBtn'); const names = document.querySelectorAll('.gateway-name'); const numContainer = document.getElementById('gatewayNumberContainer'); let number = ''; let name = ''; header.className = 'p-6 flex justify-between items-center text-white transition-all duration-500 shadow-md'; box.className = 'p-5 rounded-3xl text-sm border shadow-sm transition-all duration-500 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30'; btn.className = 'w-full font-black py-4 rounded-[20px] shadow-neon text-sm text-white transform active:scale-95 transition-all glow-btn uppercase tracking-widest border border-white/20 mt-2'; if(method === 'bkash') { header.classList.add('bg-[#e2136e]'); box.classList.add('border-[#f3b6cf]', 'text-[#c0105e]'); btn.classList.add('bg-gradient-to-r', 'from-[#e2136e]', 'to-[#c0105e]'); name = 'bKash'; number = '01846849460'; numContainer.className = "gateway-number text-base bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 px-4 py-2 rounded-xl flex justify-between items-center mt-2 shadow-inner border border-pink-200 dark:border-pink-800/50 font-mono tracking-wider cursor-pointer hover:bg-pink-100 transition-colors"; } else if(method === 'nagad') { header.classList.add('bg-[#f37021]'); box.classList.add('border-[#fcd0b6]', 'text-[#d6611a]'); btn.classList.add('bg-gradient-to-r', 'from-[#f37021]', 'to-[#d6611a]'); name = 'Nagad'; number = '01846849460'; numContainer.className = "gateway-number text-base bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-4 py-2 rounded-xl flex justify-between items-center mt-2 shadow-inner border border-orange-200 dark:border-orange-800/50 font-mono tracking-wider cursor-pointer hover:bg-orange-100 transition-colors"; } else if(method === 'rocket') { header.classList.add('bg-[#8c1596]'); box.classList.add('border-[#dcb5e3]', 'text-[#6b1073]'); btn.classList.add('bg-gradient-to-r', 'from-[#8c1596]', 'to-[#6b1073]'); name = 'Rocket'; number = '018468494606'; numContainer.className = "gateway-number text-base bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-4 py-2 rounded-xl flex justify-between items-center mt-2 shadow-inner border border-purple-200 dark:border-purple-800/50 font-mono tracking-wider cursor-pointer hover:bg-purple-100 transition-colors"; } else if(method === 'upi') { header.classList.add('bg-[#16a34a]'); box.classList.add('border-[#bbf7d0]', 'text-[#15803d]'); btn.classList.add('bg-gradient-to-r', 'from-[#16a34a]', 'to-[#15803d]'); name = 'UPI'; number = 'admin@upi'; numContainer.className = "gateway-number text-base bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-4 py-2 rounded-xl flex justify-between items-center mt-2 shadow-inner border border-green-200 dark:border-green-800/50 font-mono tracking-wider cursor-pointer hover:bg-green-100 transition-colors"; } else if(method === 'paytm') { header.classList.add('bg-[#0284c7]'); box.classList.add('border-[#bae6fd]', 'text-[#0369a1]'); btn.classList.add('bg-gradient-to-r', 'from-[#0284c7]', 'to-[#0369a1]'); name = 'Paytm'; number = '9876543210'; numContainer.className = "gateway-number text-base bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl flex justify-between items-center mt-2 shadow-inner border border-blue-200 dark:border-blue-800/50 font-mono tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"; } names.forEach(n => n.innerText = name); numContainer.innerHTML = `<span>${number}</span> <i class="fa-regular fa-copy text-sm opacity-70"></i>`; numContainer.setAttribute('onclick', `copyPayNum('${number}')`); }
-        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const localRaw = document.getElementById('localAmount').value; const amountBdt = parseFloat(localRaw.replace(/[^0-9.]/g, '')); const senderNumber = document.getElementById('senderNumber').value; const trxId = document.getElementById('trxId').value; if(amountBdt <= 0) return Swal.fire({title: 'Error', text: 'Invalid amount.', icon: 'error'}); let btn = document.getElementById('submitBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, method, amountBdt, senderNumber, trxId }) }); const data = await res.json(); if(data.success) { closeModal(); Swal.fire({title: 'Sent!', text: 'Request queued.', icon: 'success'}); document.getElementById('depositForm').reset(); updateTheme(); } else { Swal.fire({title: 'Error', text: data.error, icon: 'error'}); } } catch(e) {} btn.innerHTML = 'CONFIRM REQUEST'; });
 
         init();
     </script>
