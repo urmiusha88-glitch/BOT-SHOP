@@ -1,9 +1,9 @@
 {
   "name": "aura-store-bot",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "npx prisma generate && npx prisma db push --accept-data-loss && node index.js"
+    "start": "npx prisma generate && npx prisma db push --force-reset --accept-data-loss && node index.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
