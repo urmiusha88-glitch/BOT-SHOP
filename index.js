@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const app = express();
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.set('trust proxy', true);
 
@@ -30,7 +30,6 @@ app.use((req, res, next) => {
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 async function getAllRates() { try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); return data.rates; } catch (e) { return { BDT: 120, INR: 83, PKR: 278 }; } }
 
-// --- BOT WIZARD ---
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('🛒 1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in USD?'); return ctx.wizard.next(); },
@@ -43,14 +42,18 @@ const stage = new Scenes.Stage([addProductWizard]); bot.use(session()); bot.use(
 bot.start((ctx) => { ctx.reply(`🌟 *Welcome to AURA DIGITAL STORE*\nYour ID: \`${ctx.from.id}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🌐 Visit Website', url: 'https://bot-shop-production.up.railway.app/' }]] }}); });
 bot.command('addproduct', (ctx) => { if (ctx.from.id.toString() !== ADMIN_ID) return; ctx.scene.enter('ADD_PRODUCT_SCENE'); });
 
+// 🔥 FIXED: DEPOSIT CALCULATION ALWAYS USES BDT RATE FOR ACCURACY
 async function processDeposit(id, action) {
   const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } });
   if (dep && dep.status === 'PENDING') {
     if (action === 'APPROVE') {
-      const rates = await getAllRates(); const userRate = dep.user.country === 'IN' ? rates.INR : (dep.user.country === 'PK' ? rates.PKR : rates.BDT); const usdAmount = dep.amountBdt / userRate; 
+      const rates = await getAllRates(); 
+      const bdtRate = rates.BDT || 120;
+      const usdAmount = dep.amountBdt / bdtRate; 
+      
       if (dep.user.referredBy && !dep.user.referralRewardPaid) {
           const pastDeps = await prisma.deposit.findMany({ where: { userId: dep.userId, status: 'APPROVED' } });
-          const totalUsd = (pastDeps.reduce((sum, d) => sum + d.amountBdt, 0) + dep.amountBdt) / userRate;
+          const totalUsd = (pastDeps.reduce((sum, d) => sum + d.amountBdt, 0) + dep.amountBdt) / bdtRate;
           if (totalUsd >= 4.0) { const referrer = await prisma.user.findUnique({ where: { refCode: dep.user.referredBy } }); if (referrer) await prisma.user.update({ where: { id: referrer.id }, data: { balanceUsd: { increment: 1.0 } } }); await prisma.user.update({ where: { id: dep.userId }, data: { referralRewardPaid: true } }); }
       }
       await prisma.user.update({ where: { id: dep.userId }, data: { balanceUsd: { increment: usdAmount } } }); await prisma.deposit.update({ where: { id }, data: { status: 'APPROVED' } }); return { success: true, msg: `Approved: $${usdAmount.toFixed(2)}` };
@@ -63,7 +66,6 @@ bot.action(/reject_(.+)/, async (ctx) => { const res = await processDeposit(pars
 const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-color: #0b1121; border-radius: 16px; overflow: hidden; border: 1px solid #1e293b; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"><div style="background: linear-gradient(135deg, #2563eb, #7c3aed); padding: 30px 20px; text-align: center;"><h1 style="color: #ffffff; margin: 0; font-size: 28px; letter-spacing: 2px; font-weight: 900;">AURA <span style="color: #bfdbfe;">DIGITAL</span></h1><p style="color: #e0e7ff; margin-top: 5px; font-size: 14px;">Premium Digital Marketplace</p></div><div style="padding: 40px 30px; color: #e2e8f0;">`;
 const emailFooter = `</div><div style="background-color: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA DIGITAL STORE. All rights reserved.</p><p style="color: #64748b; font-size: 12px; margin-top: 5px;">Secure automated system email.</p></div></div>`;
 
-// --- APIs ---
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password, country, refCode } = req.body;
@@ -113,7 +115,6 @@ app.get('/reset-password/:token', (req, res) => {
     res.send(`<!DOCTYPE html><html lang="en" class="dark"><head><title>Reset Password</title><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></head><body class="bg-[#050b14] h-screen flex justify-center items-center text-white"><div class="bg-slate-900 p-8 rounded-[32px] w-full max-w-md text-center border border-slate-800 shadow-2xl"><div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-6"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><h2 class="text-3xl font-black mb-2">New Password</h2><p class="text-slate-400 mb-6 text-sm">Create a strong, new password for your vault.</p><input type="password" id="nPass" placeholder="Enter new password" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-5 py-4 font-bold outline-none focus:border-blue-500 mb-6 text-center tracking-widest"><button onclick="resetP()" class="w-full bg-blue-600 hover:bg-blue-500 transition-colors py-4 rounded-xl font-black uppercase tracking-widest">Update Password</button></div><script>async function resetP() { const pass = document.getElementById('nPass').value; if(!pass)return; const res = await fetch('/api/reset-password', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({identifier:'${req.params.token}', newPassword:pass})}); const data = await res.json(); if(data.success) {Swal.fire({title:'Success',text:'Password updated!',icon:'success',background:'#1e293b',color:'#fff'}).then(()=>window.location.href='/login');} else Swal.fire({title:'Error',text:data.error,icon:'error',background:'#1e293b',color:'#fff'}); }</script></body></html>`);
 });
 
-// 🔥 STRICT CHECKOUT / BUY NOW (STOCK & DUPLICATE PROTECTION)
 app.post('/api/checkout', async (req, res) => {
     const { userId, cartItems, promoCode } = req.body;
     try {
@@ -168,7 +169,6 @@ app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({
 app.get('/api/admin/settings', (req, res) => res.json({ isMaintenance }));
 app.post('/api/admin/settings', (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); isMaintenance = req.body.status; res.json({ success: true }); });
 
-// Routing
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
 app.get('/admin', (req, res) => res.sendFile(__dirname + '/admin.html')); 
