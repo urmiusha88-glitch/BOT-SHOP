@@ -24,10 +24,9 @@
         .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: load 1.5s infinite; border-radius: 16px; }
         @keyframes load { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
         .prof-tab.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
         
-        /* 🔥 SUPER REALISTIC METALLIC BADGES */
         .r-badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; letter-spacing: 1px; margin-left: 6px; display: inline-block; box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 2px 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b, #ef4444); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); border-color: #fca5a5; }
         .badge-vip { background: linear-gradient(135deg, #fcd34d, #d97706, #fcd34d); color: #451a03; text-shadow: 0 1px 1px rgba(255,255,255,0.5); box-shadow: 0 0 15px rgba(217, 119, 6, 0.5); border-color: #fde68a; }
@@ -44,7 +43,6 @@
         .peer-checked\:border-bkash:checked ~ div { border-color: #e2136e; background-color: rgba(226, 19, 110, 0.1); color: #e2136e; }
         .peer-checked\:border-nagad:checked ~ div { border-color: #f37021; background-color: rgba(243, 112, 33, 0.1); color: #f37021; }
         .peer-checked\:border-rocket:checked ~ div { border-color: #8c1596; background-color: rgba(140, 21, 150, 0.1); color: #8c1596; }
-        
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; }
         .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
     </style>
@@ -74,6 +72,8 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10" id="product-list">
+        <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
+        <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
         <div class="product-card p-6"><div class="skeleton w-full h-48 mb-4"></div><div class="skeleton w-3/4 h-8 mb-4"></div><div class="skeleton w-1/2 h-10"></div></div>
     </div>
 
@@ -116,10 +116,9 @@
                     <div><h3 class="text-3xl font-black flex justify-center items-center gap-2 flex-wrap" id="pNameContainer"></h3><p class="text-slate-400 font-bold" id="pEmail"></p></div>
                     <div class="bg-slate-800 p-5 rounded-2xl text-left border border-slate-700 flex justify-between items-center">
                         <div><p class="text-xs text-slate-400 font-bold uppercase mb-1">Referral Code</p><p class="text-2xl font-mono font-black text-emerald-400" id="pRef">---</p></div>
-                        <div class="text-right"><span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Earn $1.00 / Deposit</span></div>
+                        <div class="text-right"><span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full">Earn $1.00 / Deposit</span></div>
                     </div>
                     <div class="bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-yellow-500/30 p-5 rounded-2xl text-left relative overflow-hidden">
-                        <i class="fa-solid fa-crown absolute -bottom-4 -right-4 text-7xl text-yellow-500/10"></i>
                         <h4 class="font-black text-yellow-500 mb-1 text-lg"><i class="fa-solid fa-star"></i> VIP Membership</h4>
                         <p class="text-sm text-yellow-500/70 mb-4 font-medium">Claim all store items for $0.00!</p>
                         <button onclick="buyVip()" id="pBtnVip" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl uppercase">Upgrade - $30</button>
@@ -130,7 +129,6 @@
                 <div id="sec-funds" class="hidden space-y-4"><div id="pFundsList"></div></div>
                 <div id="sec-settings" class="hidden space-y-5 text-left">
                     <h3 class="font-black text-xl mb-4">Edit Profile</h3>
-                    
                     <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-900 border border-slate-600" id="settingAvatarPreview"></div>
@@ -144,7 +142,6 @@
                         </div>
                         <button onclick="removeAvatar()" class="text-red-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                     </div>
-
                     <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Email</label><input type="email" id="setEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none"></div>
                     <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Password</label><input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none"></div>
                     <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase mt-4">Save Changes</button>
@@ -192,8 +189,7 @@
         const toast = (icon, title) => Swal.fire({ toast: true, position: 'top-end', icon, title, showConfirmButton: false, timer: 1500, ...swalDark });
 
         let user = null; try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){ localStorage.removeItem('user'); }
-        let allProducts = []; let cart = []; let activePromo = 0; let activePromoCode = ''; let currentRate = 120;
-        let base64Avatar = ''; // Temp holder for image upload
+        let allProducts = []; let cart = []; let activePromo = 0; let activePromoCode = ''; let currentRate = 120; let base64Avatar = ''; let ownedIds = [];
 
         function getBadge(role, isVip, refCount = 0) {
             let badges = '';
@@ -214,7 +210,11 @@
             if(user && user.id) {
                 try {
                     const res = await fetch('/api/user/' + user.id); const data = await res.json();
-                    if(data.success) { user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); }
+                    if(data.success) { 
+                        user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); 
+                        const libRes = await fetch('/api/library/' + user.id); const libData = await libRes.json();
+                        if(Array.isArray(libData)) ownedIds = libData.map(p => p.productId);
+                    }
                     else if(data.banned) { Swal.fire({title:'Banned', text:'Account suspended.', icon:'error', ...swalDark}).then(()=>window.logout()); return; }
                 } catch(e) {}
             }
@@ -228,13 +228,14 @@
                 const uName = user.name || user.firstName || 'User'; 
                 let avHtml = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<span class="text-lg font-black">${uName.charAt(0).toUpperCase()}</span>`;
                 
-                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-full font-black border border-emerald-500/30 mr-2 hover:bg-emerald-600/40"><i class="fa-solid fa-plus mr-1"></i> Fund</button><button onclick="openProfileDashboard('orders')" class="hidden sm:block bg-purple-600/20 text-purple-400 px-4 py-2 rounded-full font-bold text-sm mr-2 hover:bg-purple-600/40"><i class="fa-solid fa-layer-group mr-1"></i> Vault</button><div class="hidden sm:flex items-center bg-slate-800 px-4 py-1.5 rounded-full font-black border border-slate-700 shadow-neon mr-2"><span class="mr-2 pr-2 border-r border-slate-600 text-sm flex items-center">${uName} ${getBadge(user.role, user.isVip, user.refCount)}</span><span class="text-blue-400">$${bal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-neon mr-2 hover:bg-blue-500"><i class="fa-solid fa-cart-shopping"></i></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700 overflow-hidden">${avHtml}</button>`;
+                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-full font-black border border-emerald-500/30 mr-2 hover:bg-emerald-600/40 transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><button onclick="openProfileDashboard('orders')" class="hidden sm:block bg-purple-600/20 text-purple-400 px-4 py-2 rounded-full font-bold text-sm mr-2 hover:bg-purple-600/40 transition-colors"><i class="fa-solid fa-layer-group mr-1"></i> Vault</button><div class="hidden sm:flex items-center bg-slate-800 px-4 py-1.5 rounded-full font-black border border-slate-700 shadow-neon mr-2"><span class="mr-2 pr-2 border-r border-slate-600 text-sm flex items-center">${uName} ${getBadge(user.role, user.isVip, user.refCount)}</span><span class="text-blue-400">$${bal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-neon mr-2 hover:bg-blue-500 transition-colors"><i class="fa-solid fa-cart-shopping"></i></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700 overflow-hidden hover:bg-slate-700 transition-colors">${avHtml}</button>`;
                 
                 mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px] mt-1 font-bold">Home</span></button><button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center"><i class="fa-solid fa-cart-shopping text-xl"></i><span class="text-[10px] mt-1 font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-400 flex flex-col items-center"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1 font-bold">$${bal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center"><div class="w-6 h-6 bg-slate-800 rounded-full overflow-hidden border border-slate-600 flex justify-center items-center">${avHtml}</div><span class="text-[10px] mt-1 font-bold">Profile</span></button>`;
+                
                 if(user.isVip) { const banner = document.getElementById('vipBanner'); if(banner) banner.classList.remove('hidden'); }
             } else {
-                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase shadow-neon hover:bg-blue-500">Login</button>`;
-                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase shadow-neon hover:bg-blue-500">Login / Register</button>`;
+                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase shadow-neon hover:bg-blue-500 transition-colors">Login</button>`;
+                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase shadow-neon hover:bg-blue-500 transition-colors">Login / Register</button>`;
             }
         }
 
@@ -249,16 +250,42 @@
         function renderProducts(list) {
             const container = document.getElementById('product-list');
             if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10">No products found.</div>';
+            
             container.innerHTML = list.map(p => {
                 let pPrice = user?.isVip ? 'FREE' : `$${p.price}`;
+                let isOwned = ownedIds.includes(p.id);
+                let btnHtml = '';
+                
+                if(isOwned) {
+                    btnHtml = `<button disabled class="w-full bg-slate-800 text-emerald-400 py-4 rounded-2xl font-black uppercase text-xs cursor-not-allowed border border-slate-700"><i class="fa-solid fa-check mr-2"></i> In Vault</button>`;
+                } else if (p.stock <= 0) {
+                    btnHtml = `<button disabled class="w-full bg-red-900/30 text-red-500 py-4 rounded-2xl font-black uppercase text-xs cursor-not-allowed border border-red-900/50"><i class="fa-solid fa-ban mr-2"></i> Sold Out</button>`;
+                } else {
+                    btnHtml = `<div class="flex gap-2"><button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-1 bg-slate-800 hover:bg-blue-600 text-white py-3 rounded-2xl font-black uppercase text-xs transition-colors border border-slate-700"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNow(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-[3] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-black uppercase text-xs transition-colors shadow-lg"><i class="fa-solid fa-bolt mr-2"></i> Buy Now</button></div>`;
+                }
+
                 let imgHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" onerror="this.src='https://placehold.co/400x300/1e293b/475569?text=Image'" class="w-full h-full object-cover">` : `<i class="fa-solid fa-code text-5xl text-slate-700"></i>`;
-                return `<div class="product-card p-6 flex flex-col justify-between"><div><div class="w-full h-48 bg-slate-800 rounded-2xl mb-4 flex items-center justify-center overflow-hidden relative">${imgHtml}<div class="absolute top-2 right-2 bg-black/60 backdrop-blur px-2 py-1 rounded border border-white/10 text-yellow-400 text-[10px] font-black">★ ${p.rating ? p.rating.toFixed(1) : '5.0'}</div></div><h3 class="text-2xl font-black mb-2">${p.name}</h3><p class="text-slate-400 text-xs mb-4 line-clamp-2">${p.abilities}</p><p class="text-3xl font-black text-blue-500 mb-6">${pPrice}</p></div><div class="flex gap-2"><button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-1 bg-slate-800 hover:bg-blue-600 text-white py-3 rounded-2xl font-black uppercase text-xs transition-colors border border-slate-700"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNow(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-[3] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-black uppercase text-xs transition-colors shadow-lg"><i class="fa-solid fa-bolt mr-2"></i> Buy Now</button></div></div>`;
+                let stockBadge = p.stock <= 0 ? `<div class="absolute top-2 left-2 bg-red-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">STOCK OUT</div>` : `<div class="absolute top-2 left-2 bg-blue-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">STOCK: ${p.stock}</div>`;
+
+                return `
+                <div class="product-card p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="w-full h-48 bg-slate-800 rounded-2xl mb-4 flex items-center justify-center overflow-hidden relative">
+                            ${imgHtml}
+                            ${stockBadge}
+                            <div class="absolute top-2 right-2 bg-black/60 backdrop-blur px-2 py-1 rounded border border-white/10 text-yellow-400 text-[10px] font-black">★ ${p.rating ? p.rating.toFixed(1) : '5.0'}</div>
+                        </div>
+                        <h3 class="text-2xl font-black mb-2">${p.name}</h3>
+                        <p class="text-slate-400 text-xs mb-4 line-clamp-2">${p.abilities}</p>
+                        <p class="text-3xl font-black text-blue-500 mb-6">${pPrice}</p>
+                    </div>
+                    ${btnHtml}
+                </div>`;
             }).join('');
         }
 
         function filterProducts() { const q = document.getElementById('searchInput').value.toLowerCase(); renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q))); }
 
-        // Cart Actions
         function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
         function addToCart(id, name, price) { if(!user) return location.href='/login'; cart.push({id, name, price: parseFloat(price)}); renderCart(); toast('success', 'Added to Cart'); }
         function removeFromCart(index) { cart.splice(index, 1); renderCart(); }
@@ -273,27 +300,45 @@
         async function applyPromo() { const code = document.getElementById('promoInput').value; if(!code) return; const res = await fetch('/api/promo', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({code}) }); const data = await res.json(); if(data.success) { activePromo = data.discount; activePromoCode = code; renderCart(); toast('success', `${data.discount}% OFF Applied!`); } else toast('error', data.error); }
         
         async function checkoutCart() {
-            if(cart.length === 0 || !user) return; Swal.fire({title: 'Processing...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
-            const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, cartItems: cart.map(i=>i.id), promoCode: activePromoCode}) }); const data = await res.json();
-            if(data.success) { user.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); cart = []; activePromo = 0; toggleCart(); renderAuth(); renderCart(); confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); Swal.fire({title:'Success! 🎉', text:'Items added to Vault.', icon:'success', confirmButtonText: 'View Vault', ...swalDark}).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); }); } else Swal.fire({title:'Error', text:data.error, icon:'error', ...swalDark});
+            if(cart.length === 0 || !user) return;
+            Swal.fire({title: 'Processing...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+            const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, cartItems: cart.map(i=>i.id), promoCode: activePromoCode}) });
+            const data = await res.json();
+            if(data.success) {
+                user.balanceUsd = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); 
+                cart.forEach(item => ownedIds.push(item.id));
+                cart = []; activePromo = 0; toggleCart(); renderAuth(); renderProducts(allProducts); confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                Swal.fire({title:'Success! 🎉', text:'Items added to Vault.', icon:'success', confirmButtonText: 'View Vault', ...swalDark}).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
+            } else Swal.fire({title:'Error', text:data.error, icon:'error', ...swalDark});
         }
 
         async function buyNow(id, name, price) {
             if(!user) return location.href='/login';
-            cart = [{id, name, price: parseFloat(price)}]; activePromoCode = ''; activePromo = 0;
-            checkoutCart(); // Routes through normal checkout to check balance and save
+            Swal.fire({ title: 'Confirm Purchase', html: `Buy <b class="text-blue-400">${name}</b> for <b class="text-emerald-400">${user.isVip ? 'FREE' : '$'+price}</b>?`, icon: 'question', showCancelButton: true, confirmButtonText: 'Buy Now', ...swalDark }).then(async (result) => {
+                if(result.isConfirmed) {
+                    cart = [{id, name, price: parseFloat(price)}]; activePromoCode = ''; activePromo = 0; checkoutCart();
+                }
+            });
         }
 
-        // Profile & Settings
+        document.getElementById('fileAvatar').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+            reader.onload = function(event) { const img = new Image(); img.onload = function() {
+                    const canvas = document.createElement('canvas'); const MAX_W = 256; const MAX_H = 256; let w = img.width; let h = img.height;
+                    if(w>h){if(w>MAX_W){h*=MAX_W/w; w=MAX_W;}}else{if(h>MAX_H){w*=MAX_H/h; h=MAX_H;}} canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+                    base64Avatar = canvas.toDataURL('image/jpeg', 0.8); document.getElementById('settingAvatarPreview').innerHTML = `<img src="${base64Avatar}" class="w-full h-full object-cover">`;
+                }; img.src = event.target.result;
+            }; reader.readAsDataURL(file);
+        });
+
         async function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
-            const uName = user.name || user.firstName || 'User'; 
-            base64Avatar = user.avatar || '';
+            const uName = user.name || user.firstName || 'User'; base64Avatar = user.avatar || '';
             document.getElementById('pAvatarContainer').innerHTML = base64Avatar ? `<img src="${base64Avatar}" class="w-full h-full object-cover">` : `<span class="text-4xl font-black">${uName.charAt(0).toUpperCase()}</span>`;
             document.getElementById('settingAvatarPreview').innerHTML = base64Avatar ? `<img src="${base64Avatar}" class="w-full h-full object-cover">` : `<span class="text-2xl font-black text-slate-500">${uName.charAt(0).toUpperCase()}</span>`;
             document.getElementById('pNameContainer').innerHTML = `${uName} ${getBadge(user.role, user.isVip, user.refCount)}`;
             document.getElementById('pEmail').innerText = user.email; document.getElementById('pRef').innerText = user.refCode || '---';
-            document.getElementById('setEmail').value = user.email; 
+            document.getElementById('setEmail').value = user.email;
             if(user.isVip) { document.getElementById('pBtnVip').innerText = "VIP ACTIVE"; document.getElementById('pBtnVip').disabled = true; document.getElementById('pBtnVip').classList.add('opacity-50'); }
             
             document.getElementById('profileModal').classList.replace('hidden', 'flex'); switchProfTab(defaultTab);
@@ -304,31 +349,7 @@
         function closeProfile() { document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
         function switchProfTab(tab) { document.querySelectorAll('.prof-tab').forEach(b => { b.classList.remove('active', 'text-blue-500'); b.classList.add('text-slate-500'); }); document.getElementById('tab-'+tab).classList.add('active', 'text-blue-500'); document.getElementById('tab-'+tab).classList.remove('text-slate-500'); document.getElementById('sec-overview').classList.add('hidden'); document.getElementById('sec-orders').classList.add('hidden'); document.getElementById('sec-funds').classList.add('hidden'); document.getElementById('sec-settings').classList.add('hidden'); document.getElementById('sec-'+tab).classList.remove('hidden'); }
         async function buyVip() { if(user.balanceUsd < 30) return Swal.fire({title:'Insufficient Funds', icon:'error', ...swalDark}); const res = await fetch('/api/buy-vip', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId: user.id})}); const data = await res.json(); if(data.success){ user.balanceUsd = data.newBalance; user.isVip = true; localStorage.setItem('user', JSON.stringify(user)); location.reload(); } }
-
-        // 🔥 Image Upload Compressor
-        document.getElementById('fileAvatar').addEventListener('change', function(e) {
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 256; const MAX_HEIGHT = 256; let width = img.width; let height = img.height;
-                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                    base64Avatar = canvas.toDataURL('image/jpeg', 0.8);
-                    document.getElementById('settingAvatarPreview').innerHTML = `<img src="${base64Avatar}" class="w-full h-full object-cover">`;
-                }; img.src = event.target.result;
-            }; reader.readAsDataURL(file);
-        });
-
-        async function saveSettings() {
-            const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value;
-            const btn = document.getElementById('btnSaveSet'); btn.innerText = "Saving...";
-            const res = await fetch('/api/user/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, email, password, avatar: base64Avatar}) }); const data = await res.json();
-            btn.innerText = "Save Changes";
-            if(data.success) { user.email = email; user.avatar = base64Avatar; localStorage.setItem('user', JSON.stringify(user)); toast('success', 'Saved!'); openProfileDashboard('overview'); renderAuth(); }
-            else Swal.fire({title:'Error', text:data.error, icon:'error', ...swalDark});
-        }
+        async function saveSettings() { const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value; const btn = document.getElementById('btnSaveSet'); btn.innerText = "Saving..."; const res = await fetch('/api/user/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, email, password, avatar: base64Avatar}) }); const data = await res.json(); btn.innerText = "Save Changes"; if(data.success) { user.email = email; user.avatar = base64Avatar; localStorage.setItem('user', JSON.stringify(user)); toast('success', 'Saved!'); openProfileDashboard('overview'); renderAuth(); } else Swal.fire({title:'Error', text:data.error, icon:'error', ...swalDark}); }
         function removeAvatar() { base64Avatar = ''; document.getElementById('settingAvatarPreview').innerHTML = `<span class="text-2xl font-black text-slate-500">${user.firstName.charAt(0).toUpperCase()}</span>`; saveSettings(); }
 
         // Fund System
@@ -341,7 +362,8 @@
         document.getElementById('depositForm').addEventListener('submit', async (e) => {
             e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value;
             if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
-            try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > History.', icon:'success', ...swalDark}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = '0'; document.getElementById('fBdtTxt').innerText = '0'; } else Swal.fire({title:'Error', text:'TrxID already exists', icon:'error', ...swalDark}); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST';
+            try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > History.', icon:'success', ...swalDark}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = '0'; document.getElementById('fBdtTxt').innerText = '0'; } else Swal.fire({title:'Error', text:'TrxID already exists', icon:'error', ...swalDark}); } catch(e) {}
+            btn.innerHTML = 'SUBMIT REQUEST';
         });
 
         window.logout = function() { localStorage.removeItem('user'); location.href='/login'; }
