@@ -18,26 +18,42 @@
         .custom-scrollbar::-webkit-scrollbar { width: 8px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
         .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); }
         
-        .badge-admin { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-        .badge-vip { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
-        .badge-basic { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid #64748b; }
+        .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b, #ef4444); color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 900; letter-spacing: 1px; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+        .badge-vip { background: linear-gradient(135deg, #fcd34d, #d97706, #fcd34d); color: #451a03; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 900; letter-spacing: 1px; box-shadow: 0 0 10px rgba(217, 119, 6, 0.4); }
+        
+        /* Mobile Sidebar Transitions */
+        .sidebar-open { transform: translateX(0); }
+        .sidebar-closed { transform: translateX(-100%); }
+        @media (min-width: 768px) { .sidebar-closed { transform: translateX(0); } }
     </style>
 </head>
-<body class="h-screen overflow-hidden selection:bg-blue-500 selection:text-white bg-grid relative">
+<body class="h-screen overflow-hidden selection:bg-blue-500 selection:text-white bg-grid relative flex flex-col md:flex-row">
     
     <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none"></div>
 
-    <div id="loginSection" class="h-screen flex justify-center items-center relative z-50 backdrop-blur-sm">
-        <div class="glass-panel p-12 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-full max-w-md text-center relative border border-slate-700/50">
+    <div id="loginSection" class="fixed inset-0 h-screen flex justify-center items-center z-[100] backdrop-blur-md bg-black/50">
+        <div class="glass-panel p-10 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-[90%] max-w-md text-center relative border border-slate-700/50">
             <h2 class="text-4xl font-black mb-8 text-white tracking-tight">Admin Core</h2>
             <input type="password" id="adminPass" class="w-full px-6 py-5 bg-slate-900/80 border border-slate-700 rounded-2xl mb-6 text-white glow-input outline-none font-bold text-center tracking-[0.3em] text-xl" placeholder="••••••••">
-            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-black glow-btn tracking-widest uppercase border border-white/10">Authenticate</button>
+            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-black glow-btn tracking-widest uppercase">Authenticate</button>
         </div>
     </div>
 
-    <div id="dashSection" class="hidden flex h-screen relative z-10">
-        <div class="w-80 glass-panel border-r border-slate-800/80 flex flex-col p-8 space-y-2 shadow-2xl relative overflow-hidden">
-            <h2 class="text-3xl font-black mb-12 text-white tracking-tighter mt-2 relative z-10">AURA <span class="text-blue-500">DIGITAL</span></h2>
+    <div class="md:hidden glass-panel w-full p-4 flex justify-between items-center z-50 border-b border-slate-800 hidden" id="mobileHeader">
+        <h2 class="text-xl font-black text-white">AURA <span class="text-blue-500">DIGITAL</span></h2>
+        <button onclick="toggleSidebar()" class="text-white text-2xl"><i class="fa-solid fa-bars"></i></button>
+    </div>
+
+    <div id="dashSection" class="hidden flex-1 flex h-full relative z-10 overflow-hidden">
+        
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+        <div id="sidebar" class="w-72 glass-panel border-r border-slate-800/80 flex flex-col p-8 space-y-2 shadow-2xl absolute md:relative z-50 h-full sidebar-closed transition-transform duration-300 bg-[#050b14] md:bg-transparent">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black text-white tracking-tighter hidden md:block">AURA <span class="text-blue-500">DIGITAL</span></h2>
+                <h2 class="text-2xl font-black text-white tracking-tighter md:hidden">Menu</h2>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
             <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
             <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-box-open mr-4 w-5"></i> Products</button>
             <button onclick="showTab('promo', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-ticket mr-4 w-5"></i> Promos</button>
@@ -46,59 +62,62 @@
             <button onclick="showTab('notices', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-tower-broadcast mr-4 w-5"></i> Broadcast</button>
         </div>
 
-        <div class="flex-1 p-10 overflow-y-auto custom-scrollbar">
-            
+        <div class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
             <div id="statsTab" class="tab-content animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Command Center</h1>
-                
-                <div class="glass-panel p-6 rounded-3xl mb-8 flex justify-between items-center border border-red-500/20 bg-red-500/5">
-                    <div>
+                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Command Center</h1>
+                <div class="glass-panel p-6 rounded-3xl mb-8 flex flex-col md:flex-row justify-between items-center border border-red-500/20 bg-red-500/5">
+                    <div class="mb-4 md:mb-0 text-center md:text-left">
                         <h3 class="font-bold text-white text-lg"><i class="fa-solid fa-triangle-exclamation text-red-500 mr-2"></i> Maintenance Mode</h3>
                         <p class="text-slate-400 text-xs mt-1">If enabled, users will see the maintenance.html page.</p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="maintenanceToggle" class="sr-only peer" onchange="toggleMaintenance()">
-                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-500"></div>
+                        <div class="w-14 h-7 bg-slate-700 rounded-full peer peer-checked:bg-red-500 after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full"></div>
                     </label>
                 </div>
-
-                <div class="grid grid-cols-2 gap-8 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div>
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Revenue</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">$0</h2></div>
                 </div>
-                <div class="glass-panel p-8 rounded-[32px]"><h3 class="font-bold text-white mb-4">Sales Analytics</h3><canvas id="revenueChart" height="100"></canvas></div>
-            </div>
-
-            <div id="promoTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Promo Codes</h1>
-                <div class="glass-panel p-8 rounded-[32px] mb-8"><div class="flex gap-4"><input type="text" id="prCode" placeholder="Code (e.g. EID20)" class="flex-1 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none uppercase font-bold"><input type="number" id="prDisc" placeholder="Discount %" class="w-32 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><button onclick="addPromo()" class="bg-blue-600 text-white px-8 font-black rounded-xl hover:bg-blue-500">Create</button></div></div>
-                <div class="glass-panel rounded-[32px] overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase"><th class="p-6">Code</th><th class="p-6">Discount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="promoListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
+                <div class="glass-panel p-8 rounded-[32px] hidden md:block"><h3 class="font-bold text-white mb-4">Sales Analytics</h3><canvas id="revenueChart" height="100"></canvas></div>
             </div>
 
             <div id="productsTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Product Control</h1>
-                <div class="glass-panel p-8 rounded-[32px] mb-8">
-                    <div class="grid grid-cols-2 gap-4 mb-4"><input type="text" id="pName" placeholder="Product Title" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><input type="text" id="pPrice" placeholder="Price (USD)" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><input type="number" id="pStock" placeholder="Stock Qty" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><input type="text" id="pAbilities" placeholder="Short Description" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><input type="text" id="pLink" placeholder="Google Drive Link" class="col-span-2 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"></div>
-                    <button onclick="addProductWeb()" class="bg-blue-600 text-white px-8 py-3 font-black rounded-xl">Publish</button>
+                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Product Control</h1>
+                <div class="glass-panel p-6 rounded-[32px] mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="pName" placeholder="Product Title" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
+                        <input type="text" id="pPrice" placeholder="Price (USD)" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
+                        <input type="number" id="pStock" placeholder="Stock Qty" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
+                        <input type="text" id="pAbilities" placeholder="Short Description" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
+                        <input type="text" id="pLink" placeholder="Google Drive Link" class="md:col-span-2 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
+                    </div>
+                    <button onclick="addProductWeb()" class="w-full md:w-auto bg-blue-600 text-white px-8 py-3 font-black rounded-xl">Publish Product</button>
                 </div>
-                <div class="glass-panel rounded-[32px] overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-[0.2em] uppercase font-black"><th class="p-6">Title</th><th class="p-6">Price</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-700/30"></tbody></table></div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Title</th><th class="p-6">Price</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-700/30"></tbody></table></div>
+            </div>
+
+            <div id="promoTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
+                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Promo Codes</h1>
+                <div class="glass-panel p-6 rounded-[32px] mb-8"><div class="flex flex-col md:flex-row gap-4"><input type="text" id="prCode" placeholder="Code (e.g. EID20)" class="flex-1 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none uppercase font-bold"><input type="number" id="prDisc" placeholder="Discount %" class="w-full md:w-32 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><button onclick="addPromo()" class="w-full md:w-auto bg-blue-600 text-white px-8 py-4 font-black rounded-xl hover:bg-blue-500">Create</button></div></div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[400px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase"><th class="p-6">Code</th><th class="p-6">Discount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="promoListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
             </div>
 
             <div id="depositsTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Deposit Queue</h1>
-                <div class="glass-panel rounded-[32px] overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID / Method</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
+                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Deposit Queue</h1>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID / Method</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
             </div>
 
             <div id="usersTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black text-white tracking-tight">User Base</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search user..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl text-white outline-none font-bold w-72"></div>
-                <div class="glass-panel rounded-[32px] overflow-hidden">
-                    <table class="w-full text-left"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name</th><th class="p-6">Email / Ref</th><th class="p-6">Balance</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-700/30"></tbody></table>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4"><h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">User Base</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search user email..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl text-white outline-none font-bold w-full md:w-72"></div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto">
+                    <table class="w-full text-left min-w-[800px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name & Roles</th><th class="p-6">Email / Ref</th><th class="p-6">Balance</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-700/30"></tbody></table>
                 </div>
             </div>
 
             <div id="noticesTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-4xl font-black mb-10 text-white tracking-tight">Broadcast System</h1>
-                <div class="flex gap-4 mb-8"><input type="text" id="noticeInput" class="flex-1 px-6 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none font-bold" placeholder="Announcement..."><button onclick="addNotice()" class="bg-blue-600 text-white px-8 font-black rounded-xl">Transmit</button></div>
+                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Broadcast System</h1>
+                <div class="flex flex-col md:flex-row gap-4 mb-8"><input type="text" id="noticeInput" class="flex-1 px-6 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none font-bold" placeholder="Write announcement..."><button onclick="addNotice()" class="w-full md:w-auto bg-blue-600 text-white px-8 py-4 font-black rounded-xl">Transmit</button></div>
                 <div id="noticeList" class="space-y-4"></div>
             </div>
 
@@ -109,16 +128,29 @@
         let pass = sessionStorage.getItem('adminPass'); let globalUsers = []; let chartInstance = null;
         if(pass) checkAuth();
 
-        async function login() { pass = document.getElementById('adminPass').value; const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title:'Denied'}); } }
-        async function checkAuth() { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashSection').classList.remove('hidden'); loadAllData(); loadSettings(); }
-        function showTab(tabId, btnElement) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); if(btnElement) btnElement.classList.add('active'); }
-        
-        function getBadge(role, isVip) {
-            if(role === 'ADMIN') return '<span class="px-2 py-0.5 rounded text-[10px] font-black badge-admin ml-2">ADMIN</span>';
-            if(isVip) return '<span class="px-2 py-0.5 rounded text-[10px] font-black badge-vip ml-2">VIP</span>';
-            return '<span class="px-2 py-0.5 rounded text-[10px] font-black badge-basic ml-2">BASIC</span>';
+        function toggleSidebar() { 
+            document.getElementById('sidebar').classList.toggle('sidebar-closed'); 
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
+        async function login() { pass = document.getElementById('adminPass').value; const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title:'Access Denied'}); } }
+        
+        async function checkAuth() { 
+            document.getElementById('loginSection').classList.add('hidden'); 
+            document.getElementById('dashSection').classList.remove('hidden'); 
+            document.getElementById('mobileHeader').classList.remove('hidden');
+            loadAllData(); loadSettings(); 
+        }
+
+        function showTab(tabId, btnElement) { 
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); 
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
+            document.getElementById(tabId + 'Tab').classList.remove('hidden'); 
+            if(btnElement) btnElement.classList.add('active'); 
+            if(window.innerWidth < 768) toggleSidebar(); // Close sidebar on mobile after clicking
+        }
+        
         async function loadSettings() {
             const res = await fetch('/api/admin/settings'); const data = await res.json();
             document.getElementById('maintenanceToggle').checked = data.isMaintenance;
@@ -140,8 +172,11 @@
             document.getElementById('promoListBody').innerHTML = data.promos.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-black text-blue-400 text-xl">${p.code}</td><td class="p-6 text-white font-bold text-lg">${p.discount}%</td><td class="p-6 text-right"><button onclick="deletePromo(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
             const nRes = await fetch('/api/notices'); const notices = await nRes.json(); document.getElementById('noticeList').innerHTML = notices.map(n => `<div class="glass-panel p-6 rounded-2xl flex justify-between items-center"><span class="text-white font-bold">${n.text}</span> <button onclick="deleteNotice(${n.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
             
-            const ctx = document.getElementById('revenueChart').getContext('2d'); if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, { type: 'line', data: { labels: ['M','T','W','T','F','S','S'], datasets: [{ label: 'Sales', data: [10,25,12,30,15,40,22], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, scales: { y: { display: false }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+            const ctx = document.getElementById('revenueChart');
+            if(ctx && window.innerWidth > 768) {
+                if(chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx.getContext('2d'), { type: 'line', data: { labels: ['M','T','W','T','F','S','S'], datasets: [{ label: 'Sales', data: [10,25,12,30,15,40,22], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, scales: { y: { display: false }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+            }
         }
 
         function filterUsers() { const query = document.getElementById('userSearch').value.toLowerCase(); const filtered = globalUsers.filter(u => u.firstName.toLowerCase().includes(query) || (u.email && u.email.toLowerCase().includes(query))); renderUsers(filtered); }
@@ -149,10 +184,10 @@
         function renderUsers(users) { 
             document.getElementById('userListBody').innerHTML = users.map(u => `
             <tr class="hover:bg-slate-800/20 ${u.isBanned ? 'opacity-50' : ''}">
-                <td class="p-6 font-bold text-white flex items-center">${u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover mr-3 border border-slate-600">` : `<div class="w-8 h-8 rounded-full bg-slate-700 mr-3 flex items-center justify-center">${u.firstName.charAt(0)}</div>`} ${u.firstName} ${getBadge(u.role, u.isVip)} <br> ${u.isBanned?'<span class="text-[10px] text-red-500 font-black ml-11">BANNED</span>':''}</td>
-                <td class="p-6 text-sm text-slate-400">${u.email}<br><span class="text-[10px] text-blue-400">Ref: ${u.refCode}</span></td>
+                <td class="p-6 font-bold text-white flex items-center">${u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover mr-3 border border-slate-600">` : `<div class="w-8 h-8 rounded-full bg-slate-700 mr-3 flex items-center justify-center">${u.firstName.charAt(0)}</div>`} <div class="flex flex-col"><span>${u.firstName} ${u.role === 'ADMIN' ? '<span class="badge-admin">ADMIN</span>' : ''} ${u.isVip ? '<span class="badge-vip">VIP</span>' : ''}</span> ${u.isBanned?'<span class="text-[10px] text-red-500 font-black">BANNED</span>':''}</div></td>
+                <td class="p-6 text-sm text-slate-400">${u.email}<br><span class="text-[10px] text-blue-400 font-mono tracking-widest">Ref: ${u.refCode}</span></td>
                 <td class="p-6 text-emerald-400 font-black text-xl">$${u.balanceUsd.toFixed(2)}</td>
-                <td class="p-6 text-right">
+                <td class="p-6 text-right whitespace-nowrap">
                     <button onclick="editBalance(${u.id}, ${u.balanceUsd})" class="bg-blue-500/20 text-blue-400 p-2 rounded-lg mr-2 hover:bg-blue-500 hover:text-white transition-colors" title="Edit Balance"><i class="fa-solid fa-wallet"></i></button>
                     <button onclick="toggleAdmin(${u.id}, '${u.role}')" class="bg-purple-500/20 text-purple-400 p-2 rounded-lg mr-2 hover:bg-purple-600 hover:text-white transition-colors" title="Toggle Admin Role"><i class="fa-solid fa-user-shield"></i></button>
                     <button onclick="toggleBan(${u.id}, ${u.isBanned})" class="${u.isBanned?'bg-red-500 text-white':'bg-red-500/10 text-red-400'} p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="${u.isBanned?'Unban User':'Ban User'}"><i class="fa-solid fa-ban"></i></button>
@@ -160,7 +195,7 @@
             </tr>`).join(''); 
         }
 
-        async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Balance', input: 'number', inputValue: currentBalance, inputAttributes: { step: '0.01' }, showCancelButton: true }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', showConfirmButton:false, timer:1500}); } }
+        async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Balance', input: 'number', inputValue: currentBalance, inputAttributes: { step: '0.01' }, showCancelButton: true, background:'#1e293b', color:'#fff' }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'}); } }
         async function toggleAdmin(id, currentRole) { const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN'; if(confirm(`Change role to ${newRole}?`)) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'role', id, role: newRole})}); loadAllData(); } }
         async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban user?' : 'BAN this user?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
         async function addProductWeb() { const name = document.getElementById('pName').value; const price = document.getElementById('pPrice').value; const stock = document.getElementById('pStock').value; const abilities = document.getElementById('pAbilities').value; const driveLink = document.getElementById('pLink').value; if(!name) return; await fetch('/api/admin/product', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, name, price, stock, abilities, driveLink}) }); loadAllData(); }
