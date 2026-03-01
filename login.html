@@ -39,18 +39,14 @@
                 <h2 class="text-2xl font-bold mb-4">Welcome Back</h2>
                 <input type="email" id="lEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
                 <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
-                
-                <div class="flex justify-end">
-                    <button onclick="switchTab('forgot')" class="text-sm font-bold text-blue-500 hover:underline">Forgot Password?</button>
-                </div>
-
+                <div class="flex justify-end"><button onclick="switchTab('forgot')" class="text-sm font-bold text-blue-500 hover:underline">Forgot Password?</button></div>
                 <button onclick="handleLogin()" id="btnLogin" class="w-full bg-blue-600 py-4 rounded-xl font-black tracking-widest uppercase hover:bg-blue-500 transition-colors mt-2">Enter Vault</button>
             </div>
 
             <div id="regSection" class="hidden space-y-4">
                 <h2 class="text-2xl font-bold mb-4">Create Account</h2>
                 <input type="text" id="rName" placeholder="Full Name" class="input-box w-full p-4 rounded-xl font-bold">
-                <input type="email" id="rEmail" placeholder="Real Email Address (For Verification)" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="email" id="rEmail" placeholder="Real Email Address (Required)" class="input-box w-full p-4 rounded-xl font-bold">
                 <input type="password" id="rPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
                 <div class="grid grid-cols-2 gap-3">
                     <select id="rCountry" class="input-box p-4 rounded-xl font-bold text-slate-400">
@@ -63,12 +59,19 @@
 
             <div id="forgotSection" class="hidden space-y-4">
                 <h2 class="text-2xl font-bold mb-2">Reset Password</h2>
-                <p class="text-sm text-slate-400 mb-4">Enter your email to receive a password reset link.</p>
+                <p class="text-sm text-slate-400 mb-4">Enter your email to receive a 6-digit code.</p>
                 <input type="email" id="fEmail" placeholder="Your Account Email" class="input-box w-full p-4 rounded-xl font-bold">
-                <button onclick="handleForgot()" id="btnForgot" class="w-full bg-blue-600 py-4 rounded-xl font-black tracking-widest uppercase hover:bg-blue-500 transition-colors mt-2">Send Reset Link</button>
-                <div class="text-center mt-4">
-                    <button onclick="switchTab('login')" class="text-sm font-bold text-slate-500 hover:text-white">Back to Login</button>
-                </div>
+                <button onclick="handleForgot()" id="btnForgot" class="w-full bg-blue-600 py-4 rounded-xl font-black tracking-widest uppercase hover:bg-blue-500 mt-2">Send Code</button>
+                <div class="text-center mt-4"><button onclick="switchTab('login')" class="text-sm font-bold text-slate-500 hover:text-white">Back to Login</button></div>
+            </div>
+
+            <div id="resetSection" class="hidden space-y-4">
+                <h2 class="text-2xl font-bold mb-2">Create New Password</h2>
+                <p class="text-sm text-slate-400 mb-4">Enter the 6-digit code sent to your email.</p>
+                <input type="text" id="rCode" placeholder="6-Digit OTP Code" class="input-box w-full p-4 rounded-xl font-black text-center text-2xl tracking-[0.5em] text-blue-400">
+                <input type="password" id="rNewPass" placeholder="Enter New Password" class="input-box w-full p-4 rounded-xl font-bold mt-2">
+                <button onclick="submitReset()" id="btnSubmitReset" class="w-full bg-emerald-600 py-4 rounded-xl font-black tracking-widest uppercase hover:bg-emerald-500 mt-4">Confirm Reset</button>
+                <div class="text-center mt-4"><button onclick="switchTab('login')" class="text-sm font-bold text-slate-500 hover:text-white">Back to Login</button></div>
             </div>
 
         </div>
@@ -78,70 +81,50 @@
         const swalDark = { background: '#1e293b', color: '#fff' };
 
         function switchTab(t) {
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('regSection').classList.add('hidden');
-            document.getElementById('forgotSection').classList.add('hidden');
-            
-            if(t === 'login') {
-                document.getElementById('loginSection').classList.remove('hidden');
-                document.getElementById('loginTab').className = 'pb-2 font-bold tab-active';
-                document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive';
-            } else if(t === 'reg') {
-                document.getElementById('regSection').classList.remove('hidden');
-                document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive';
-                document.getElementById('regTab').className = 'pb-2 font-bold tab-active';
-            } else {
-                document.getElementById('forgotSection').classList.remove('hidden');
-                document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive';
-                document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive';
-            }
+            ['loginSection', 'regSection', 'forgotSection', 'resetSection'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive'; document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive';
+            if(t === 'login') { document.getElementById('loginSection').classList.remove('hidden'); document.getElementById('loginTab').className = 'pb-2 font-bold tab-active'; }
+            else if(t === 'reg') { document.getElementById('regSection').classList.remove('hidden'); document.getElementById('regTab').className = 'pb-2 font-bold tab-active'; }
+            else if(t === 'forgot') { document.getElementById('forgotSection').classList.remove('hidden'); }
+            else if(t === 'reset') { document.getElementById('resetSection').classList.remove('hidden'); }
         }
 
         async function handleLogin() {
-            const email = document.getElementById('lEmail').value;
-            const password = document.getElementById('lPass').value;
-            if(!email || !password) return;
+            const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value; if(!email || !password) return;
             const btn = document.getElementById('btnLogin'); btn.innerText = "Processing...";
-            
             const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email, password}) });
-            const data = await res.json();
-            btn.innerText = "Enter Vault";
-            
+            const data = await res.json(); btn.innerText = "Enter Vault";
             if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); location.href = '/'; }
             else Swal.fire({title: 'Error', text: data.error || 'Invalid credentials', icon: 'error', ...swalDark});
         }
 
         async function handleRegister() {
-            const name = document.getElementById('rName').value;
-            const email = document.getElementById('rEmail').value;
-            const password = document.getElementById('rPass').value;
-            const country = document.getElementById('rCountry').value;
-            const refCode = document.getElementById('rRef').value;
+            const name = document.getElementById('rName').value; const email = document.getElementById('rEmail').value; const password = document.getElementById('rPass').value;
+            const country = document.getElementById('rCountry').value; const refCode = document.getElementById('rRef').value;
             if(!name || !email || !password) return;
-            
             const btn = document.getElementById('btnReg'); btn.innerText = "Creating...";
             const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password, country, refCode}) });
-            const data = await res.json();
-            btn.innerText = "Sign Up";
-            
-            if(data.success) { 
-                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-                Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); 
-                switchTab('login'); 
-            }
+            const data = await res.json(); btn.innerText = "Sign Up";
+            if(data.success) { confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); }
             else Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark});
         }
 
         async function handleForgot() {
-            const email = document.getElementById('fEmail').value;
-            if(!email) return;
+            const email = document.getElementById('fEmail').value; if(!email) return;
             const btn = document.getElementById('btnForgot'); btn.innerText = "Sending...";
-            
             const res = await fetch('/api/forgot-password', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email}) });
-            const data = await res.json();
-            btn.innerText = "Send Reset Link";
-            
-            if(data.success) { Swal.fire({title: 'Email Sent!', text: 'Check your inbox for the reset link.', icon: 'success', ...swalDark}); switchTab('login'); }
+            const data = await res.json(); btn.innerText = "Send Code";
+            if(data.success) { Swal.fire({title: 'Code Sent!', text: 'Check your email for the 6-digit code.', icon: 'success', ...swalDark}); switchTab('reset'); }
+            else Swal.fire({title: 'Error', text: data.error, icon: 'error', ...swalDark});
+        }
+
+        async function submitReset() {
+            const identifier = document.getElementById('rCode').value; const newPassword = document.getElementById('rNewPass').value;
+            if(!identifier || !newPassword) return;
+            const btn = document.getElementById('btnSubmitReset'); btn.innerText = "Verifying...";
+            const res = await fetch('/api/reset-password', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({identifier, newPassword}) });
+            const data = await res.json(); btn.innerText = "Confirm Reset";
+            if(data.success) { Swal.fire({title: 'Success', text: 'Password Updated!', icon: 'success', ...swalDark}); switchTab('login'); }
             else Swal.fire({title: 'Error', text: data.error, icon: 'error', ...swalDark});
         }
     </script>
