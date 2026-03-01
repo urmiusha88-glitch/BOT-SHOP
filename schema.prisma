@@ -21,22 +21,33 @@ model Product {
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
-  email        String?    @unique
-  password     String?   
-  telegramId   String?    @unique 
-  firstName    String?
-  country      String     @default("BD") 
-  balanceUsd   Float      @default(0.0) 
-  refCode      String?    @unique 
-  isVip        Boolean    @default(false)
-  vipExpiry    DateTime?
-  isBanned     Boolean    @default(false)
-  role         String     @default("USER") // 🔥 NEW: USER or ADMIN
-  avatar       String?    // 🔥 NEW: Profile Picture
-  deposits     Deposit[] 
-  purchases    Purchase[] 
-  createdAt    DateTime   @default(now())
+  id                 Int        @id @default(autoincrement())
+  email              String?    @unique
+  password           String?   
+  telegramId         String?    @unique 
+  firstName          String?
+  country            String     @default("BD") 
+  balanceUsd         Float      @default(0.0) 
+  refCode            String?    @unique 
+  referredBy         String?    
+  referralRewardPaid Boolean    @default(false)
+  refCount           Int        @default(0)
+  ipAddress          String?    
+  isVip              Boolean    @default(false)
+  vipExpiry          DateTime?
+  isBanned           Boolean    @default(false)
+  role               String     @default("USER")
+  avatar             String?
+  
+  // 🔥 NEW: SECURITY & VERIFICATION
+  isVerified         Boolean    @default(false)
+  verifyToken        String?
+  resetToken         String?
+  resetExpiry        DateTime?
+
+  deposits           Deposit[] 
+  purchases          Purchase[] 
+  createdAt          DateTime   @default(now())
 }
 
 model Promo {
