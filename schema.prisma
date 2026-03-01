@@ -39,10 +39,10 @@ model User {
   role               String     @default("USER")
   avatar             String?
   
-  // 🔥 NEW: SECURITY & VERIFICATION
   isVerified         Boolean    @default(false)
   verifyToken        String?
   resetToken         String?
+  resetCode          String?    // 🔥 NEW: 6-Digit OTP Code
   resetExpiry        DateTime?
 
   deposits           Deposit[] 
