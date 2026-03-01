@@ -13,7 +13,8 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050b14; color: #e2e8f0; padding-bottom: 80px; }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
-        .blob { position: fixed; filter: blur(100px); opacity: 0.15; z-index: -1; animation: float 20s infinite alternate; }
+        .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(100px); opacity: 0.15; animation: float 20s infinite alternate; }
         .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; }
         .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: #8b5cf6; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(100px, 50px); } }
@@ -23,7 +24,7 @@
         .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: load 1.5s infinite; border-radius: 16px; }
         @keyframes load { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
         .prof-tab.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
         .badge-admin { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
         .badge-vip { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
@@ -37,7 +38,7 @@
     </style>
 </head>
 <body>
-    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
     <div class="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 bg-slate-800/90 backdrop-blur-md border border-slate-700 px-4 py-2 rounded-full shadow-lg text-xs font-bold text-slate-300 flex items-center gap-2">
         <span class="flex h-3 w-3 relative"><span class="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative rounded-full h-3 w-3 bg-emerald-500"></span></span>
