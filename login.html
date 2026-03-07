@@ -3,88 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access | AURA DIGITAL STORE</title>
+    <title>Access | AURA STORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background: #050b14; color: white; overflow: hidden; }
-        .split-left { background: linear-gradient(45deg, #2563eb, #7c3aed); }
-        .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; color: white; outline: none; }
-        .input-box:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.3); }
+        
+        /* Floating Blobs */
+        .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(90px); opacity: 0.4; animation: float 15s infinite alternate ease-in-out; }
+        .blob-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: #3b82f6; }
+        .blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: #8b5cf6; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
+
+        /* Animations */
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-right { animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; color: white; outline: none; }
+        .input-box:focus { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.3); background: rgba(15,23,42,0.9); transform: translateY(-2px); }
         .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
-        .tab-inactive { color: #64748b; }
-        @media (max-width: 1024px) { .split-left { height: 25vh; } .split-right { height: 75vh; border-radius: 40px 40px 0 0; margin-top: -40px; background: #0b1121; } }
+        .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
+        
+        .split-left { background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(124,58,237,0.2)); backdrop-filter: blur(10px); border-right: 1px solid rgba(255,255,255,0.05); }
+        @media (max-width: 1024px) { .split-left { height: 30vh; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); } .split-right { height: 70vh; } }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col lg:flex-row">
 
-    <div class="split-left w-full lg:w-1/2 flex flex-col justify-center p-12 relative overflow-hidden">
-        <div class="relative z-10 text-center lg:text-left">
-            <h1 class="text-4xl lg:text-6xl font-black mb-2 tracking-tighter">AURA <span class="text-blue-200">STORE</span></h1>
-            <p class="text-blue-100 font-medium opacity-80">Premium Physical Collections.</p>
+    <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
+
+    <div class="split-left w-full lg:w-1/2 flex flex-col justify-center items-center p-12 relative z-10 animate-slide-up">
+        <div class="text-center">
+            <div class="w-24 h-24 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.6)] text-white mb-6 transform hover:rotate-12 transition-transform duration-500">
+                <i class="fa-solid fa-shirt text-4xl"></i>
+            </div>
+            <h1 class="text-5xl lg:text-7xl font-black mb-2 tracking-tighter">AURA<span class="text-blue-400">STORE</span></h1>
+            <p class="text-blue-200 font-bold tracking-widest uppercase text-sm opacity-80">Premium Physical Collections</p>
         </div>
     </div>
 
-    <div class="split-right w-full lg:w-1/2 flex justify-center items-start lg:items-center p-8 z-10 bg-[#0b1121] overflow-y-auto">
-        <div class="w-full max-w-md mt-6 lg:mt-0">
-            <div class="flex gap-6 mb-8 border-b border-slate-800">
-                <button id="loginTab" onclick="switchTab('login')" class="pb-2 font-bold tab-active">Login</button>
-                <button id="regTab" onclick="switchTab('reg')" class="pb-2 font-bold tab-inactive">Register</button>
+    <div class="split-right w-full lg:w-1/2 flex justify-center items-start lg:items-center p-6 sm:p-12 z-10 overflow-y-auto custom-scrollbar">
+        <div class="glass-panel w-full max-w-md p-8 rounded-[32px] shadow-2xl animate-slide-up" style="animation-delay: 0.2s; opacity: 0;">
+            <div class="flex gap-6 mb-8 border-b border-slate-700/50">
+                <button id="loginTab" onclick="switchTab('login')" class="pb-3 font-black uppercase tracking-widest text-sm tab-active transition-all w-1/2">Login</button>
+                <button id="regTab" onclick="switchTab('reg')" class="pb-3 font-black uppercase tracking-widest text-sm tab-inactive transition-all w-1/2 hover:text-white">Register</button>
             </div>
 
-            <div id="loginSection" class="space-y-4">
-                <h2 class="text-2xl font-bold mb-4">Welcome Back</h2>
+            <div id="loginSection" class="space-y-5 animate-slide-right">
+                <h2 class="text-2xl font-black mb-2">Welcome Back</h2>
+                <p class="text-xs text-slate-400 font-bold mb-6">Enter your credentials to access the store.</p>
                 <input type="email" id="lEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
                 <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
-                <div class="flex justify-end"><button onclick="switchTab('forgot')" class="text-sm font-bold text-blue-500 hover:underline">Forgot Password?</button></div>
-                <button onclick="handleLogin()" id="btnLogin" class="w-full bg-blue-600 py-4 rounded-xl font-black tracking-widest uppercase hover:bg-blue-500 mt-2">Enter Store</button>
+                <button onclick="handleLogin()" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-95 mt-4">Enter Store <i class="fa-solid fa-arrow-right ml-2"></i></button>
             </div>
 
-            <div id="regSection" class="hidden space-y-4">
-                <h2 class="text-2xl font-bold mb-4">Create Account</h2>
+            <div id="regSection" class="hidden space-y-5">
+                <h2 class="text-2xl font-black mb-2">Create Account</h2>
+                <p class="text-xs text-slate-400 font-bold mb-6">Join the premium marketplace today.</p>
                 <input type="text" id="rName" placeholder="Full Name" class="input-box w-full p-4 rounded-xl font-bold">
-                <input type="email" id="rEmail" placeholder="Real Email Address (Required)" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="email" id="rEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
                 <input type="password" id="rPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
-                <div class="grid grid-cols-2 gap-3">
-                    <select id="rCountry" class="input-box p-4 rounded-xl font-bold text-slate-400"><option value="BD">Bangladesh</option></select>
-                    <input type="text" id="rRef" placeholder="Ref Code (Opt)" class="input-box p-4 rounded-xl font-bold uppercase text-emerald-400">
-                </div>
-                <button onclick="handleRegister()" id="btnReg" class="w-full bg-slate-100 text-slate-900 hover:bg-white py-4 rounded-xl font-black tracking-widest uppercase mt-2">Sign Up</button>
-            </div>
-
-            <div id="forgotSection" class="hidden space-y-4">
-                <h2 class="text-2xl font-bold mb-2">Reset Password</h2>
-                <p class="text-sm text-slate-400 mb-4">Enter email to receive a 6-digit code.</p>
-                <input type="email" id="fEmail" placeholder="Account Email" class="input-box w-full p-4 rounded-xl font-bold">
-                <button onclick="handleForgot()" id="btnForgot" class="w-full bg-blue-600 py-4 rounded-xl font-black tracking-widest uppercase hover:bg-blue-500 mt-2">Send Code</button>
-                <div class="text-center mt-4"><button onclick="switchTab('login')" class="text-sm font-bold text-slate-500 hover:text-white">Back to Login</button></div>
-            </div>
-
-            <div id="resetSection" class="hidden space-y-4">
-                <h2 class="text-2xl font-bold mb-2">New Password</h2>
-                <input type="text" id="rCode" placeholder="6-Digit OTP" class="input-box w-full p-4 rounded-xl font-black text-center text-2xl tracking-[0.5em] text-blue-400">
-                <input type="password" id="rNewPass" placeholder="New Password" class="input-box w-full p-4 rounded-xl font-bold mt-2">
-                <button onclick="submitReset()" id="btnSubmitReset" class="w-full bg-emerald-600 py-4 rounded-xl font-black tracking-widest uppercase hover:bg-emerald-500 mt-4">Confirm Reset</button>
+                <input type="text" id="rRef" placeholder="Referral Code (Optional)" class="input-box w-full p-4 rounded-xl font-bold uppercase text-emerald-400">
+                <button onclick="handleRegister()" id="btnReg" class="w-full bg-slate-100 text-slate-900 hover:bg-white py-4 rounded-xl font-black tracking-widest uppercase transition-all shadow-lg active:scale-95 mt-4">Sign Up</button>
             </div>
         </div>
     </div>
 
     <script>
-        const swalDark = { background: '#1e293b', color: '#fff' };
+        const swalDark = { background: 'rgba(15, 23, 42, 0.95)', color: '#fff', backdrop: 'rgba(0,0,0,0.8)' };
+        
         function switchTab(t) {
-            ['loginSection', 'regSection', 'forgotSection', 'resetSection'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive'; document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive';
-            if(t === 'login') { document.getElementById('loginSection').classList.remove('hidden'); document.getElementById('loginTab').className = 'pb-2 font-bold tab-active'; }
-            else if(t === 'reg') { document.getElementById('regSection').classList.remove('hidden'); document.getElementById('regTab').className = 'pb-2 font-bold tab-active'; }
-            else if(t === 'forgot') { document.getElementById('forgotSection').classList.remove('hidden'); }
-            else if(t === 'reset') { document.getElementById('resetSection').classList.remove('hidden'); }
+            const loginSec = document.getElementById('loginSection'); const regSec = document.getElementById('regSection');
+            loginSec.classList.add('hidden'); regSec.classList.add('hidden');
+            loginSec.classList.remove('animate-slide-right'); regSec.classList.remove('animate-slide-right');
+            
+            document.getElementById('loginTab').className = 'pb-3 font-black uppercase tracking-widest text-sm tab-inactive transition-all w-1/2 hover:text-white'; 
+            document.getElementById('regTab').className = 'pb-3 font-black uppercase tracking-widest text-sm tab-inactive transition-all w-1/2 hover:text-white';
+            
+            if(t === 'login') { 
+                loginSec.classList.remove('hidden'); 
+                void loginSec.offsetWidth; // trigger reflow
+                loginSec.classList.add('animate-slide-right'); 
+                document.getElementById('loginTab').classList.replace('tab-inactive', 'tab-active'); 
+            } else { 
+                regSec.classList.remove('hidden'); 
+                void regSec.offsetWidth; 
+                regSec.classList.add('animate-slide-right'); 
+                document.getElementById('regTab').classList.replace('tab-inactive', 'tab-active'); 
+            }
         }
-        async function handleLogin() { const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value; if(!email || !password) return; const btn = document.getElementById('btnLogin'); btn.innerText = "Processing..."; const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email, password}) }); const data = await res.json(); btn.innerText = "Enter Store"; if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); location.href = '/'; } else Swal.fire({title: 'Error', text: data.error || 'Invalid credentials', icon: 'error', ...swalDark}); }
-        async function handleRegister() { const name = document.getElementById('rName').value; const email = document.getElementById('rEmail').value; const password = document.getElementById('rPass').value; const country = document.getElementById('rCountry').value; const refCode = document.getElementById('rRef').value; if(!name || !email || !password) return; const btn = document.getElementById('btnReg'); btn.innerText = "Creating..."; const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password, country, refCode}) }); const data = await res.json(); btn.innerText = "Sign Up"; if(data.success) { confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); } else Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); }
-        async function handleForgot() { const email = document.getElementById('fEmail').value; if(!email) return; const btn = document.getElementById('btnForgot'); btn.innerText = "Sending..."; const res = await fetch('/api/forgot-password', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email}) }); const data = await res.json(); btn.innerText = "Send Code"; if(data.success) { Swal.fire({title: 'Code Sent!', text: 'Check email.', icon: 'success', ...swalDark}); switchTab('reset'); } else Swal.fire({title: 'Error', text: data.error, icon: 'error', ...swalDark}); }
-        async function submitReset() { const identifier = document.getElementById('rCode').value; const newPassword = document.getElementById('rNewPass').value; if(!identifier || !newPassword) return; const btn = document.getElementById('btnSubmitReset'); btn.innerText = "Verifying..."; const res = await fetch('/api/reset-password', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({identifier, newPassword}) }); const data = await res.json(); btn.innerText = "Confirm Reset"; if(data.success) { Swal.fire({title: 'Success', text: 'Password Updated!', icon: 'success', ...swalDark}); switchTab('login'); } else Swal.fire({title: 'Error', text: data.error, icon: 'error', ...swalDark}); }
+
+        async function handleLogin() { 
+            const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value; 
+            if(!email || !password) return; 
+            const btn = document.getElementById('btnLogin'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...'; 
+            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email, password}) }); 
+            const data = await res.json(); btn.innerHTML = 'Enter Store <i class="fa-solid fa-arrow-right ml-2"></i>'; 
+            if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); document.body.style.opacity = 0; setTimeout(()=>location.href = '/', 300); } 
+            else Swal.fire({title: 'Error', text: data.error || 'Invalid credentials', icon: 'error', ...swalDark}); 
+        }
+
+        async function handleRegister() { 
+            const name = document.getElementById('rName').value; const email = document.getElementById('rEmail').value; const password = document.getElementById('rPass').value; const refCode = document.getElementById('rRef').value; 
+            if(!name || !email || !password) return; 
+            const btn = document.getElementById('btnReg'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating...'; 
+            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password, country:'BD', refCode}) }); 
+            const data = await res.json(); btn.innerHTML = 'Sign Up'; 
+            if(data.success) { confetti({ particleCount: 150, spread: 80 }); Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); } 
+            else Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); 
+        }
     </script>
 </body>
 </html>
