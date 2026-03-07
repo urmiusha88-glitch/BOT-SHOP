@@ -117,7 +117,7 @@
             document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400 font-mono">${d.trxId}<br><span class="text-blue-400 font-black text-xs uppercase">${d.method}</span></td><td class="p-6 font-black text-emerald-400 text-lg">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg font-bold text-xs mr-2 hover:bg-emerald-500 hover:text-white">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-500 hover:text-white">Reject</button>` : `<span class="font-black text-[10px] text-slate-500">${d.status}</span>`}</td></tr>`).join('');
             document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${p.name}</td><td class="p-6 text-blue-400 font-black text-lg">৳${p.price}</td><td class="p-6 text-slate-400 font-bold">${p.stock} units</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
             
-            // 🔥 ORDER WORKFLOW BUTTONS
+            // 🔥 ORDER WORKFLOW BUTTONS FIXED
             document.getElementById('adminOrderList').innerHTML = data.orders.map(o => {
                 let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor);
                 let varStr = varText.length>0 ? `<br><span class="text-emerald-400 text-[10px] bg-emerald-900/30 px-2 py-1 rounded">Variant: ${varText.join(' - ')}</span>` : '';
@@ -170,7 +170,19 @@
         async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban user?' : 'BAN this user?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
         async function deleteProduct(id) { if(confirm('Delete Product?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
         async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
-        async function updateOrderStatus(id, status) { Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark}); await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); Swal.close(); loadAllData(); toast('success', `Marked as ${status}`); }
+        
+        // 🔥 FIXED: GLOBAL UPDATE FUNCTION
+        window.updateOrderStatus = async function(id, status) { 
+            Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, background:'#1e293b', color:'#fff'}); 
+            try {
+                await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); 
+                Swal.close(); 
+                loadAllData(); 
+                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: `Marked as ${status}`, showConfirmButton: false, timer: 1500, background:'#1e293b', color:'#fff'});
+            } catch(e) {
+                Swal.fire('Error', 'Update failed.', 'error');
+            }
+        }
     </script>
 </body>
 </html>
