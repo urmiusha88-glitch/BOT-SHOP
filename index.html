@@ -20,18 +20,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Feature 1: Dynamic Theme Variables */
+        /* 1. Theme Variables for Light/Dark Mode */
         :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; --glass: rgba(255,255,255,0.9); }
         .dark { --bg: #050b14; --text: #e2e8f0; --card: #0f172a; --border: #1e293b; --glass: rgba(15,23,42,0.85); }
         
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; transition: background-color 0.3s, color 0.3s; overflow-x: hidden; }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
 
-        /* Feature 3: Splash Screen */
+        /* 3. Splash Screen */
         #splashScreen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.6s ease-out; }
         .spinner { width: 60px; height: 60px; border: 6px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         
-        /* Feature 2: Neon Glow & Glassmorphism */
+        /* 2. Neon Glow & Glassmorphism */
         .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
         .blob { position: absolute; filter: blur(100px); opacity: 0.15; animation: float 20s infinite alternate; }
         .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; }
@@ -49,8 +49,10 @@
         .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
         .badge-basic { background: linear-gradient(135deg, #94a3b8, #475569); color: white; }
         
-        .variant-select { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px; rounded: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: 0.3s; }
-        .variant-select:focus { border-color: #3b82f6; }
+        /* 🔥 FIXED: VARIANT SELECT DROPDOWN VISIBILITY */
+        .variant-select { background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: all 0.3s ease; cursor: pointer; }
+        .variant-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .variant-select option { background-color: var(--card); color: var(--text); font-weight: bold; }
         
         /* Feature 6: Visual Order Timeline */
         .timeline-step { width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10; position: relative; }
@@ -68,9 +70,7 @@
         @media (min-width: 768px) { #btnScrollTop { bottom: 30px; right: 30px; } #btnFeedback { bottom: 30px; left: 30px; } }
     </style>
 </head>
-<body>
-
-    <div id="splashScreen"><div class="spinner"></div></div>
+<body class="dark"> <div id="splashScreen"><div class="spinner"></div></div>
 
     <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
@@ -99,6 +99,7 @@
     </nav>
 
     <button onclick="openFeedback()" id="btnFeedback" class="fab hover:bg-indigo-500" title="Give Feedback"><i class="fa-solid fa-comment-dots text-xl"></i></button>
+    
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500" title="Scroll to Top"><i class="fa-solid fa-arrow-up"></i></button>
 
     <div class="pt-10 pb-10 text-center relative z-10 px-4">
@@ -326,11 +327,11 @@
             
             container.innerHTML = list.map(p => {
                 let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="sz-${p.id}" class="variant-select"><option value="">Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
-                let colorOpts = p.colors && p.colors.length > 0 ? `<select id="cl-${p.id}" class="variant-select"><option value="">Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
-                let variantHtml = (sizeOpts || colorOpts) ? `<div class="flex gap-2 mb-4">${sizeOpts}${colorOpts}</div>` : `<div class="mb-4 text-xs text-slate-500 font-bold h-9 flex items-center">Standard Item</div>`;
+                let colorOpts = p.colors && p.colors.length > 0 ? `<select id="cl-${p.id}" class="variant-select mt-2"><option value="">Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
+                let variantHtml = (sizeOpts || colorOpts) ? `<div class="mb-4">${sizeOpts}${colorOpts}</div>` : `<div class="mb-4 text-xs text-slate-500 font-bold h-9 flex items-center">Standard Item</div>`;
 
                 let btnHtml = p.stock <= 0 
-                    ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-black uppercase text-xs cursor-not-allowed border border-red-500/20">Sold Out</button>`
+                    ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-black uppercase text-xs cursor-not-allowed border border-red-500/30">Sold Out</button>`
                     : `<div class="flex gap-2"><button onclick="addToCartUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-1 bg-[var(--bg)] border border-[var(--border)] hover:border-blue-500 text-blue-500 py-3 rounded-xl font-black transition-colors active:scale-95"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNowUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black uppercase text-xs transition-transform active:scale-95 shadow-lg"><i class="fa-solid fa-bolt mr-1"></i> Buy</button></div>`;
                 
                 let mainImage = (p.imageIds && p.imageIds.length > 0) ? p.imageIds[0] : p.imageId;
@@ -411,24 +412,25 @@
             if(cart.length === 0 || !user) return;
             const phone = document.getElementById('cPhone').value; const street = document.getElementById('cStreet').value; const city = document.getElementById('cCity').value; const zip = document.getElementById('cZip').value;
             if(!phone || !street || !city) return Swal.fire('Error', 'Please fill delivery details.', 'error');
-            Swal.fire({title: 'Processing Order...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+            Swal.fire({title: 'Processing Order...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, background:'var(--card)', color:'var(--text)'});
             try {
                 const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, cartItems: cart, address: { phone, street, city, postcode: zip }}) });
                 const data = await res.json();
                 if(data.success) {
                     user.balanceBdt = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); cart = []; updateCartBadge(); toggleCart(); renderAuth(); renderProducts(allProducts); document.getElementById('addressSection').classList.add('hidden'); document.getElementById('depositForm').reset();
-                    Swal.fire({ title: 'Order Sent! 🎉', html: `<p class="mb-2 text-sm">Advance Paid: <b>৳${data.advance}</b></p><p class="text-lg font-black text-emerald-500">Due (COD): ৳${data.due}</p><p class="text-xs text-blue-500 mt-3">Digital receipt sent to email.</p>`, icon: 'success', confirmButtonColor: '#10b981', confirmButtonText: 'View Status', ...swalDark }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
-                } else Swal.fire({title:'Failed', text: data.error, icon:'error', ...swalDark});
+                    Swal.fire({ title: 'Order Sent! 🎉', html: `<p class="mb-2 text-sm">Advance Paid: <b>৳${data.advance}</b></p><p class="text-lg font-black text-emerald-500">Due (COD): ৳${data.due}</p><p class="text-xs text-blue-500 mt-3">Digital receipt sent to email.</p>`, icon: 'success', confirmButtonColor: '#10b981', confirmButtonText: 'View Status', background:'var(--card)', color:'var(--text)' }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
+                } else Swal.fire({title:'Failed', text: data.error, icon:'error', background:'var(--card)', color:'var(--text)'});
             } catch(e) { Swal.fire('Error', 'Network Error', 'error'); }
         }
 
         // 13. FIXED Feedback Function (Async Background Processing)
         async function openFeedback() {
-            if(!user) return Swal.fire('Hey!', 'Please login to send feedback.', 'info', swalDark);
+            if(!user) return Swal.fire('Hey!', 'Please login to send feedback.', 'info', {background:'var(--card)', color:'var(--text)'});
             const { value: formValues } = await Swal.fire({
                 title: 'Send Feedback',
                 html: `<input id="fb-sub" class="swal2-input !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)]" placeholder="Subject (e.g. Bug / UI)"><textarea id="fb-msg" class="swal2-textarea !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)] custom-scrollbar" placeholder="Write your message here..."></textarea>`,
-                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5', ...swalDark,
+                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5',
+                background:'var(--card)', color:'var(--text)',
                 preConfirm: () => {
                     const sub = document.getElementById('fb-sub').value; const msg = document.getElementById('fb-msg').value;
                     if(!sub || !msg) { Swal.showValidationMessage('Both fields required!'); return false; }
@@ -436,9 +438,7 @@
                 }
             });
             if(formValues) {
-                // Instantly show success without waiting for server!
-                Swal.fire({title: 'Sent!', text: 'Thanks for your feedback!', icon: 'success', timer: 2000, showConfirmButton: false, ...swalDark});
-                // Send to backend silently
+                Swal.fire({title: 'Sent!', text: 'Thanks for your feedback!', icon: 'success', timer: 2000, showConfirmButton: false, background:'var(--card)', color:'var(--text)'});
                 fetch('/api/feedback', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: user.id, subject: formValues.subject, message: formValues.message}) }).catch(()=>{});
             }
         }
@@ -476,7 +476,7 @@
                     return `<div class="bg-[var(--card)] border border-[var(--border)] p-5 rounded-3xl mb-4 shadow-sm"><div class="flex justify-between items-start mb-2"><div><h4 class="font-black text-sm text-[var(--text)]">${p.product.name} <span class="text-blue-500 text-[10px] ml-1 bg-blue-500/10 px-1 rounded">${varStr}</span></h4><p class="text-[10px] text-slate-500 mt-1">ID: #${p.id} • ${new Date(p.createdAt).toLocaleDateString()}</p></div><span class="text-xs font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">৳${p.priceTotal}</span></div>${timeline}</div>`;
                 }).join(''); 
             });
-            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-[var(--card)] p-4 rounded-2xl flex justify-between items-center border border-[var(--border)] mb-3 shadow-sm"><div><p class="font-black text-sm uppercase text-[var(--text)]">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-500 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">${d.status}</span></div>`; }).join(''); });
+            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-[var(--card)] p-4 rounded-2xl flex justify-between items-center border border-[var(--border)] mb-3 shadow-sm"><div><p class="font-black text-sm uppercase text-[var(--text)]">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-500 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-500 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span></div>`; }).join(''); });
         }
         function closeProfile() { document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
         function switchProfTab(tab) { document.querySelectorAll('.prof-tab').forEach(b => { b.classList.remove('active', 'text-blue-500', 'border-blue-500'); b.classList.add('text-slate-500', 'border-transparent'); }); document.getElementById('tab-'+tab).classList.add('active', 'text-blue-500', 'border-blue-500'); document.getElementById('tab-'+tab).classList.remove('text-slate-500', 'border-transparent'); document.getElementById('sec-overview').classList.add('hidden'); document.getElementById('sec-orders').classList.add('hidden'); document.getElementById('sec-funds').classList.add('hidden'); document.getElementById('sec-settings').classList.add('hidden'); document.getElementById('sec-'+tab).classList.remove('hidden'); }
@@ -499,7 +499,7 @@
         function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 flex justify-between items-center text-white shadow-md transition-colors duration-300'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.replace('bg-[#f37021]','bg-[#e2136e]'); header.classList.add('bg-[#e2136e]'); btn.classList.add('bg-[#e2136e]', 'hover:bg-[#b30b54]'); icon.className = 'fa-solid fa-paper-plane mr-2'; } else if(method === 'nagad') { num = '01846849460'; header.classList.replace('bg-[#e2136e]','bg-[#f37021]'); header.classList.add('bg-[#f37021]'); btn.classList.add('bg-[#f37021]', 'hover:bg-[#d65b15]'); icon.className = 'fa-solid fa-fire mr-2'; } document.getElementById('fNumber').innerText = num; }
         function copyNumber() { navigator.clipboard.writeText(document.getElementById('fNumber').innerText); toast('success', 'Copied!'); }
 
-        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', ...swalDark}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire('Error', 'TrxID exists', 'error'); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
+        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', background:'var(--card)', color:'var(--text)'}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire('Error', 'TrxID exists', 'error'); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
 
         window.logout = function() { localStorage.removeItem('user'); localStorage.removeItem('wishlist'); document.body.style.opacity=0; setTimeout(()=>location.href='/login', 300); }
         document.addEventListener('DOMContentLoaded', init);
