@@ -48,6 +48,18 @@ model User {
   createdAt          DateTime   @default(now())
 }
 
+// 🔥 NEW RIDER MODEL
+model Rider {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  phone       String
+  password    String
+  isVerified  Boolean  @default(false)
+  verifyToken String?
+  createdAt   DateTime @default(now())
+}
+
 model Promo {
   id        Int      @id @default(autoincrement())
   code      String   @unique
@@ -83,7 +95,8 @@ model Purchase {
   city          String?  
   postcode      String?  
   status        String   @default("PENDING") 
-  deliveryOtp   String?  // 🔥 Added for Rider OTP Verification
+  deliveryOtp   String?  
+  deliveredBy   String?  // 🔥 Track which rider delivered
   createdAt     DateTime @default(now())
 }
 
