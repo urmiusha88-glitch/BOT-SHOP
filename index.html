@@ -27,20 +27,19 @@
         .r-badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; letter-spacing: 1px; margin-left: 6px; display: inline-block; box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 2px 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b, #ef4444); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
         .badge-basic { background: linear-gradient(135deg, #94a3b8, #475569, #94a3b8); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
-        
-        /* 🔥 NEW STATUS BADGES */
-        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
-        .st-pending { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid #facc15; }
-        .st-received { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #60a5fa; }
-        .st-shipped { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid #c084fc; }
-        .st-delivered { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #34d399; }
-        
-        .variant-select { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px; rounded: 8px; outline: none; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; }
-        .variant-select:focus { border-color: #3b82f6; }
         
         .theme-bkash { background: linear-gradient(135deg, #e2136e, #b30b54); } .theme-nagad { background: linear-gradient(135deg, #f37021, #d65b15); }
         .peer-checked\:border-bkash:checked ~ div { border-color: #e2136e; background-color: rgba(226, 19, 110, 0.1); color: #e2136e; } .peer-checked\:border-nagad:checked ~ div { border-color: #f37021; background-color: rgba(243, 112, 33, 0.1); color: #f37021; }
+        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .status-pending { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.5); }
+        .status-received { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.5); }
+        .status-shipped { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.5); }
+        .status-delivered { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); }
+        
+        .variant-select { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px; rounded: 8px; outline: none; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; }
+        .variant-select:focus { border-color: #3b82f6; }
     </style>
 </head>
 <body>
@@ -56,7 +55,18 @@
         </div>
     </nav>
 
-    <div class="pt-16 pb-12 text-center relative z-10 px-4">
+    <div id="noticeBanner" class="hidden bg-gradient-to-r from-blue-700 to-indigo-800 text-white text-xs sm:text-sm font-bold py-2 shadow-lg overflow-hidden relative z-40 border-b border-indigo-400">
+        <div class="max-w-7xl mx-auto flex items-center px-4">
+            <i class="fa-solid fa-bullhorn animate-pulse mr-3 text-yellow-300"></i>
+            <marquee id="noticeText" scrollamount="5" class="flex-1 tracking-widest uppercase"></marquee>
+        </div>
+    </div>
+
+    <button onclick="openFeedback()" class="fixed bottom-24 left-4 md:bottom-8 md:left-8 z-40 bg-indigo-600 hover:bg-indigo-500 text-white w-12 h-12 rounded-full shadow-[0_0_20px_rgba(79,70,229,0.5)] flex justify-center items-center transition-transform active:scale-95" title="Give Feedback">
+        <i class="fa-solid fa-comment-dots text-xl"></i>
+    </button>
+
+    <div class="pt-12 pb-12 text-center relative z-10 px-4">
         <h1 class="text-4xl sm:text-7xl font-black mb-6 tracking-tight">Premium <span class="text-blue-500">Collections</span></h1>
         <div class="max-w-xl mx-auto"><input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search products..." class="w-full bg-slate-800/50 border border-slate-700 rounded-full px-6 py-4 outline-none focus:border-blue-500 font-bold shadow-lg text-white"></div>
     </div>
@@ -75,7 +85,6 @@
 
     <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full md:w-[450px] bg-[#0b1121] border-l border-slate-800 z-[70] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl">
         <div class="p-6 border-b border-slate-800 flex justify-between items-center"><h2 class="text-2xl font-black"><i class="fa-solid fa-cart-shopping mr-2 text-blue-500"></i> My Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-800 rounded-full hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
-        
         <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
             <div id="cartItemsContainer" class="space-y-4 mb-6"></div>
             <div id="addressSection" class="hidden bg-slate-900 border border-slate-800 p-5 rounded-2xl">
@@ -87,13 +96,11 @@
                 </div>
             </div>
         </div>
-
         <div class="p-6 border-t border-slate-800 bg-slate-900/50">
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-400 text-sm">Subtotal:</span><span id="cartTotal" class="font-bold text-white text-lg">৳0</span></div>
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-800"><span class="font-bold text-slate-400 text-sm">Advance Booking:</span><span id="cartAdvance" class="font-black text-emerald-400 text-lg">- ৳0</span></div>
             <div class="flex justify-between items-center mb-6"><span class="font-black text-white uppercase tracking-widest">Due (COD):</span><span id="cartDue" class="text-3xl font-black text-blue-500">৳0</span></div>
             <button onclick="processOrder()" id="btnConfirmOrder" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-colors"><i class="fa-solid fa-check-circle mr-2"></i> Confirm Order</button>
-            <p class="text-center text-[10px] text-slate-500 mt-3 font-bold">Advance booking fee will be deducted from your wallet.</p>
         </div>
     </div>
 
@@ -124,37 +131,12 @@
     <div id="fundModal" class="fixed inset-0 bg-black/80 hidden z-[90] justify-center items-center px-4 backdrop-blur-sm transition-all duration-300">
         <div class="bg-slate-900 rounded-[32px] w-full max-w-md shadow-2xl relative overflow-hidden transition-all duration-500" id="fundModalBox">
             <div id="fundHeader" class="p-6 transition-all duration-500 flex justify-between items-center text-white shadow-md bg-slate-800"><h2 class="text-2xl font-black flex items-center gap-2"><i id="fundIcon" class="fa-solid fa-wallet"></i> <span>Add Balance</span></h2><button onclick="closeFund()" class="w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
-            <form id="depositForm" class="p-6 space-y-6 bg-slate-900">
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">Select Method</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-4 text-center border-2 border-slate-700 rounded-2xl font-black text-slate-500 peer-checked:border-bkash text-sm uppercase tracking-widest transition-all">bKash</div></label>
-                        <label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-4 text-center border-2 border-slate-700 rounded-2xl font-black text-slate-500 peer-checked:border-nagad text-sm uppercase tracking-widest transition-all">Nagad</div></label>
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Amount to Add (৳)</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none"><span class="text-emerald-500 font-black text-xl">৳</span></div>
-                        <input type="number" id="fBdt" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl pl-10 pr-4 py-4 font-black text-2xl outline-none focus:border-blue-500 text-white shadow-inner" placeholder="0">
-                    </div>
-                </div>
-
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                    <p class="text-xs font-black text-slate-400 uppercase mb-3 tracking-widest">Send Money To:</p>
-                    <div onclick="copyNumber()" class="bg-slate-900 border border-slate-700 px-5 py-4 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 group transition-colors shadow-inner">
-                        <span id="fNumber" class="font-mono text-2xl font-black text-white tracking-widest">01846849460</span>
-                        <i class="fa-regular fa-copy text-slate-500 group-hover:text-blue-500 text-xl transition-colors"></i>
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <input type="text" id="fSender" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-4 font-bold outline-none focus:border-blue-500 text-white placeholder-slate-500" placeholder="Your Sender Number">
-                    <input type="text" id="fTrx" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-4 font-black uppercase tracking-widest outline-none focus:border-blue-500 text-blue-400 placeholder-slate-500" placeholder="Transaction ID (TrxID)">
-                </div>
-
-                <button type="submit" id="fBtn" class="w-full text-white font-black py-5 rounded-2xl uppercase tracking-[0.2em] transition-all shadow-lg text-lg">Submit Request</button>
+            <form id="depositForm" class="p-6 space-y-5 bg-slate-900">
+                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-3">Select Method</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-3 text-center border-2 border-slate-700 rounded-xl font-black text-slate-500 peer-checked:border-bkash text-xs uppercase tracking-widest">bKash</div></label><label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-3 text-center border-2 border-slate-700 rounded-xl font-black text-slate-500 peer-checked:border-nagad text-xs uppercase tracking-widest">Nagad</div></label></div></div>
+                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Add Balance (৳)</label><input type="number" id="fBdt" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500 text-emerald-400" placeholder="0"></div>
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700"><p class="text-xs font-black text-slate-400 uppercase mb-2">Send Money To:</p><div onclick="copyNumber()" class="bg-slate-900 border border-slate-700 px-4 py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 group"><span id="fNumber" class="font-mono text-xl font-black text-white tracking-widest">01846849460</span><i class="fa-regular fa-copy text-slate-500 group-hover:text-blue-500"></i></div></div>
+                <div class="space-y-3"><input type="text" id="fSender" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500" placeholder="Sender Number"><input type="text" id="fTrx" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black uppercase tracking-widest outline-none focus:border-blue-500" placeholder="TrxID"></div>
+                <button type="submit" id="fBtn" class="w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all">Submit Request</button>
             </form>
         </div>
     </div>
@@ -172,6 +154,7 @@
 
         async function init() {
             renderAuth();
+            loadNotices(); // 🔥 Load notices on start
             if(user && user.id) {
                 try {
                     const res = await fetch('/api/user/' + user.id); const data = await res.json();
@@ -180,6 +163,17 @@
                 } catch(e) {}
             }
             loadProducts();
+        }
+
+        async function loadNotices() {
+            try {
+                const res = await fetch('/api/notices');
+                const notices = await res.json();
+                if(notices && notices.length > 0) {
+                    document.getElementById('noticeText').innerHTML = notices.map(n => `<span class="mx-10">• ${n.text}</span>`).join('');
+                    document.getElementById('noticeBanner').classList.remove('hidden');
+                }
+            } catch(e) {}
         }
 
         function renderAuth() {
@@ -226,46 +220,58 @@
             }).join('');
         }
 
-        function openGallery(productId) {
-            const p = allProducts.find(x => x.id === productId); if(!p || !p.imageIds || p.imageIds.length === 0) return;
-            const modal = document.getElementById('imageModal'); const mainImg = document.getElementById('galleryMainImg'); const thumbs = document.getElementById('galleryThumbnails');
-            mainImg.src = `/api/photo/${p.imageIds[0]}`;
-            thumbs.innerHTML = p.imageIds.map(id => `<img src="/api/photo/${id}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">`).join('');
-            modal.classList.replace('hidden', 'flex');
-        }
-        function closeGallery() { document.getElementById('imageModal').classList.replace('flex', 'hidden'); }
+        // 🔥 FEEDBACK SYSTEM LOGIC
+        async function openFeedback() {
+            if(!user) return Swal.fire('Oops!', 'Please login to send feedback.', 'info', ...swalDark);
+            
+            const { value: formValues } = await Swal.fire({
+                title: 'Send Feedback',
+                html: `
+                    <input id="fb-sub" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none text-white mb-3" placeholder="Subject (e.g. App Update)">
+                    <textarea id="fb-msg" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none text-white h-32 resize-none custom-scrollbar" placeholder="What can we fix or improve for you?"></textarea>
+                `,
+                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5',
+                ...swalDark,
+                preConfirm: () => {
+                    const sub = document.getElementById('fb-sub').value; const msg = document.getElementById('fb-msg').value;
+                    if(!sub || !msg) { Swal.showValidationMessage('Both fields are required!'); return false; }
+                    return { subject: sub, message: msg };
+                }
+            });
 
+            if(formValues) {
+                Swal.fire({title: 'Sending...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+                try {
+                    const res = await fetch('/api/feedback', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: user.id, subject: formValues.subject, message: formValues.message}) });
+                    const data = await res.json();
+                    if(data.success) Swal.fire('Sent!', 'Thanks for your valuable feedback!', 'success', ...swalDark);
+                    else Swal.fire('Error', 'Failed to send.', 'error', ...swalDark);
+                } catch(e) { Swal.fire('Error', 'Network error.', 'error', ...swalDark); }
+            }
+        }
+
+        function openGallery(productId) { const p = allProducts.find(x => x.id === productId); if(!p || !p.imageIds || p.imageIds.length === 0) return; const modal = document.getElementById('imageModal'); const mainImg = document.getElementById('galleryMainImg'); const thumbs = document.getElementById('galleryThumbnails'); mainImg.src = `/api/photo/${p.imageIds[0]}`; thumbs.innerHTML = p.imageIds.map(id => `<img src="/api/photo/${id}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">`).join(''); modal.classList.replace('hidden', 'flex'); }
+        function closeGallery() { document.getElementById('imageModal').classList.replace('flex', 'hidden'); }
         function filterProducts() { const q = document.getElementById('searchInput').value.toLowerCase(); renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q))); }
         function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
-        
-        function updateCartBadge() {
-            const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob');
-            if(!cDesk || !cMob) return;
-            if(cart.length > 0) { cDesk.innerText = cart.length; cMob.innerText = cart.length; cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); } 
-            else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); }
-        }
+        function updateCartBadge() { const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob'); if(!cDesk || !cMob) return; if(cart.length > 0) { cDesk.innerText = cart.length; cMob.innerText = cart.length; cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); } else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); } }
 
         function addToCart(id, name, price) {
             if(!user) return location.href='/login';
-            let sEl = document.getElementById(`sz-${id}`); let cEl = document.getElementById(`cl-${id}`);
-            let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
+            let sEl = document.getElementById(`sz-${id}`); let cEl = document.getElementById(`cl-${id}`); let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
             if(sEl && !size) return Swal.fire('Error', 'Please select a Size!', 'warning', ...swalDark);
             if(cEl && !color) return Swal.fire('Error', 'Please select a Color!', 'warning', ...swalDark);
             const pInfo = allProducts.find(x=>x.id===id); let img = (pInfo && pInfo.imageIds && pInfo.imageIds.length>0) ? pInfo.imageIds[0] : null;
-            cart.push({ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }); 
-            renderCart(); updateCartBadge(); toast('success', 'Added to Cart'); 
+            cart.push({ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }); renderCart(); updateCartBadge(); toast('success', 'Added to Cart'); 
         }
 
         function buyNow(id, name, price) {
             if(!user) return location.href='/login';
-            let sEl = document.getElementById(`sz-${id}`); let cEl = document.getElementById(`cl-${id}`);
-            let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
+            let sEl = document.getElementById(`sz-${id}`); let cEl = document.getElementById(`cl-${id}`); let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
             if(sEl && !size) return Swal.fire('Error', 'Please select a Size!', 'warning', ...swalDark);
             if(cEl && !color) return Swal.fire('Error', 'Please select a Color!', 'warning', ...swalDark);
             const pInfo = allProducts.find(x=>x.id===id); let img = (pInfo && pInfo.imageIds && pInfo.imageIds.length>0) ? pInfo.imageIds[0] : null;
-            cart = [{ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }]; 
-            document.getElementById('addressSection').classList.remove('hidden');
-            renderCart(); updateCartBadge(); toggleCart();
+            cart = [{ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }]; document.getElementById('addressSection').classList.remove('hidden'); renderCart(); updateCartBadge(); toggleCart();
         }
 
         function removeFromCart(cartId) { cart = cart.filter(i => i.cartId !== cartId); renderCart(); updateCartBadge(); if(cart.length === 0) document.getElementById('addressSection').classList.add('hidden'); }
@@ -273,34 +279,22 @@
         function renderCart() {
             const container = document.getElementById('cartItemsContainer');
             if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-cart-arrow-down text-4xl mb-3"></i><br><p class="font-bold">Cart is empty</p></div>'; document.getElementById('cartTotal').innerText = '৳0'; document.getElementById('cartDue').innerText = '৳0'; document.getElementById('cartAdvance').innerText = '- ৳0'; return; }
-            
             document.getElementById('addressSection').classList.remove('hidden'); 
             let sum = 0; 
             container.innerHTML = cart.map(i => { 
-                sum += i.price; 
-                let imgHtml = i.img ? `<img src="/api/photo/${i.img}" class="w-12 h-12 object-cover rounded-lg border border-slate-600">` : `<div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div>`;
-                let variants = []; if(i.size) variants.push(`Size: ${i.size}`); if(i.color) variants.push(`Color: ${i.color}`);
-                let varHtml = variants.length > 0 ? `<p class="text-[10px] text-slate-400 mt-1">${variants.join(' | ')}</p>` : '';
+                sum += i.price; let imgHtml = i.img ? `<img src="/api/photo/${i.img}" class="w-12 h-12 object-cover rounded-lg border border-slate-600">` : `<div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div>`; let variants = []; if(i.size) variants.push(`Size: ${i.size}`); if(i.color) variants.push(`Color: ${i.color}`); let varHtml = variants.length > 0 ? `<p class="text-[10px] text-slate-400 mt-1">${variants.join(' | ')}</p>` : '';
                 return `<div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center border border-slate-700"><div class="flex items-center gap-3">${imgHtml}<div><p class="font-bold text-sm leading-tight">${i.name}</p>${varHtml}<p class="text-emerald-400 font-black mt-1">৳${i.price}</p></div></div><button onclick="removeFromCart(${i.cartId})" class="text-red-500 hover:text-red-400 bg-red-500/10 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash"></i></button></div>`; 
             }).join('');
-            
-            document.getElementById('cartTotal').innerText = `৳${sum}`;
-            let advance = sum > 0 ? 200 : 0; if(sum < 200) advance = sum; 
-            let due = sum - advance;
-            document.getElementById('cartAdvance').innerText = `- ৳${advance}`;
-            document.getElementById('cartDue').innerText = `৳${due}`;
+            document.getElementById('cartTotal').innerText = `৳${sum}`; let advance = sum > 0 ? 200 : 0; if(sum < 200) advance = sum; let due = sum - advance; document.getElementById('cartAdvance').innerText = `- ৳${advance}`; document.getElementById('cartDue').innerText = `৳${due}`;
         }
         
         async function processOrder() {
             if(cart.length === 0 || !user) return;
             const phone = document.getElementById('cPhone').value; const street = document.getElementById('cStreet').value; const city = document.getElementById('cCity').value; const zip = document.getElementById('cZip').value;
             if(!phone || !street || !city) return Swal.fire('Error', 'Please fill all delivery details.', 'error', ...swalDark);
-            
             Swal.fire({title: 'Processing Order...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
-            
             const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, cartItems: cart, address: { phone, street, city, postcode: zip }}) });
             const data = await res.json();
-            
             if(data.success) {
                 user.balanceBdt = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); 
                 cart = []; updateCartBadge(); toggleCart(); renderAuth(); renderProducts(allProducts); document.getElementById('addressSection').classList.add('hidden');
@@ -308,28 +302,28 @@
             } else Swal.fire({title:'Booking Failed', text: data.error, icon:'error', ...swalDark});
         }
 
+        document.getElementById('fileAvatar').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+            reader.onload = function(event) { const img = new Image(); img.onload = function() {
+                    const canvas = document.createElement('canvas'); let w = img.width; let h = img.height; if(w>256){h*=256/w; w=256;} canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+                    base64Avatar = canvas.toDataURL('image/jpeg', 0.8); document.getElementById('settingAvatarPreview').innerHTML = `<img src="${base64Avatar}" class="w-full h-full object-cover">`;
+                }; img.src = event.target.result;
+            }; reader.readAsDataURL(file);
+        });
+
         async function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
             const uName = user.name || user.firstName || 'User'; base64Avatar = user.avatar || '';
             document.getElementById('pAvatarContainer').innerHTML = base64Avatar ? `<img src="${base64Avatar}" class="w-full h-full object-cover">` : `<span class="text-4xl font-black">${uName.charAt(0).toUpperCase()}</span>`;
             document.getElementById('settingAvatarPreview').innerHTML = base64Avatar ? `<img src="${base64Avatar}" class="w-full h-full object-cover">` : `<span class="text-2xl font-black text-slate-500">${uName.charAt(0).toUpperCase()}</span>`;
             document.getElementById('pNameContainer').innerHTML = `${uName} ${getBadge(user.role)}`;
-            document.getElementById('pEmail').innerText = user.email; document.getElementById('pRef').innerText = user.refCode || '---';
-            document.getElementById('setEmail').value = user.email;
-            
+            document.getElementById('pEmail').innerText = user.email; document.getElementById('pRef').innerText = user.refCode || '---'; document.getElementById('setEmail').value = user.email;
             document.getElementById('profileModal').classList.replace('hidden', 'flex'); switchProfTab(defaultTab);
             
-            // 🔥 REAL-TIME STATUS BADGE UPDATE
             fetch('/api/library/' + user.id).then(r=>r.json()).then(data => { 
                 document.getElementById('pOrdersList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No orders yet.</p>' : data.map(p => {
-                    let sClass = '';
-                    if(p.status === 'PENDING') sClass = 'st-pending';
-                    else if(p.status === 'RECEIVED') sClass = 'st-received';
-                    else if(p.status === 'SHIPPED') sClass = 'st-shipped';
-                    else sClass = 'st-delivered';
-
-                    let varText = []; if(p.selectedSize) varText.push(p.selectedSize); if(p.selectedColor) varText.push(p.selectedColor);
-                    let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
+                    let sClass = p.status === 'PENDING' ? 'status-pending' : (p.status === 'RECEIVED' ? 'status-received' : (p.status === 'SHIPPED' ? 'status-shipped' : 'status-delivered'));
+                    let varText = []; if(p.selectedSize) varText.push(p.selectedSize); if(p.selectedColor) varText.push(p.selectedColor); let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
                     return `<div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-3"><div class="flex justify-between items-start mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div><div><h4 class="font-bold text-sm">${p.product.name} <span class="text-blue-400 text-[10px] ml-1">${varStr}</span></h4><p class="text-[10px] text-slate-400 mt-1">Total: ৳${p.priceTotal} • Paid: ৳${p.advancePaid}</p></div></div><span class="status-badge ${sClass}">${p.status}</span></div><div class="bg-slate-900/50 p-2 rounded-xl flex justify-between items-center px-4"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To Pay on Delivery:</span><span class="text-sm font-black text-emerald-400">৳${p.dueCod}</span></div></div>`;
                 }).join(''); 
             });
@@ -342,8 +336,6 @@
 
         function openFund() { if(!user) return location.href='/login'; document.getElementById('fundModal').classList.replace('hidden', 'flex'); document.getElementById('fBdt').value = ''; updateFundUI(); }
         function closeFund() { document.getElementById('fundModal').classList.replace('flex', 'hidden'); }
-        
-        // 🔥 ADD FUND UI REFRESHED
         function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 transition-all duration-500 flex justify-between items-center text-white shadow-md'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.add('theme-bkash'); btn.classList.add('theme-bkash'); icon.className = 'fa-solid fa-paper-plane'; } else if(method === 'nagad') { num = '01846849460'; header.classList.add('theme-nagad'); btn.classList.add('theme-nagad'); icon.className = 'fa-solid fa-fire'; } document.getElementById('fNumber').innerText = num; }
         function copyNumber() { navigator.clipboard.writeText(document.getElementById('fNumber').innerText); toast('success', 'Copied!'); }
 
