@@ -9,14 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #000000; color: white; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
-        .app-container { max-width: 480px; margin: 0 auto; background-color: #0f172a; min-height: 100dvh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .glass-panel { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; color: white; outline: none; font-size: 16px; /* 16px prevents iOS zoom */ }
+        body { font-family: 'Inter', sans-serif; background-color: #050b14; color: white; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; overflow-x: hidden; }
+        .glass-panel { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; color: white; outline: none; font-size: 16px; }
         .input-box:focus { border-color: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.3); }
         .tab-active { border-bottom: 2px solid #10b981; color: #10b981; }
         .tab-inactive { color: #64748b; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
         
         .r-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
         .badge-rookie { background: linear-gradient(135deg, #94a3b8, #475569, #94a3b8); color: white; }
@@ -30,110 +29,113 @@
         .nav-tab.active { color: #10b981; border-color: #10b981; }
     </style>
 </head>
-<body>
+<body class="min-h-screen bg-[#050b14]">
 
-    <div class="app-container sm:border-x sm:border-slate-800">
-        
-        <div id="authSection" class="flex-1 flex flex-col justify-center p-6 w-full">
+    <div id="authSection" class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-md">
             <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-4xl text-white mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-4">
+                <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-4xl text-slate-900 mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-4">
                     <i class="fa-solid fa-motorcycle"></i>
                 </div>
-                <h1 class="text-3xl font-black tracking-tight">RIDER <span class="text-emerald-400">PORTAL</span></h1>
+                <h1 class="text-3xl font-black tracking-tight text-white">RIDER <span class="text-emerald-400">PORTAL</span></h1>
             </div>
 
-            <div class="glass-panel p-6 rounded-3xl shadow-2xl">
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl">
                 <div class="flex gap-6 mb-6 border-b border-slate-700">
                     <button id="loginTab" onclick="switchTab('login')" class="pb-2 font-bold tab-active w-1/2">Login</button>
-                    <button id="regTab" onclick="switchTab('reg')" class="pb-2 font-bold tab-inactive w-1/2">Register</button>
+                    <button id="regTab" onclick="switchTab('reg')" class="pb-2 font-bold tab-inactive w-1/2 border-transparent border-b-2">Register</button>
                 </div>
 
-                <div id="loginForm" class="space-y-4">
+                <div id="loginForm" class="space-y-5 animate-[fadeIn_0.3s]">
                     <input type="email" id="lEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
-                    <button onclick="login()" id="btnLogin" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-colors shadow-lg mt-2 active:scale-95">Login</button>
+                    <button onclick="login()" id="btnLogin" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-colors shadow-[0_0_15px_rgba(16,185,129,0.4)] mt-2 active:scale-95">Login</button>
                 </div>
 
-                <div id="regForm" class="hidden space-y-4">
+                <div id="regForm" class="hidden space-y-5 animate-[fadeIn_0.3s]">
                     <input type="text" id="rName" placeholder="Full Name" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="tel" id="rPhone" placeholder="Phone Number" class="input-box w-full p-4 rounded-xl font-bold">
-                    <input type="email" id="rEmail" placeholder="Real Email Address" class="input-box w-full p-4 rounded-xl font-bold">
+                    <input type="email" id="rEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="password" id="rPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
-                    <button onclick="register()" id="btnReg" class="w-full bg-slate-100 hover:bg-white text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest mt-2 active:scale-95">Register</button>
+                    <button onclick="register()" id="btnReg" class="w-full bg-slate-100 hover:bg-white text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest mt-2 active:scale-95 shadow-lg">Register</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div id="dashSection" class="hidden flex-col h-[100dvh] w-full">
-            
-            <div class="shrink-0 flex justify-between items-center bg-slate-900 p-4 border-b border-slate-800 shadow-lg z-50">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-xl text-slate-900 overflow-hidden border-2 border-emerald-400" id="topAvatar">
+    <div id="dashSection" class="hidden flex-col h-screen w-full fixed inset-0 bg-[#050b14]">
+        
+        <div class="shrink-0 bg-slate-900 border-b border-slate-800 shadow-lg z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-slate-900 overflow-hidden border-2 border-emerald-400 shadow-lg" id="topAvatar">
                         <i class="fa-solid fa-motorcycle"></i>
                     </div>
                     <div>
-                        <h2 class="font-black leading-tight text-white" id="riderNameDisplay">Rider</h2>
-                        <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest" id="riderBadgeDisplay">Rookie</p>
+                        <h2 class="text-xl font-black leading-tight text-white" id="riderNameDisplay">Rider</h2>
+                        <p class="text-xs text-emerald-400 font-bold uppercase tracking-widest mt-0.5" id="riderBadgeDisplay">Rookie</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-lg transition-colors active:scale-95"><i class="fa-solid fa-power-off text-xl"></i></button>
+                <button onclick="logout()" class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl font-bold transition-colors active:scale-95"><i class="fa-solid fa-power-off sm:mr-2"></i><span class="hidden sm:inline">Logout</span></button>
             </div>
+        </div>
 
-            <div class="shrink-0 flex justify-around bg-slate-900 border-b border-slate-800 pt-2 z-40">
-                <button onclick="switchDashTab('active')" id="dtab-active" class="nav-tab active pb-3 px-4 font-bold text-[11px] uppercase tracking-widest border-b-2 border-emerald-500 w-1/3 text-center">Active</button>
-                <button onclick="switchDashTab('history')" id="dtab-history" class="nav-tab text-slate-500 pb-3 px-4 font-bold text-[11px] uppercase tracking-widest border-b-2 border-transparent w-1/3 text-center">History</button>
-                <button onclick="switchDashTab('profile')" id="dtab-profile" class="nav-tab text-slate-500 pb-3 px-4 font-bold text-[11px] uppercase tracking-widest border-b-2 border-transparent w-1/3 text-center">Profile</button>
+        <div class="shrink-0 bg-slate-900/50 border-b border-slate-800 z-40 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 flex justify-center sm:justify-start gap-4 sm:gap-8 pt-3">
+                <button onclick="switchDashTab('active')" id="dtab-active" class="nav-tab active pb-3 px-2 sm:px-4 font-bold text-xs sm:text-sm uppercase tracking-widest border-b-2 border-emerald-500 transition-colors">Active Orders</button>
+                <button onclick="switchDashTab('history')" id="dtab-history" class="nav-tab text-slate-500 pb-3 px-2 sm:px-4 font-bold text-xs sm:text-sm uppercase tracking-widest border-b-2 border-transparent transition-colors">History</button>
+                <button onclick="switchDashTab('profile')" id="dtab-profile" class="nav-tab text-slate-500 pb-3 px-2 sm:px-4 font-bold text-xs sm:text-sm uppercase tracking-widest border-b-2 border-transparent transition-colors">Profile</button>
             </div>
+        </div>
 
-            <div class="flex-1 overflow-y-auto custom-scrollbar bg-[#0f172a]">
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <div class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
                 
-                <div id="view-active" class="p-4 space-y-4 pb-10"></div>
+                <div id="view-active" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 animate-[fadeIn_0.3s]"></div>
 
-                <div id="view-history" class="p-4 space-y-4 pb-10 hidden"></div>
+                <div id="view-history" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 animate-[fadeIn_0.3s]"></div>
 
-                <div id="view-profile" class="p-6 hidden text-center pb-10">
-                    <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto flex items-center justify-center text-5xl text-white font-black shadow-[0_0_20px_rgba(16,185,129,0.3)] mb-4 overflow-hidden border-4 border-slate-700" id="profAvatar"></div>
-                    <div id="profBadgeHtml" class="mb-4"></div>
-                    <h3 class="text-2xl font-black mb-1 text-white" id="profName">Name</h3>
-                    <p class="text-slate-400 font-bold text-sm mb-6" id="profEmail">email</p>
+                <div id="view-profile" class="hidden max-w-2xl mx-auto pb-20 animate-[fadeIn_0.3s]">
+                    <div class="glass-panel p-6 sm:p-10 rounded-[32px] shadow-2xl text-center">
+                        <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto flex items-center justify-center text-5xl text-white font-black shadow-[0_0_20px_rgba(16,185,129,0.3)] mb-4 overflow-hidden border-4 border-slate-700" id="profAvatar"></div>
+                        <div id="profBadgeHtml" class="mb-4"></div>
+                        <h3 class="text-3xl font-black mb-1 text-white" id="profName">Name</h3>
+                        <p class="text-slate-400 font-bold text-sm mb-8" id="profEmail">email</p>
 
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Delivered</p>
-                            <p class="text-3xl font-black text-emerald-400" id="profCount">0</p>
-                        </div>
-                        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Next Rank</p>
-                            <p class="text-sm font-black text-blue-400 mt-3" id="profNext">10 left</p>
-                        </div>
-                    </div>
-
-                    <div class="text-left space-y-4">
-                        <h3 class="font-black text-lg text-white mb-2 border-b border-slate-800 pb-2">Settings</h3>
-                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <div>
-                                    <p class="font-bold text-sm text-white">Update Avatar</p>
-                                    <div class="upload-btn-wrapper mt-1">
-                                        <button class="bg-emerald-600/20 text-emerald-400 px-3 py-2 rounded text-xs font-bold transition-colors">Choose Image</button>
-                                        <input type="file" id="fileAvatar" accept="image/*" />
-                                    </div>
-                                </div>
+                        <div class="grid grid-cols-2 gap-4 mb-10">
+                            <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700">
+                                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Total Delivered</p>
+                                <p class="text-4xl font-black text-emerald-400" id="profCount">0</p>
+                            </div>
+                            <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700">
+                                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Next Rank</p>
+                                <p class="text-lg font-black text-blue-400 mt-2" id="profNext">10 left</p>
                             </div>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Email</label>
-                            <input type="email" id="setEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-4 font-bold outline-none text-white focus:border-emerald-500 text-sm">
+
+                        <div class="text-left space-y-5 bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
+                            <h3 class="font-black text-xl text-white mb-4 flex items-center"><i class="fa-solid fa-gear text-emerald-500 mr-3"></i> Settings</h3>
+                            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+                                <p class="font-bold text-sm text-slate-300">Update Profile Picture</p>
+                                <div class="upload-btn-wrapper">
+                                    <button class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-lg text-xs font-bold transition-colors hover:bg-emerald-600 hover:text-white">Choose Image</button>
+                                    <input type="file" id="fileAvatar" accept="image/*" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+                                <input type="email" id="setEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-5 py-4 font-bold outline-none text-white focus:border-emerald-500 transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Change Password</label>
+                                <input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-5 py-4 font-bold outline-none text-white focus:border-emerald-500 transition-colors">
+                            </div>
+                            <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest mt-2 shadow-[0_0_15px_rgba(59,130,246,0.4)] active:scale-95 transition-all">Save Changes</button>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Password</label>
-                            <input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-4 font-bold outline-none text-white focus:border-emerald-500 text-sm">
-                        </div>
-                        <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest mt-2 shadow-lg active:scale-95 transition-transform">Save Profile</button>
                     </div>
                 </div>
+
             </div>
-            
         </div>
     </div>
 
@@ -158,7 +160,10 @@
                 let btn = document.getElementById('dtab-'+tab);
                 btn.classList.remove('active', 'border-emerald-500', 'text-white'); btn.classList.add('text-slate-500', 'border-transparent');
             });
+            
+            // Remove 'hidden' so the grid class takes over
             document.getElementById('view-'+t).classList.remove('hidden');
+            
             let activeBtn = document.getElementById('dtab-'+t);
             activeBtn.classList.remove('text-slate-500', 'border-transparent'); activeBtn.classList.add('active', 'border-emerald-500', 'text-white');
             
@@ -232,63 +237,80 @@
         }
 
         async function fetchOrders() {
-            const container = document.getElementById('view-active'); container.innerHTML = '<p class="text-center text-slate-500 font-bold mt-20"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3"></i><br>Finding Orders...</p>';
+            const container = document.getElementById('view-active'); container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold mt-20"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4"></i><br>Finding Orders...</div>';
             try {
                 const res = await fetch('/api/rider/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
                 const data = await res.json();
-                if(data.orders.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 mt-24"><i class="fa-solid fa-box-open text-6xl mb-4 opacity-30"></i><h3 class="text-xl font-black text-white">No Active Deliveries</h3><p class="text-xs mt-2">All assigned orders are completed.</p></div>'; return; }
+                if(data.orders.length === 0) { container.innerHTML = '<div class="col-span-full text-center text-slate-500 mt-24"><i class="fa-solid fa-box-open text-6xl mb-4 opacity-30"></i><h3 class="text-xl font-black text-white">No Active Deliveries</h3><p class="text-sm mt-2">All assigned orders are completed.</p></div>'; return; }
                 
                 container.innerHTML = data.orders.map(o => {
                     let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor); let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
                     return `
-                    <div class="glass-panel p-5 rounded-3xl relative overflow-hidden shadow-lg border border-slate-700/50">
+                    <div class="glass-panel p-6 rounded-3xl relative overflow-hidden shadow-lg border border-slate-700/50 flex flex-col justify-between h-full">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
                         
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p>
-                                <h3 class="font-black text-lg leading-tight text-white">${o.user.firstName}</h3>
+                        <div>
+                            <div class="flex justify-between items-start mb-5">
+                                <div>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p>
+                                    <h3 class="font-black text-xl leading-tight text-white">${o.user.firstName}</h3>
+                                </div>
+                                <a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-transform active:scale-95 text-xl"><i class="fa-solid fa-phone"></i></a>
                             </div>
-                            <a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-transform active:scale-95 text-lg"><i class="fa-solid fa-phone"></i></a>
-                        </div>
-                        
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-4">
-                            <p class="text-xs text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2 text-base align-middle"></i> ${o.street}, ${o.city} <br><span class="ml-6 text-slate-500">ZIP: ${o.postcode}</span></p>
-                        </div>
-                        
-                        <div class="mb-5 pb-4 border-b border-slate-700">
-                            <p class="text-sm font-bold text-slate-200"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Unknown Product'} <span class="text-[10px] text-slate-400 ml-1 block mt-1">${varStr}</span></p>
-                        </div>
-                        
-                        <div class="flex justify-between items-end mb-5">
-                            <div>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash (COD)</p>
-                                <p class="text-4xl font-black text-emerald-400 tracking-tight">৳${o.dueCod}</p>
+                            
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
+                                <p class="text-sm text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2 text-lg align-middle"></i> ${o.street}, ${o.city} <br><span class="ml-7 text-slate-500 font-mono text-xs mt-1 inline-block">ZIP: ${o.postcode}</span></p>
+                            </div>
+                            
+                            <div class="mb-6 pb-5 border-b border-slate-700">
+                                <p class="text-base font-bold text-slate-200 leading-snug"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Unknown Product'} <span class="text-[11px] text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded ml-1 mt-2 inline-block">${varStr}</span></p>
                             </div>
                         </div>
                         
-                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform active:scale-95 text-sm"><i class="fa-solid fa-shield-halved mr-2"></i> Verify & Deliver</button>
+                        <div>
+                            <div class="flex justify-between items-end mb-5">
+                                <div>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash (COD)</p>
+                                    <p class="text-4xl font-black text-emerald-400 tracking-tight">৳${o.dueCod}</p>
+                                </div>
+                            </div>
+                            
+                            <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform active:scale-95 text-sm"><i class="fa-solid fa-shield-halved mr-2"></i> Verify & Deliver</button>
+                        </div>
                     </div>`;
                 }).join('');
-            } catch(e) { container.innerHTML = '<p class="text-center text-red-400 font-bold mt-20">Connection Error.</p>'; }
+            } catch(e) { container.innerHTML = '<div class="col-span-full text-center text-red-400 font-bold mt-20">Connection Error.</div>'; }
         }
 
         async function fetchHistory() {
-            const container = document.getElementById('view-history'); container.innerHTML = '<p class="text-center text-slate-500 font-bold mt-20"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3"></i><br>Loading History...</p>';
+            const container = document.getElementById('view-history'); container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold mt-20"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4"></i><br>Loading History...</div>';
             try {
                 const res = await fetch('/api/rider/history', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
                 const data = await res.json();
-                if(data.history.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 mt-24"><i class="fa-solid fa-clock-rotate-left text-6xl mb-4 opacity-30"></i><h3 class="text-xl font-black text-white">No History</h3><p class="text-xs mt-2">Start delivering to build your profile.</p></div>'; return; }
+                if(data.history.length === 0) { container.innerHTML = '<div class="col-span-full text-center text-slate-500 mt-24"><i class="fa-solid fa-clock-rotate-left text-6xl mb-4 opacity-30"></i><h3 class="text-xl font-black text-white">No History</h3><p class="text-sm mt-2">Start delivering to build your profile.</p></div>'; return; }
                 
                 container.innerHTML = data.history.map(o => {
                     const d = new Date(o.createdAt).toLocaleDateString();
-                    return `<div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md"><div class="flex justify-between items-start mb-3"><div><h4 class="font-bold text-base text-white">${o.user.firstName}</h4><p class="text-[11px] text-slate-400 mt-1">Order #${o.id} • ${d}</p></div><span class="bg-emerald-900/40 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase border border-emerald-500/20"><i class="fa-solid fa-check mr-1"></i> Delivered</span></div><div class="bg-slate-900/80 p-3 rounded-xl flex justify-between items-center px-4"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cash Collected</span><span class="text-base font-black text-emerald-400">৳${o.dueCod}</span></div></div>`;
+                    return `
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="font-bold text-lg text-white mb-1">${o.user.firstName}</h4>
+                                <p class="text-[11px] text-slate-400 font-mono">ID: #${o.id} • ${d}</p>
+                            </div>
+                            <span class="bg-emerald-900/40 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase border border-emerald-500/20"><i class="fa-solid fa-check mr-1"></i> Delivered</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cash Collected</span>
+                            <span class="text-xl font-black text-emerald-400">৳${o.dueCod}</span>
+                        </div>
+                    </div>`;
                 }).join('');
-            } catch(e) { container.innerHTML = '<p class="text-center text-red-400 font-bold mt-20">Connection Error.</p>'; }
+            } catch(e) { container.innerHTML = '<div class="col-span-full text-center text-red-400 font-bold mt-20">Connection Error.</div>'; }
         }
 
         function confirmDelivery(orderId, amount) {
-            Swal.fire({ title: 'Send OTP?', html: `Verification code will be sent to the customer's email. You need to collect <b class="text-emerald-400 text-2xl block mt-2">৳${amount}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#3b82f6', cancelButtonColor: '#ef4444', confirmButtonText: 'Send Code', cancelButtonText: 'Cancel', ...swalDark }).then(async (result) => {
+            Swal.fire({ title: 'Send OTP?', html: `Verification code will be sent to the customer's email. You need to collect <b class="text-emerald-400 text-3xl block mt-3">৳${amount}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#3b82f6', cancelButtonColor: '#ef4444', confirmButtonText: 'Send Code', cancelButtonText: 'Cancel', ...swalDark }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.fire({title: 'Sending Email...', text: 'Please wait...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
                     const res = await fetch('/api/rider/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({riderId: rider.id, orderId}) });
@@ -304,7 +326,7 @@
                             
                             if(verifyData.success) { 
                                 Swal.fire({title: 'Awesome! 🎉', text: 'Delivery completed successfully.', icon: 'success', ...swalDark}); 
-                                loadRiderData(); // This refreshes the active orders AND updates the rider's badge/count
+                                loadRiderData(); 
                             } 
                             else { Swal.fire('Error', verifyData.error || 'Failed to verify.', 'error', ...swalDark); }
                         }
