@@ -9,9 +9,11 @@ datasource db {
 model Product {
   id        Int        @id @default(autoincrement())
   name      String
-  price     Float      // Price in BDT
-  abilities String     // Product Description (Size, Fabric etc)
-  imageId   String?  
+  price     Float      
+  abilities String     
+  imageIds  String[]   // 🔥 For Multiple Images
+  sizes     String[]   // 🔥 For Size Variants
+  colors    String[]   // 🔥 For Color Variants
   stock     Int        @default(100)
   rating    Float      @default(5.0) 
   createdAt DateTime   @default(now())
@@ -25,7 +27,7 @@ model User {
   telegramId         String?    @unique 
   firstName          String?
   country            String     @default("BD") 
-  balanceBdt         Float      @default(0.0) // ONLY BDT
+  balanceBdt         Float      @default(0.0) 
   refCode            String?    @unique 
   referredBy         String?    
   referralRewardPaid Boolean    @default(false)
@@ -65,22 +67,23 @@ model Deposit {
   createdAt     DateTime @default(now())
 }
 
-// 🔥 UPGRADED FOR PHYSICAL ORDERS
 model Purchase {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
-  productId   Int
-  product     Product  @relation(fields: [productId], references: [id])
-  priceTotal  Float    // Original total
-  advancePaid Float    // 200 TK Booking
-  dueCod      Float    // Cash on delivery amount
-  phone       String?  // Customer Phone
-  street      String?  // House/Street
-  city        String?  // City/Area
-  postcode    String?  // Postal Code
-  status      String   @default("PENDING") // PENDING, SHIPPED, DELIVERED
-  createdAt   DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  productId     Int
+  product       Product  @relation(fields: [productId], references: [id])
+  selectedSize  String?  // 🔥 Store Selected Size
+  selectedColor String?  // 🔥 Store Selected Color
+  priceTotal    Float    
+  advancePaid   Float    
+  dueCod        Float    
+  phone         String?  
+  street        String?  
+  city          String?  
+  postcode      String?  
+  status        String   @default("PENDING") 
+  createdAt     DateTime @default(now())
 }
 
 model Notice {
