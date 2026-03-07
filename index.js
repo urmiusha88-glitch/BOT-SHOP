@@ -21,11 +21,18 @@ const ADMIN_ID = process.env.ADMIN_ID;
 let isMaintenance = false;
 const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
 
+// 🔥 STRICT MAINTENANCE MIDDLEWARE
 app.use((req, res, next) => {
-  if (req.path.startsWith('/api/admin') || req.path === '/admin' || req.path.startsWith('/api/rider') || req.path === '/rider') return next();
+  // Allow ONLY Admin routes and PWA files to bypass maintenance
+  if (req.path.startsWith('/api/admin') || req.path === '/admin' || req.path === '/manifest.json' || req.path === '/sw.js') {
+      return next();
+  }
   
   if (isMaintenance) { 
+      // If it's an API request from any other page, block it
       if (req.path.startsWith('/api/')) return res.status(503).json({ success: false, message: 'Maintenance Active' }); 
+      
+      // Force browser to load the maintenance page for Rider, Main Store, Login, etc.
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
@@ -74,7 +81,6 @@ const addNoticeWizard = new Scenes.WizardScene('ADD_NOTICE_SCENE',
 const stage = new Scenes.Stage([addProductWizard, addNoticeWizard]); 
 mainBot.use(session()); mainBot.use(stage.middleware());
 
-// Bot Start & Admin Menu Function
 function sendAdminMenu(ctx) {
     if (ctx.from.id.toString() !== ADMIN_ID) return ctx.reply('❌ Unauthorized Access.');
     const mStatus = isMaintenance ? '🔴 ON' : '🟢 OFF';
@@ -95,7 +101,6 @@ mainBot.start((ctx) => sendAdminMenu(ctx));
 mainBot.command('admin', (ctx) => sendAdminMenu(ctx));
 mainBot.command('addproduct', (ctx) => { if (ctx.from.id.toString() === ADMIN_ID) ctx.scene.enter('ADD_PRODUCT_SCENE'); });
 
-// Bot Button Actions
 mainBot.action('menu_add_product', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_PRODUCT_SCENE'); });
 mainBot.action('menu_add_notice', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_NOTICE_SCENE'); });
 mainBot.action('menu_clear_notices', async (ctx) => { 
@@ -127,7 +132,7 @@ mainBot.action('menu_stats', async (ctx) => {
 });
 
 // =========================================================
-// 🔥 LOG BOT LOGIC (FOR DEPOSITS & ORDERS)
+// 🔥 LOG BOT LOGIC
 // =========================================================
 async function processDeposit(id, action) {
   const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } });
