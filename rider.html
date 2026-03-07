@@ -15,6 +15,18 @@
         .input-box:focus { border-color: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.3); }
         .tab-active { border-bottom: 2px solid #10b981; color: #10b981; }
         .tab-inactive { color: #64748b; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+        
+        .r-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .badge-rookie { background: linear-gradient(135deg, #94a3b8, #475569, #94a3b8); color: white; }
+        .badge-bronze { background: linear-gradient(135deg, #d97706, #78350f, #d97706); color: white; box-shadow: 0 0 10px rgba(217, 119, 6, 0.5); }
+        .badge-silver { background: linear-gradient(135deg, #cbd5e1, #64748b, #cbd5e1); color: #0f172a; text-shadow: none; box-shadow: 0 0 10px rgba(203, 213, 225, 0.5); }
+        .badge-gold { background: linear-gradient(135deg, #fbbf24, #b45309, #fbbf24); color: #451a03; text-shadow: none; box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
+        .badge-platinum { background: linear-gradient(135deg, #e2e8f0, #94a3b8, #f8fafc); color: #0f172a; text-shadow: none; box-shadow: 0 0 15px rgba(226, 232, 240, 0.6); }
+        .badge-diamond { background: linear-gradient(135deg, #67e8f9, #0284c7, #a5f3fc); color: #082f49; text-shadow: none; box-shadow: 0 0 20px rgba(6, 182, 212, 0.8); }
+        
+        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
+        .nav-tab.active { color: #10b981; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
@@ -49,166 +61,208 @@
         </div>
     </div>
 
-    <div id="dashSection" class="w-full max-w-md hidden flex-col h-full absolute inset-0 bg-[#0f172a] overflow-y-auto">
+    <div id="dashSection" class="w-full max-w-md hidden flex-col h-full absolute inset-0 bg-[#0f172a] overflow-y-auto custom-scrollbar">
         <div class="flex justify-between items-center bg-slate-900 p-4 border-b border-slate-800 shadow-lg sticky top-0 z-50">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-motorcycle"></i></div>
+                <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-xl text-slate-900 overflow-hidden border-2 border-emerald-400" id="topAvatar">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
                 <div>
-                    <h2 class="font-black leading-tight" id="riderNameDisplay">Deliveries</h2>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active Orders</p>
+                    <h2 class="font-black leading-tight" id="riderNameDisplay">Rider</h2>
+                    <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest" id="riderBadgeDisplay">Rookie</p>
                 </div>
             </div>
             <button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-lg transition-colors"><i class="fa-solid fa-power-off"></i></button>
         </div>
 
-        <div id="ordersContainer" class="space-y-4 p-4 pb-10"></div>
+        <div class="flex bg-slate-900 border-b border-slate-800 px-4 pt-2 gap-6 sticky top-[73px] z-40">
+            <button onclick="switchDashTab('active')" id="dtab-active" class="nav-tab active pb-3 font-bold text-xs uppercase tracking-widest border-b-2 border-emerald-500">Active</button>
+            <button onclick="switchDashTab('history')" id="dtab-history" class="nav-tab text-slate-500 pb-3 font-bold text-xs uppercase tracking-widest border-b-2 border-transparent">History</button>
+            <button onclick="switchDashTab('profile')" id="dtab-profile" class="nav-tab text-slate-500 pb-3 font-bold text-xs uppercase tracking-widest border-b-2 border-transparent">Profile</button>
+        </div>
+
+        <div id="view-active" class="p-4 space-y-4 pb-10"></div>
+
+        <div id="view-history" class="p-4 space-y-4 pb-10 hidden"></div>
+
+        <div id="view-profile" class="p-6 hidden text-center pb-10">
+            <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto flex items-center justify-center text-5xl text-white font-black shadow-[0_0_20px_rgba(16,185,129,0.3)] mb-4 overflow-hidden border-4 border-slate-700" id="profAvatar"></div>
+            <div id="profBadgeHtml" class="mb-4"></div>
+            <h3 class="text-2xl font-black mb-1" id="profName">Name</h3>
+            <p class="text-slate-400 font-bold text-sm mb-6" id="profEmail">email</p>
+
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><p class="text-xs text-slate-400 font-bold uppercase mb-1">Delivered</p><p class="text-3xl font-black text-emerald-400" id="profCount">0</p></div>
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><p class="text-xs text-slate-400 font-bold uppercase mb-1">Next Rank</p><p class="text-sm font-black text-blue-400 mt-2" id="profNext">10 left</p></div>
+            </div>
+
+            <div class="text-left space-y-4">
+                <h3 class="font-black text-lg text-white mb-2 border-b border-slate-800 pb-2">Settings</h3>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between"><div class="flex items-center gap-4"><div><p class="font-bold text-sm">Update Avatar</p><div class="upload-btn-wrapper mt-1"><button class="bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded text-xs font-bold transition-colors">Choose Image</button><input type="file" id="fileAvatar" accept="image/*" /></div></div></div></div>
+                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Email</label><input type="email" id="setEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-emerald-500"></div>
+                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Password</label><input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-emerald-500"></div>
+                <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest mt-2">Save Profile</button>
+            </div>
+        </div>
     </div>
 
     <script>
         const swalDark = { background: '#1e293b', color: '#fff' };
-        let rider = null; try { const r = localStorage.getItem('rider'); if(r) rider = JSON.parse(r); } catch(e){}
-        
-        if(rider && rider.id) { fetchOrders(); }
+        let rider = null; try { const r = localStorage.getItem('riderSession'); if(r) rider = JSON.parse(r); } catch(e){}
+        let base64Avatar = '';
+
+        if(rider && rider.id) { loadRiderData(); }
 
         function switchTab(t) {
             document.getElementById('loginForm').classList.add('hidden'); document.getElementById('regForm').classList.add('hidden');
-            document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive'; document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive';
+            document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive border-transparent border-b-2'; document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive border-transparent border-b-2';
             if(t === 'login') { document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('loginTab').className = 'pb-2 font-bold tab-active'; }
             else { document.getElementById('regForm').classList.remove('hidden'); document.getElementById('regTab').className = 'pb-2 font-bold tab-active'; }
         }
 
+        function switchDashTab(t) {
+            ['active', 'history', 'profile'].forEach(tab => {
+                document.getElementById('view-'+tab).classList.add('hidden');
+                let btn = document.getElementById('dtab-'+tab);
+                btn.classList.remove('active', 'border-emerald-500'); btn.classList.add('text-slate-500', 'border-transparent');
+            });
+            document.getElementById('view-'+t).classList.remove('hidden');
+            let activeBtn = document.getElementById('dtab-'+t);
+            activeBtn.classList.remove('text-slate-500', 'border-transparent'); activeBtn.classList.add('active', 'border-emerald-500');
+            
+            if(t === 'active') fetchOrders();
+            if(t === 'history') fetchHistory();
+        }
+
+        function getRiderBadge(count) {
+            if(count >= 100) return { html: '<span class="r-badge badge-diamond"><i class="fa-solid fa-gem mr-1"></i> DIAMOND RIDER</span>', name: 'Diamond' };
+            if(count >= 50) return { html: '<span class="r-badge badge-platinum"><i class="fa-solid fa-star mr-1"></i> PLATINUM RIDER</span>', name: 'Platinum' };
+            if(count >= 30) return { html: '<span class="r-badge badge-gold"><i class="fa-solid fa-medal mr-1"></i> GOLD RIDER</span>', name: 'Gold' };
+            if(count >= 20) return { html: '<span class="r-badge badge-silver"><i class="fa-solid fa-medal mr-1"></i> SILVER RIDER</span>', name: 'Silver' };
+            if(count >= 10) return { html: '<span class="r-badge badge-bronze"><i class="fa-solid fa-medal mr-1"></i> BRONZE RIDER</span>', name: 'Bronze' };
+            return { html: '<span class="r-badge badge-rookie"><i class="fa-solid fa-seedling mr-1"></i> ROOKIE</span>', name: 'Rookie' };
+        }
+
+        function getNextRankInfo(count) {
+            if(count < 10) return `${10 - count} to Bronze`;
+            if(count < 20) return `${20 - count} to Silver`;
+            if(count < 30) return `${30 - count} to Gold`;
+            if(count < 50) return `${50 - count} to Platinum`;
+            if(count < 100) return `${100 - count} to Diamond`;
+            return 'Max Rank Achieved!';
+        }
+
+        async function loadRiderData() {
+            const res = await fetch('/api/rider/me', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
+            const data = await res.json();
+            if(data.success) {
+                rider = data.rider; localStorage.setItem('riderSession', JSON.stringify(rider));
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('dashSection').classList.remove('hidden'); document.getElementById('dashSection').classList.add('flex');
+                
+                document.getElementById('riderNameDisplay').innerText = rider.name;
+                const badge = getRiderBadge(rider.deliveryCount);
+                document.getElementById('riderBadgeDisplay').innerText = badge.name;
+                
+                let avHtml = rider.avatar ? `<img src="${rider.avatar}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-motorcycle"></i>`;
+                document.getElementById('topAvatar').innerHTML = avHtml;
+                document.getElementById('profAvatar').innerHTML = rider.avatar ? `<img src="${rider.avatar}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user-astronaut"></i>`;
+                
+                document.getElementById('profName').innerText = rider.name;
+                document.getElementById('profEmail').innerText = rider.email;
+                document.getElementById('profCount').innerText = rider.deliveryCount;
+                document.getElementById('profBadgeHtml').innerHTML = badge.html;
+                document.getElementById('profNext').innerText = getNextRankInfo(rider.deliveryCount);
+                
+                document.getElementById('setEmail').value = rider.email;
+                base64Avatar = rider.avatar || '';
+
+                fetchOrders();
+            } else { logout(); }
+        }
+
         async function login() { 
             const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value;
-            if(!email || !password) return;
-            const btn = document.getElementById('btnLogin'); btn.innerText = "Checking...";
+            if(!email || !password) return; const btn = document.getElementById('btnLogin'); btn.innerText = "Checking...";
             const res = await fetch('/api/rider/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password}) }); 
-            const data = await res.json();
-            btn.innerText = "LOGIN";
-            if(data.success) { rider = data.rider; localStorage.setItem('rider', JSON.stringify(rider)); fetchOrders(); } 
+            const data = await res.json(); btn.innerText = "LOGIN";
+            if(data.success) { rider = { id: data.rider.id }; loadRiderData(); } 
             else { Swal.fire({toast:true, position:'top-end', icon:'error', title: data.error || 'Login Failed'}); } 
         }
 
         async function register() { 
             const name = document.getElementById('rName').value; const phone = document.getElementById('rPhone').value; const email = document.getElementById('rEmail').value; const password = document.getElementById('rPass').value;
-            if(!name || !email || !phone || !password) return;
-            const btn = document.getElementById('btnReg'); btn.innerText = "Creating...";
+            if(!name || !email || !phone || !password) return; const btn = document.getElementById('btnReg'); btn.innerText = "Creating...";
             const res = await fetch('/api/rider/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, phone, email, password}) }); 
-            const data = await res.json();
-            btn.innerText = "REGISTER";
+            const data = await res.json(); btn.innerText = "REGISTER";
             if(data.success) { Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); } 
             else { Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); } 
         }
 
         async function fetchOrders() {
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('dashSection').classList.remove('hidden');
-            document.getElementById('dashSection').classList.add('flex');
-            document.getElementById('riderNameDisplay').innerText = rider.name;
-
-            const container = document.getElementById('ordersContainer');
-            container.innerHTML = '<p class="text-center text-slate-500 font-bold mt-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Loading Deliveries...</p>';
-
+            const container = document.getElementById('view-active'); container.innerHTML = '<p class="text-center text-slate-500 font-bold mt-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Loading...</p>';
             try {
                 const res = await fetch('/api/rider/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
                 const data = await res.json();
-                
-                if(!data.success) { logout(); return; }
-
-                if(data.orders.length === 0) {
-                    container.innerHTML = '<div class="text-center text-slate-500 mt-20"><i class="fa-solid fa-box-open text-5xl mb-4 opacity-50"></i><h3 class="text-xl font-black">No Active Deliveries</h3><p class="text-sm">You have delivered all shipped orders.</p></div>';
-                    return;
-                }
-
+                if(data.orders.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 mt-20"><i class="fa-solid fa-box-open text-5xl mb-4 opacity-50"></i><h3 class="text-xl font-black">No Active Deliveries</h3></div>'; return; }
                 container.innerHTML = data.orders.map(o => {
-                    let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor);
-                    let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
-
-                    return `
-                    <div class="glass-panel p-5 rounded-3xl relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-                        
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p>
-                                <h3 class="font-black text-lg leading-tight">${o.user.firstName}</h3>
-                            </div>
-                            <a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-transform active:scale-95"><i class="fa-solid fa-phone"></i></a>
-                        </div>
-
-                        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700 mb-4">
-                            <p class="text-xs text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2"></i> ${o.street}, ${o.city} - ${o.postcode}</p>
-                        </div>
-
-                        <div class="mb-5 pb-4 border-b border-slate-700">
-                            <p class="text-sm font-bold text-slate-200"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Unknown Product'} <span class="text-[10px] text-slate-400 font-normal ml-1">${varStr}</span></p>
-                        </div>
-
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash (COD)</p>
-                                <p class="text-3xl font-black text-emerald-400">৳${o.dueCod}</p>
-                            </div>
-                        </div>
-
-                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform active:scale-95"><i class="fa-solid fa-shield-halved mr-2"></i> Verify & Deliver</button>
-                    </div>`;
+                    let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor); let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
+                    return `<div class="glass-panel p-5 rounded-3xl relative overflow-hidden"><div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div><div class="flex justify-between items-start mb-4"><div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p><h3 class="font-black text-lg leading-tight">${o.user.firstName}</h3></div><a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-transform active:scale-95"><i class="fa-solid fa-phone"></i></a></div><div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700 mb-4"><p class="text-xs text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2"></i> ${o.street}, ${o.city} - ${o.postcode}</p></div><div class="mb-5 pb-4 border-b border-slate-700"><p class="text-sm font-bold text-slate-200"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Unknown Product'} <span class="text-[10px] text-slate-400 ml-1">${varStr}</span></p></div><div class="flex justify-between items-end mb-4"><div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash (COD)</p><p class="text-3xl font-black text-emerald-400">৳${o.dueCod}</p></div></div><button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform active:scale-95"><i class="fa-solid fa-shield-halved mr-2"></i> Verify & Deliver</button></div>`;
                 }).join('');
-
-            } catch(e) { container.innerHTML = '<p class="text-center text-red-400 font-bold mt-10">Connection Error.</p>'; }
+            } catch(e) { container.innerHTML = '<p class="text-center text-red-400">Connection Error.</p>'; }
         }
 
-        // 🔥 OTP LOGIC WITH RIDER DATA
+        async function fetchHistory() {
+            const container = document.getElementById('view-history'); container.innerHTML = '<p class="text-center text-slate-500 font-bold mt-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Loading...</p>';
+            try {
+                const res = await fetch('/api/rider/history', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
+                const data = await res.json();
+                if(data.history.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 mt-20"><i class="fa-solid fa-clock-rotate-left text-5xl mb-4 opacity-50"></i><h3 class="text-xl font-black">No History Yet</h3></div>'; return; }
+                container.innerHTML = data.history.map(o => {
+                    const d = new Date(o.createdAt).toLocaleDateString();
+                    return `<div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><div class="flex justify-between items-start mb-2"><div><h4 class="font-bold text-sm text-white">${o.user.firstName}</h4><p class="text-[10px] text-slate-400 mt-1">Order #${o.id} • ${d}</p></div><span class="bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded text-[10px] font-black uppercase"><i class="fa-solid fa-check mr-1"></i> Delivered</span></div><div class="bg-slate-900/50 p-2 rounded-lg flex justify-between items-center px-3"><span class="text-[10px] font-bold text-slate-400 uppercase">Cash Collected:</span><span class="text-sm font-black text-emerald-400">৳${o.dueCod}</span></div></div>`;
+                }).join('');
+            } catch(e) { container.innerHTML = '<p class="text-center text-red-400">Connection Error.</p>'; }
+        }
+
         function confirmDelivery(orderId, amount) {
-            Swal.fire({
-                title: 'Send OTP?',
-                html: `A verification code and receipt will be sent to the customer's email. Collect <b class="text-emerald-400 text-xl">৳${amount}</b> cash.`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3b82f6',
-                cancelButtonColor: '#ef4444',
-                confirmButtonText: 'Yes, Send OTP',
-                ...swalDark
-            }).then(async (result) => {
+            Swal.fire({ title: 'Send OTP?', html: `Verification code will be sent to customer. Collect <b class="text-emerald-400 text-xl">৳${amount}</b>.`, icon: 'question', showCancelButton: true, confirmButtonColor: '#3b82f6', cancelButtonColor: '#ef4444', confirmButtonText: 'Yes, Send OTP', ...swalDark }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.fire({title: 'Sending Email...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
-                    
                     const res = await fetch('/api/rider/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({riderId: rider.id, orderId}) });
                     const data = await res.json();
-                    
                     if(data.success) {
-                        const { value: otp } = await Swal.fire({
-                            title: 'Enter OTP Code',
-                            input: 'text',
-                            inputLabel: "Ask the customer for the 6-digit code from their email",
-                            inputPlaceholder: 'e.g. 123456',
-                            showCancelButton: true,
-                            confirmButtonColor: '#10b981',
-                            confirmButtonText: 'Verify & Complete',
-                            inputValidator: (value) => { if (!value) return 'You need to enter the code!' },
-                            ...swalDark
-                        });
-                        
+                        const { value: otp } = await Swal.fire({ title: 'Enter OTP Code', input: 'text', inputLabel: "Customer's 6-digit code", inputPlaceholder: 'e.g. 123456', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'Verify & Complete', inputValidator: (value) => { if (!value) return 'Enter the code!' }, ...swalDark });
                         if(otp) {
                             Swal.fire({title: 'Verifying...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
-                            
                             const verifyRes = await fetch('/api/rider/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({riderId: rider.id, orderId, otp}) });
                             const verifyData = await verifyRes.json();
-                            
-                            if(verifyData.success) {
-                                Swal.fire({title: 'Success!', text: 'Order marked as Delivered.', icon: 'success', ...swalDark});
-                                fetchOrders(); 
-                            } else {
-                                Swal.fire('Error', verifyData.error || 'Failed to verify.', 'error', ...swalDark);
-                            }
+                            if(verifyData.success) { Swal.fire({title: 'Success!', text: 'Delivered!', icon: 'success', ...swalDark}); loadRiderData(); } 
+                            else { Swal.fire('Error', verifyData.error || 'Failed to verify.', 'error', ...swalDark); }
                         }
-                    } else {
-                        Swal.fire('Error', data.error || 'Failed to send OTP.', 'error', ...swalDark);
-                    }
+                    } else { Swal.fire('Error', data.error || 'Failed to send OTP.', 'error', ...swalDark); }
                 }
             });
         }
 
-        function logout() { localStorage.removeItem('rider'); location.reload(); }
+        document.getElementById('fileAvatar').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+            reader.onload = function(event) { const img = new Image(); img.onload = function() {
+                    const canvas = document.createElement('canvas'); let w = img.width; let h = img.height; if(w>256){h*=256/w; w=256;} canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+                    base64Avatar = canvas.toDataURL('image/jpeg', 0.8); document.getElementById('profAvatar').innerHTML = `<img src="${base64Avatar}" class="w-full h-full object-cover">`;
+                }; img.src = event.target.result;
+            }; reader.readAsDataURL(file);
+        });
+
+        async function saveSettings() {
+            const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value;
+            const btn = document.getElementById('btnSaveSet'); btn.innerText = "Saving...";
+            const res = await fetch('/api/rider/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({riderId: rider.id, email, password, avatar: base64Avatar}) }); 
+            const data = await res.json(); btn.innerText = "Save Profile";
+            if(data.success) { toast('success', 'Profile Updated!'); loadRiderData(); } else Swal.fire({title:'Error', icon:'error', ...swalDark}); 
+        }
+
+        function logout() { localStorage.removeItem('riderSession'); location.reload(); }
     </script>
 </body>
 </html>
