@@ -18,7 +18,7 @@ let isMaintenance = false;
 const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
 
 app.use((req, res, next) => {
-  if (req.path.startsWith('/api/admin') || req.path === '/admin') return next();
+  if (req.path.startsWith('/api/admin') || req.path === '/admin' || req.path.startsWith('/api/rider') || req.path === '/rider') return next();
   if (isMaintenance) { if (req.path.startsWith('/api/')) return res.status(503).json({ success: false }); return res.status(503).sendFile(__dirname + '/maintenance.html'); }
   next();
 });
@@ -26,9 +26,9 @@ app.use((req, res, next) => {
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
-  (ctx) => { ctx.reply('🛍️ 1. Product Name?'); return ctx.wizard.next(); },
+  (ctx) => { ctx.reply('🛍️ 1. Product Name (e.g. Premium T-Shirt)?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in BDT (৳)?'); return ctx.wizard.next(); },
-  (ctx) => { ctx.wizard.state.price = parseFloat(ctx.message.text); ctx.reply('🪄 3. Description?'); return ctx.wizard.next(); },
+  (ctx) => { ctx.wizard.state.price = parseFloat(ctx.message.text); ctx.reply('🪄 3. Description (Fabric, Size details)?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.stock = parseInt(ctx.message.text) || 1; ctx.reply('📏 4. Sizes? (Comma separated or "none")'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.sizes = ctx.message.text.toLowerCase() === 'none' ? [] : ctx.message.text.split(',').map(s=>s.trim()); ctx.reply('🎨 5. Colors? (Comma separated or "none")'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.colors = ctx.message.text.toLowerCase() === 'none' ? [] : ctx.message.text.split(',').map(s=>s.trim()); ctx.wizard.state.imageIds = []; ctx.reply('📸 6. Send Photos one by one.\n✅ Type /finish when done.'); return ctx.wizard.next(); },
@@ -63,19 +63,16 @@ async function processDeposit(id, action) {
 bot.action(/approve_(.+)/, async (ctx) => { const res = await processDeposit(parseInt(ctx.match[1]), 'APPROVE'); ctx.editMessageText(`✅ ${res.msg}`); });
 bot.action(/reject_(.+)/, async (ctx) => { const res = await processDeposit(parseInt(ctx.match[1]), 'REJECT'); ctx.editMessageText(`❌ ${res.msg}`); });
 
-// 🔥 TELEGRAM ORDER ACTION BUTTONS
-bot.action(/ord_recv_(.+)/, async (ctx) => { 
-    await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'RECEIVED' } }); 
-    ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n📌 *Status:* 📥 RECEIVED`); 
-});
-bot.action(/ord_ship_(.+)/, async (ctx) => { 
-    await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'SHIPPED' } }); 
-    ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n📌 *Status:* 🚚 SHIPPED`); 
-});
-bot.action(/ord_delv_(.+)/, async (ctx) => { 
-    await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'DELIVERED' } }); 
-    ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n📌 *Status:* ✅ DELIVERED`); 
-});
+async function updateOrderTelegram(ctx, status, icon) {
+    const id = parseInt(ctx.match[1]);
+    await prisma.purchase.update({ where: { id }, data: { status } });
+    const msgText = ctx.callbackQuery.message.text;
+    ctx.editMessageText(`${msgText}\n\n${icon} *STATUS UPDATED: ${status}*`, { parse_mode: 'Markdown' }).catch(()=>{});
+    ctx.answerCbQuery(`Marked as ${status}`);
+}
+bot.action(/receive_(.+)/, (ctx) => updateOrderTelegram(ctx, 'RECEIVED', '📥'));
+bot.action(/ship_(.+)/, (ctx) => updateOrderTelegram(ctx, 'SHIPPED', '🚚'));
+bot.action(/deliver_(.+)/, (ctx) => updateOrderTelegram(ctx, 'DELIVERED', '✅'));
 
 const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-color: #0b1121; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; font-family: Arial, sans-serif;"><div style="background-color: #2563eb; padding: 20px; text-align: center;"><h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">AURA STORE</h1></div><div style="padding: 30px; color: #e2e8f0;">`;
 const emailFooter = `</div><div style="background-color: #0f172a; padding: 15px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE.</p></div></div>`;
@@ -91,6 +88,8 @@ app.post('/api/register', async (req, res) => {
         
         const verifyToken = crypto.randomBytes(32).toString('hex');
         await prisma.user.create({ data: { firstName: name, email, password, country, refCode: generateRefCode(), referredBy, ipAddress: ip, verifyToken, isVerified: false } });
+        if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `🆕 *NEW USER*\nName: ${name}\nEmail: ${email}\nIP: \`${ip}\``, { parse_mode: 'Markdown' }).catch(e => {});
+
         const host = req.headers['x-forwarded-host'] || req.get('host');
         const verifyLink = `https://${host}/api/verify-email/${verifyToken}`;
         const mailOptions = { from: `"AURA STORE" <${process.env.EMAIL_USER}>`, to: email, subject: 'Verify Your Identity', html: `${emailHeader}<h2 style="color: #ffffff;">Welcome, ${name}!</h2><p>Please verify your email:</p><div style="text-align: center; margin: 30px 0;"><a href="${verifyLink}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">VERIFY ACCOUNT</a></div><p style="background-color: #1e293b; padding: 10px; border-radius: 5px; word-break: break-all; color: #3b82f6; font-size: 12px;">${verifyLink}</p>${emailFooter}` };
@@ -108,10 +107,12 @@ app.get('/api/verify-email/:token', async (req, res) => {
 
 app.post('/api/login', async (req, res) => {
     try {
+        let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress; if(ip && ip.includes(',')) ip = ip.split(',')[0];
         const user = await prisma.user.findUnique({ where: { email: req.body.email } });
         if (user && user.password === req.body.password) { 
             if(user.isBanned) return res.status(403).json({ success: false, error: 'Banned' }); 
             if(!user.isVerified) return res.status(403).json({ success: false, error: 'Please verify your email.' }); 
+            if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `🔑 *LOGIN*\nName: ${user.firstName}\nEmail: ${user.email}\nWallet: ৳${user.balanceBdt}\nIP: \`${ip}\``, { parse_mode: 'Markdown' }).catch(e => {});
             res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceBdt: user.balanceBdt, refCode: user.refCode, role: user.role, avatar: user.avatar, refCount: user.refCount } }); 
         } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); }
     } catch(e) { res.status(500).json({ success: false, error: 'Server error' }); }
@@ -132,11 +133,12 @@ app.post('/api/checkout', async (req, res) => {
         if(!prod || prod.stock <= 0) continue;
         total += prod.price; 
         itemsToBuy.push({ prod, size: item.size, color: item.color });
+        
         let varTxt = []; if(item.size) varTxt.push(item.size); if(item.color) varTxt.push(item.color);
         receiptItemsHtml += `<p style="margin: 5px 0; color: #cbd5e1;">• ${prod.name} ${varTxt.length>0 ? `[${varTxt.join(', ')}]` : ''} - <b>৳${prod.price}</b></p>`;
       }
       
-      if(itemsToBuy.length === 0) return res.json({ success: false, error: 'Items out of stock or invalid.' });
+      if(itemsToBuy.length === 0) return res.json({ success: false, error: 'Items out of stock.' });
       
       let actualAdvance = Math.min(ADVANCE_FEE, total); 
       let totalDue = total - actualAdvance;
@@ -155,27 +157,48 @@ app.post('/api/checkout', async (req, res) => {
       }
       adminOrderMsg += `\n💰 *Total:* ৳${total}\n✅ *Advance Paid:* ৳${actualAdvance}\n🚚 *Due (COD):* ৳${totalDue}`;
 
-      // 🔥 SEND TELEGRAM ALERT WITH ALL BUTTONS
       if(ADMIN_ID) {
           bot.telegram.sendMessage(ADMIN_ID, adminOrderMsg, { 
               parse_mode: 'Markdown', 
-              reply_markup: { 
-                  inline_keyboard: [
-                      [{ text: '📥 Receive Order', callback_data: `ord_recv_${purchaseRecords[0]}` }],
-                      [{ text: '🚚 Mark Shipped', callback_data: `ord_ship_${purchaseRecords[0]}` }, { text: '✅ Delivered', callback_data: `ord_delv_${purchaseRecords[0]}` }]
-                  ] 
-              } 
+              reply_markup: { inline_keyboard: [ [{ text: '📥 Receive Order', callback_data: `receive_${purchaseRecords[0]}` }], [{ text: '🚚 Mark Shipped', callback_data: `ship_${purchaseRecords[0]}` }, { text: '✅ Delivered', callback_data: `deliver_${purchaseRecords[0]}` }] ] } 
           });
       }
 
       const receiptMail = { 
           from: `"AURA STORE" <${process.env.EMAIL_USER}>`, to: user.email, subject: 'Order Confirmed - Your Receipt', 
-          html: `${emailHeader}<h2 style="color: #10b981; margin-bottom: 5px;">Order Confirmed! 🎉</h2><p style="color: #94a3b8; font-size: 14px;">Thank you for shopping with AURA STORE. Your order is now pending for admin review.</p><div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 25px 0;"><h3 style="color: #ffffff; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Order Details</h3>${receiptItemsHtml}<div style="margin-top: 15px; border-top: 1px dashed #334155; padding-top: 15px;"><p style="margin: 5px 0; color: #e2e8f0;"><strong>Total Price:</strong> ৳${total}</p><p style="margin: 5px 0; color: #34d399;"><strong>Advance Paid:</strong> ৳${actualAdvance}</p><p style="margin: 5px 0; color: #ef4444; font-size: 18px;"><strong>Due on Delivery (COD):</strong> ৳${totalDue}</p></div></div><div style="background-color: #0f172a; padding: 15px; border-radius: 8px;"><p style="margin: 0; color: #94a3b8; font-size: 12px;"><strong>Delivery Address:</strong><br>${address.street}, ${address.city} - ${address.postcode}<br>Phone: ${address.phone}</p></div>${emailFooter}` 
+          html: `${emailHeader}<h2 style="color: #10b981; margin-bottom: 5px;">Order Confirmed! 🎉</h2><p style="color: #94a3b8; font-size: 14px;">Thank you for shopping with AURA STORE. Your order is now pending for review.</p><div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 25px 0;"><h3 style="color: #ffffff; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Order Details</h3>${receiptItemsHtml}<div style="margin-top: 15px; border-top: 1px dashed #334155; padding-top: 15px;"><p style="margin: 5px 0; color: #e2e8f0;"><strong>Total Price:</strong> ৳${total}</p><p style="margin: 5px 0; color: #34d399;"><strong>Advance Paid:</strong> ৳${actualAdvance}</p><p style="margin: 5px 0; color: #ef4444; font-size: 18px;"><strong>Due on Delivery (COD):</strong> ৳${totalDue}</p></div></div><div style="background-color: #0f172a; padding: 15px; border-radius: 8px;"><p style="margin: 0; color: #94a3b8; font-size: 12px;"><strong>Delivery Address:</strong><br>${address.street}, ${address.city} - ${address.postcode}<br>Phone: ${address.phone}</p></div>${emailFooter}` 
       };
       if(process.env.EMAIL_USER && process.env.EMAIL_PASS) transporter.sendMail(receiptMail).catch(e=>{});
 
       res.json({ success: true, newBalance: user.balanceBdt - actualAdvance, advance: actualAdvance, due: totalDue });
     } catch(e) { res.status(500).json({ success: false, error: 'Server Error' }); }
+});
+
+// 🔥 RIDER APIs
+app.post('/api/rider/login', (req, res) => {
+    if (req.body.password === (process.env.RIDER_PASSWORD || 'Rider123')) res.json({ success: true });
+    else res.status(401).json({ success: false });
+});
+
+app.post('/api/rider/orders', async (req, res) => {
+    if (req.body.password !== (process.env.RIDER_PASSWORD || 'Rider123')) return res.status(403).json({ error: 'Unauthorized' });
+    try {
+        const orders = await prisma.purchase.findMany({
+            where: { status: 'SHIPPED' },
+            include: { user: true, product: true },
+            orderBy: { createdAt: 'asc' }
+        });
+        res.json({ success: true, orders });
+    } catch(e) { res.json({ success: false }); }
+});
+
+app.post('/api/rider/order/action', async (req, res) => {
+    if (req.body.password !== (process.env.RIDER_PASSWORD || 'Rider123')) return res.status(403).json({ error: 'Unauthorized' });
+    try {
+        await prisma.purchase.update({ where: { id: parseInt(req.body.id) }, data: { status: 'DELIVERED' } });
+        if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `✅ *DELIVERED BY RIDER*\nOrder ID: #${req.body.id}`, { parse_mode: 'Markdown' }).catch(e=>{});
+        res.json({ success: true });
+    } catch(e) { res.json({ success: false }); }
 });
 
 app.get('/api/notices', async (req, res) => res.json(await prisma.notice.findMany({ where: { isActive: true } }))); 
@@ -201,6 +224,7 @@ app.get('/sw.js', (req, res) => res.sendFile(__dirname + '/sw.js'));
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
 app.get('/admin', (req, res) => res.sendFile(__dirname + '/admin.html')); 
+app.get('/rider', (req, res) => res.sendFile(__dirname + '/rider.html')); // 🔥 RIDER ROUTE
 
 app.listen(8080);
 bot.launch();
