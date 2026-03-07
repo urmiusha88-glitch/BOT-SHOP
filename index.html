@@ -11,19 +11,18 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { animation: { 'bounce-short': 'bounce 0.5s ease-in-out 1' } } }
+            theme: { extend: { animation: { 'fade-in': 'fadeIn 0.5s ease-in-out', 'bounce-short': 'bounce 0.5s ease-in-out 1', 'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite' } } }
         }
     </script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* 🔥 FIXED: Theme Variables */
         :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; --glass: rgba(255,255,255,0.9); }
         html.dark { --bg: #050b14; --text: #e2e8f0; --card: #0f172a; --border: #1e293b; --glass: rgba(15,23,42,0.85); }
         
-        /* 🔥 FIXED: Custom Animations & Keyframes */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
@@ -35,11 +34,9 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
 
-        /* Splash Screen */
         #splashScreen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.6s ease-out; }
         .spinner { width: 60px; height: 60px; border: 6px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         
-        /* Neon Glow & Glassmorphism */
         .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
         .blob { position: absolute; filter: blur(100px); opacity: 0.15; animation: float 20s infinite alternate; }
         .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; }
@@ -60,20 +57,27 @@
         .variant-select { background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: 0.3s; cursor: pointer; }
         .variant-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         
-        /* Timeline */
         .timeline-step { width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10; position: relative; }
         .t-active { background: #10b981; color: white; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
         .t-inactive { background: var(--border); color: #94a3b8; }
         .t-line { flex: 1; height: 4px; background: var(--border); margin: 0 -5px; z-index: 1; }
         .t-line.active { background: #10b981; }
 
-        /* Floating Buttons */
+        /* 🔥 Updated FAB Positions */
         .fab { position: fixed; z-index: 45; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .fab:active { transform: scale(0.9); }
+        
         #btnScrollTop { bottom: 90px; right: 20px; background: #3b82f6; color: white; opacity: 0; pointer-events: none; transform: translateY(20px); }
         #btnScrollTop.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        
         #btnFeedback { bottom: 90px; left: 20px; background: #4f46e5; color: white; }
-        @media (min-width: 768px) { #btnScrollTop { bottom: 30px; right: 30px; } #btnFeedback { bottom: 30px; left: 30px; } }
+        #btnContact { bottom: 155px; left: 20px; background: #0ea5e9; color: white; } 
+        
+        @media (min-width: 768px) { 
+            #btnScrollTop { bottom: 30px; right: 30px; } 
+            #btnFeedback { bottom: 30px; left: 30px; } 
+            #btnContact { bottom: 95px; left: 30px; } 
+        }
     </style>
 </head>
 <body class="dark">
@@ -107,6 +111,9 @@
     </nav>
 
     <button onclick="openFeedback()" id="btnFeedback" class="fab hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(79,70,229,0.6)] animate-slide-up" style="animation-delay: 0.5s;" title="Give Feedback"><i class="fa-solid fa-comment-dots text-xl"></i></button>
+    
+    <button onclick="openContact()" id="btnContact" class="fab hover:bg-[#0ea5e9] hover:shadow-[0_0_20px_rgba(14,165,233,0.6)] animate-slide-up" style="animation-delay: 0.7s;" title="Contact Support"><i class="fa-solid fa-headset text-xl"></i></button>
+    
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500" title="Scroll to Top"><i class="fa-solid fa-arrow-up"></i></button>
 
     <div class="pt-10 pb-10 text-center relative z-10 px-4 animate-slide-up">
@@ -209,25 +216,13 @@
         let user = null; try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){}
         let allProducts = []; let cart = []; let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]'); let base64Avatar = ''; let showOnlyWishlist = false;
 
-        // Theme Management
         function applyTheme() {
             const isLight = localStorage.getItem('theme') === 'light';
-            if (isLight) {
-                document.documentElement.classList.remove('dark');
-                const icon = document.getElementById('themeIcon');
-                if (icon) icon.className = 'fa-solid fa-moon text-slate-700';
-            } else {
-                document.documentElement.classList.add('dark');
-                const icon = document.getElementById('themeIcon');
-                if (icon) icon.className = 'fa-solid fa-sun text-yellow-400';
-            }
+            if (isLight) { document.documentElement.classList.remove('dark'); const icon = document.getElementById('themeIcon'); if (icon) icon.className = 'fa-solid fa-moon text-slate-700'; } 
+            else { document.documentElement.classList.add('dark'); const icon = document.getElementById('themeIcon'); if (icon) icon.className = 'fa-solid fa-sun text-yellow-400'; }
         }
-        function toggleTheme() {
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
-            applyTheme();
-        }
-        applyTheme(); // Run on load
+        function toggleTheme() { const isDark = document.documentElement.classList.contains('dark'); localStorage.setItem('theme', isDark ? 'light' : 'dark'); applyTheme(); }
+        applyTheme();
 
         window.addEventListener('load', () => { 
             setTimeout(() => { document.getElementById('splashScreen').style.opacity = '0'; setTimeout(()=>document.getElementById('splashScreen').style.display='none',600); }, 800);
@@ -245,35 +240,23 @@
             }, 1000);
         }
 
-        window.addEventListener('scroll', () => {
-            const btn = document.getElementById('btnScrollTop');
-            if(btn) { if (window.scrollY > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); }
-        });
+        window.addEventListener('scroll', () => { const btn = document.getElementById('btnScrollTop'); if(btn) { if (window.scrollY > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); } });
 
         function getBadge(role) { return role === 'ADMIN' ? '<span class="r-badge badge-admin">ADMIN</span>' : '<span class="r-badge badge-basic">USER</span>'; }
 
         async function init() {
             renderAuth(); loadNotices();
-            if(user && user.id) {
-                try { const res = await fetch('/api/user/' + user.id); const data = await res.json();
-                    if(data.success) { user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); }
-                    else if(data.banned) { Swal.fire('Banned', 'Account suspended.', 'error').then(()=>window.logout()); return; }
-                } catch(e) {}
-            }
+            if(user && user.id) { try { const res = await fetch('/api/user/' + user.id); const data = await res.json(); if(data.success) { user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); } else if(data.banned) { Swal.fire('Banned', 'Account suspended.', 'error').then(()=>window.logout()); return; } } catch(e) {} }
             loadProducts();
         }
 
-        async function loadNotices() {
-            try { const res = await fetch('/api/notices'); const notices = await res.json();
-                if(notices && notices.length > 0) { document.getElementById('noticeText').innerHTML = notices.map(n => `<span class="mx-10">• ${n.text}</span>`).join(''); document.getElementById('noticeBanner').classList.remove('hidden'); }
-            } catch(e) {}
-        }
+        async function loadNotices() { try { const res = await fetch('/api/notices'); const notices = await res.json(); if(notices && notices.length > 0) { document.getElementById('noticeText').innerHTML = notices.map(n => `<span class="mx-10">• ${n.text}</span>`).join(''); document.getElementById('noticeBanner').classList.remove('hidden'); } } catch(e) {} }
 
         function renderAuth() {
             const authDiv = document.getElementById('authSection'); const mobNav = document.getElementById('mobileBottomNav');
             if(user) {
                 const uName = user.name || user.firstName || 'User'; let avHtml = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<span class="text-lg font-black">${uName.charAt(0).toUpperCase()}</span>`; let displayBal = `৳${parseFloat(user.balanceBdt).toFixed(0)}`;
-                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-4 py-2 rounded-full font-bold text-sm hidden sm:block hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><div class="hidden sm:flex items-center bg-[var(--card)] border border-[var(--border)] px-4 py-1.5 rounded-full font-black shadow-sm"><span class="mr-2 pr-2 border-r border-[var(--border)] text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-500">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden hover:opacity-80 transition-opacity">${avHtml}</button>`;
+                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-4 py-2 rounded-full font-bold text-sm hidden sm:block hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><div class="hidden sm:flex items-center bg-[var(--card)] border border-[var(--border)] px-4 py-1.5 rounded-full font-black shadow-sm"><span class="mr-2 pr-2 border-r border-[var(--border)] text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-500">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden animate-bounce-short">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden hover:opacity-80 transition-opacity">${avHtml}</button>`;
                 mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center pt-2 transition-transform active:scale-95"><i class="fa-solid fa-store text-xl mb-1"></i><span class="text-[10px] font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 hover:text-blue-500 flex flex-col items-center relative pt-2 transition-colors active:scale-95"><i class="fa-solid fa-cart-shopping text-xl mb-1"></i><span id="cartCountMob" class="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span><span class="text-[10px] font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-500 flex flex-col items-center pt-2 transition-transform active:scale-95"><i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px] font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 hover:text-blue-500 flex flex-col items-center pt-2 transition-colors active:scale-95"><div class="w-6 h-6 rounded-full overflow-hidden border border-[var(--border)] flex justify-center items-center mb-1">${avHtml}</div><span class="text-[10px] font-bold">Profile</span></button>`;
             } else {
                 authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-500 transition-colors active:scale-95">Login</button>`;
@@ -305,14 +288,10 @@
             const p = allProducts.find(x=>x.id===id); if(!p) return;
             const img = (p.imageIds && p.imageIds.length>0) ? `/api/photo/${p.imageIds[0]}` : 'https://placehold.co/400x400';
             document.getElementById('qvImageArea').innerHTML = `<img src="${img}" class="max-w-full max-h-full object-contain rounded-xl drop-shadow-2xl">`;
-            
             let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="qv-sz" class="variant-select"><option value="">Select Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
             let colorOpts = p.colors && p.colors.length > 0 ? `<select id="qv-cl" class="variant-select mt-3"><option value="">Select Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
-            
             document.getElementById('qvDetailsArea').innerHTML = `<h2 class="text-3xl font-black mb-2 leading-tight text-[var(--text)]">${p.name}</h2><p class="text-emerald-500 font-black text-3xl mb-4">৳${p.price}</p><p class="text-sm text-slate-500 mb-6 leading-relaxed">${p.abilities}</p><div class="mb-4">${sizeOpts}${colorOpts}</div><p class="text-xs font-bold ${p.stock>0?'text-blue-500':'text-red-500'} bg-blue-500/10 px-3 py-1 rounded inline-block"><i class="fa-solid fa-box mr-1"></i> Stock: ${p.stock}</p>`;
-            
             document.getElementById('qvActionArea').innerHTML = p.stock<=0 ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-black uppercase tracking-widest cursor-not-allowed border border-red-500/20">Out of Stock</button>` : `<button onclick="addToCartQV(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-transform active:scale-95"><i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart</button>`;
-            
             document.getElementById('quickViewModal').classList.replace('hidden', 'flex');
         }
         function closeQuickView() { document.getElementById('quickViewModal').classList.replace('flex','hidden'); }
@@ -322,10 +301,7 @@
             addToCartDirect(id, name, price, size, color); closeQuickView();
         }
 
-        function shareProduct(id, name) {
-            if (navigator.share) { navigator.share({ title: name, url: window.location.href }); } 
-            else { navigator.clipboard.writeText(window.location.href); toast('success', 'Link Copied!'); }
-        }
+        function shareProduct(id, name) { if (navigator.share) { navigator.share({ title: name, url: window.location.href }); } else { navigator.clipboard.writeText(window.location.href); toast('success', 'Link Copied!'); } }
 
         function renderProducts(list) {
             const container = document.getElementById('product-list');
@@ -345,7 +321,7 @@
                 
                 let wClass = wishlist.includes(p.id) ? "text-rose-500 bg-rose-500/10 border-rose-500/30" : "text-slate-400 hover:text-rose-500 bg-[var(--card)] border-[var(--border)]";
                 let viewers = Math.floor(Math.random() * 20) + 5; 
-                let animDelay = (index * 0.1) > 0.5 ? 0.5 : (index * 0.1); // Stagger animation
+                let animDelay = (index * 0.1) > 0.5 ? 0.5 : (index * 0.1); 
 
                 return `
                 <div class="product-card p-4 flex flex-col justify-between relative group rounded-2xl animate-slide-up shadow-sm" style="animation-delay: ${animDelay}s; opacity: 0;">
@@ -371,23 +347,9 @@
             }).join('');
         }
 
-        function filterProducts() { 
-            const q = document.getElementById('searchInput').value.toLowerCase(); 
-            let list = showOnlyWishlist ? allProducts.filter(p=>wishlist.includes(p.id)) : allProducts;
-            renderProducts(list.filter(p => p.name.toLowerCase().includes(q))); 
-        }
-
+        function filterProducts() { const q = document.getElementById('searchInput').value.toLowerCase(); let list = showOnlyWishlist ? allProducts.filter(p=>wishlist.includes(p.id)) : allProducts; renderProducts(list.filter(p => p.name.toLowerCase().includes(q))); }
         function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
-        function updateCartBadge() { 
-            const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob'); 
-            if(!cDesk || !cMob) return; 
-            if(cart.length > 0) { 
-                cDesk.innerText = cart.length; cMob.innerText = cart.length; 
-                cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); 
-                cDesk.classList.remove('animate-bounce-short'); void cDesk.offsetWidth; cDesk.classList.add('animate-bounce-short'); 
-                cMob.classList.remove('animate-bounce-short'); void cMob.offsetWidth; cMob.classList.add('animate-bounce-short'); 
-            } else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); } 
-        }
+        function updateCartBadge() { const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob'); if(!cDesk || !cMob) return; if(cart.length > 0) { cDesk.innerText = cart.length; cMob.innerText = cart.length; cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); cDesk.classList.remove('animate-bounce-short'); void cDesk.offsetWidth; cDesk.classList.add('animate-bounce-short'); cMob.classList.remove('animate-bounce-short'); void cMob.offsetWidth; cMob.classList.add('animate-bounce-short'); } else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); } }
 
         function addToCartUI(id, name, price) {
             if(!user) return location.href='/login';
@@ -431,17 +393,17 @@
                 const data = await res.json();
                 if(data.success) {
                     user.balanceBdt = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); cart = []; updateCartBadge(); toggleCart(); renderAuth(); renderProducts(allProducts); document.getElementById('addressSection').classList.add('hidden'); document.getElementById('depositForm').reset();
-                    Swal.fire({ title: 'Order Sent! 🎉', html: `<p class="mb-2 text-sm">Advance Paid: <b>৳${data.advance}</b></p><p class="text-lg font-black text-emerald-500">Due (COD): ৳${data.due}</p><p class="text-xs text-blue-500 mt-3">Digital receipt sent to email.</p>`, icon: 'success', confirmButtonColor: '#10b981', confirmButtonText: 'View Status', background:'var(--card)', color:'var(--text)' }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
-                } else Swal.fire({title:'Failed', text: data.error, icon:'error', background:'var(--card)', color:'var(--text)'});
+                    Swal.fire({ title: 'Order Sent! 🎉', html: `<p class="mb-2 text-sm">Advance Paid: <b>৳${data.advance}</b></p><p class="text-lg font-black text-emerald-500">Due (COD): ৳${data.due}</p><p class="text-xs text-blue-500 mt-3">Digital receipt sent to email.</p>`, icon: 'success', confirmButtonColor: '#10b981', confirmButtonText: 'View Status', ...swalDark }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
+                } else Swal.fire({title:'Failed', text: data.error, icon:'error', ...swalDark});
             } catch(e) { Swal.fire('Error', 'Network Error', 'error'); }
         }
 
         async function openFeedback() {
-            if(!user) return Swal.fire('Hey!', 'Please login to send feedback.', 'info');
+            if(!user) return Swal.fire('Hey!', 'Please login to send feedback.', 'info', swalDark);
             const { value: formValues } = await Swal.fire({
                 title: 'Send Feedback',
                 html: `<input id="fb-sub" class="swal2-input !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)]" placeholder="Subject (e.g. Bug / UI)"><textarea id="fb-msg" class="swal2-textarea !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)] custom-scrollbar" placeholder="Write your message here..."></textarea>`,
-                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5', background:'var(--card)', color:'var(--text)',
+                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5', ...swalDark,
                 preConfirm: () => {
                     const sub = document.getElementById('fb-sub').value; const msg = document.getElementById('fb-msg').value;
                     if(!sub || !msg) { Swal.showValidationMessage('Both fields required!'); return false; }
@@ -449,9 +411,30 @@
                 }
             });
             if(formValues) {
-                Swal.fire({title: 'Sent!', text: 'Thanks for your feedback!', icon: 'success', timer: 2000, showConfirmButton: false, background:'var(--card)', color:'var(--text)'});
+                Swal.fire({title: 'Sent!', text: 'Thanks for your feedback!', icon: 'success', timer: 2000, showConfirmButton: false, ...swalDark});
                 fetch('/api/feedback', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: user.id, subject: formValues.subject, message: formValues.message}) }).catch(()=>{});
             }
+        }
+
+        // 🔥 NEW: Contact Support Function
+        function openContact() {
+            Swal.fire({
+                title: 'Contact Support',
+                html: `
+                    <p class="text-sm text-slate-400 mb-6">Reach out to us on our official channels:</p>
+                    <div class="flex justify-center gap-6">
+                        <a href="https://t.me/minato_namikaze143" target="_blank" class="w-16 h-16 bg-[#25a3e1]/10 text-[#25a3e1] hover:bg-[#25a3e1] hover:text-white rounded-2xl flex items-center justify-center text-3xl transition-all shadow-[0_0_15px_rgba(37,163,225,0.2)] hover:shadow-[0_0_25px_rgba(37,163,225,0.6)] transform hover:-translate-y-1">
+                            <i class="fa-brands fa-telegram"></i>
+                        </a>
+                        <a href="https://www.facebook.com/yours.ononto" target="_blank" class="w-16 h-16 bg-[#1877f2]/10 text-[#1877f2] hover:bg-[#1877f2] hover:text-white rounded-2xl flex items-center justify-center text-3xl transition-all shadow-[0_0_15px_rgba(24,119,242,0.2)] hover:shadow-[0_0_25px_rgba(24,119,242,0.6)] transform hover:-translate-y-1">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                ...swalDark
+            });
         }
 
         function openGallery(productId) { const p = allProducts.find(x => x.id === productId); if(!p || !p.imageIds || p.imageIds.length === 0) return; const modal = document.getElementById('imageModal'); const mainImg = document.getElementById('galleryMainImg'); const thumbs = document.getElementById('galleryThumbnails'); mainImg.src = `/api/photo/${p.imageIds[0]}`; thumbs.innerHTML = p.imageIds.map(id => `<img src="/api/photo/${id}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">`).join(''); modal.classList.replace('hidden', 'flex'); }
@@ -496,7 +479,7 @@
         function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 flex justify-between items-center text-white shadow-md transition-colors duration-300'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.replace('bg-[#f37021]','bg-[#e2136e]'); header.classList.add('bg-[#e2136e]'); btn.classList.add('bg-[#e2136e]', 'hover:bg-[#b30b54]'); icon.className = 'fa-solid fa-paper-plane mr-2'; } else if(method === 'nagad') { num = '01846849460'; header.classList.replace('bg-[#e2136e]','bg-[#f37021]'); header.classList.add('bg-[#f37021]'); btn.classList.add('bg-[#f37021]', 'hover:bg-[#d65b15]'); icon.className = 'fa-solid fa-fire mr-2'; } document.getElementById('fNumber').innerText = num; }
         function copyNumber() { navigator.clipboard.writeText(document.getElementById('fNumber').innerText); toast('success', 'Copied!'); }
 
-        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', background:'var(--card)', color:'var(--text)'}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire('Error', 'TrxID exists', 'error'); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
+        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', ...swalDark}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire('Error', 'TrxID exists', 'error'); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
 
         window.logout = function() { localStorage.removeItem('user'); localStorage.removeItem('wishlist'); document.body.style.opacity=0; setTimeout(()=>location.href='/login', 300); }
         document.addEventListener('DOMContentLoaded', init);
