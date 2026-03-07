@@ -9,72 +9,111 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; -webkit-font-smoothing: antialiased; }
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
         .glass-panel { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .glow-input:focus { border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); outline: none; }
+        .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; color: white; outline: none; }
+        .input-box:focus { border-color: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.3); }
+        .tab-active { border-bottom: 2px solid #10b981; color: #10b981; }
+        .tab-inactive { color: #64748b; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div id="loginSection" class="w-full max-w-sm mt-20">
-        <div class="text-center mb-10">
+    <div id="authSection" class="w-full max-w-sm mt-10">
+        <div class="text-center mb-8">
             <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-4xl text-white mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-4">
                 <i class="fa-solid fa-motorcycle"></i>
             </div>
-            <h1 class="text-3xl font-black tracking-tight">RIDER <span class="text-emerald-400">ACCESS</span></h1>
-            <p class="text-slate-400 text-sm mt-2">Enter rider PIN to view deliveries.</p>
+            <h1 class="text-3xl font-black tracking-tight">RIDER <span class="text-emerald-400">PORTAL</span></h1>
         </div>
 
         <div class="glass-panel p-6 rounded-3xl shadow-2xl">
-            <input type="password" id="riderPass" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 font-black text-center text-2xl tracking-[0.5em] glow-input mb-4" placeholder="••••">
-            <button onclick="login()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-colors shadow-lg">Authenticate</button>
+            <div class="flex gap-6 mb-6 border-b border-slate-700">
+                <button id="loginTab" onclick="switchTab('login')" class="pb-2 font-bold tab-active">Login</button>
+                <button id="regTab" onclick="switchTab('reg')" class="pb-2 font-bold tab-inactive">Register</button>
+            </div>
+
+            <div id="loginForm" class="space-y-4">
+                <input type="email" id="lEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
+                <button onclick="login()" id="btnLogin" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-colors shadow-lg mt-2">Login</button>
+            </div>
+
+            <div id="regForm" class="hidden space-y-4">
+                <input type="text" id="rName" placeholder="Full Name" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="text" id="rPhone" placeholder="Phone Number" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="email" id="rEmail" placeholder="Real Email Address" class="input-box w-full p-4 rounded-xl font-bold">
+                <input type="password" id="rPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
+                <button onclick="register()" id="btnReg" class="w-full bg-slate-100 hover:bg-white text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest mt-2">Register</button>
+            </div>
         </div>
     </div>
 
-    <div id="dashSection" class="w-full max-w-md hidden flex-col h-full">
-        <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-6 shadow-lg sticky top-4 z-50">
+    <div id="dashSection" class="w-full max-w-md hidden flex-col h-full absolute inset-0 bg-[#0f172a] overflow-y-auto">
+        <div class="flex justify-between items-center bg-slate-900 p-4 border-b border-slate-800 shadow-lg sticky top-0 z-50">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-motorcycle"></i></div>
                 <div>
-                    <h2 class="font-black leading-tight">Deliveries</h2>
+                    <h2 class="font-black leading-tight" id="riderNameDisplay">Deliveries</h2>
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active Orders</p>
                 </div>
             </div>
             <button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-lg transition-colors"><i class="fa-solid fa-power-off"></i></button>
         </div>
 
-        <div id="ordersContainer" class="space-y-4 pb-10">
-            <p class="text-center text-slate-500 font-bold mt-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Loading Deliveries...</p>
-        </div>
+        <div id="ordersContainer" class="space-y-4 p-4 pb-10"></div>
     </div>
 
     <script>
         const swalDark = { background: '#1e293b', color: '#fff' };
-        let pass = sessionStorage.getItem('riderPass');
+        let rider = null; try { const r = localStorage.getItem('rider'); if(r) rider = JSON.parse(r); } catch(e){}
         
-        if(pass) fetchOrders();
+        if(rider && rider.id) { fetchOrders(); }
+
+        function switchTab(t) {
+            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('regForm').classList.add('hidden');
+            document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive'; document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive';
+            if(t === 'login') { document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('loginTab').className = 'pb-2 font-bold tab-active'; }
+            else { document.getElementById('regForm').classList.remove('hidden'); document.getElementById('regTab').className = 'pb-2 font-bold tab-active'; }
+        }
 
         async function login() { 
-            pass = document.getElementById('riderPass').value; 
-            const btn = document.querySelector('button'); btn.innerText = "Checking...";
-            const res = await fetch('/api/rider/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); 
-            btn.innerText = "AUTHENTICATE";
-            if(res.ok) { sessionStorage.setItem('riderPass', pass); fetchOrders(); } 
-            else { Swal.fire({toast:true, position:'top-end', icon:'error', title:'Invalid PIN'}); } 
+            const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value;
+            if(!email || !password) return;
+            const btn = document.getElementById('btnLogin'); btn.innerText = "Checking...";
+            const res = await fetch('/api/rider/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password}) }); 
+            const data = await res.json();
+            btn.innerText = "LOGIN";
+            if(data.success) { rider = data.rider; localStorage.setItem('rider', JSON.stringify(rider)); fetchOrders(); } 
+            else { Swal.fire({toast:true, position:'top-end', icon:'error', title: data.error || 'Login Failed'}); } 
+        }
+
+        async function register() { 
+            const name = document.getElementById('rName').value; const phone = document.getElementById('rPhone').value; const email = document.getElementById('rEmail').value; const password = document.getElementById('rPass').value;
+            if(!name || !email || !phone || !password) return;
+            const btn = document.getElementById('btnReg'); btn.innerText = "Creating...";
+            const res = await fetch('/api/rider/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, phone, email, password}) }); 
+            const data = await res.json();
+            btn.innerText = "REGISTER";
+            if(data.success) { Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); } 
+            else { Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); } 
         }
 
         async function fetchOrders() {
-            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('authSection').classList.add('hidden');
             document.getElementById('dashSection').classList.remove('hidden');
             document.getElementById('dashSection').classList.add('flex');
+            document.getElementById('riderNameDisplay').innerText = rider.name;
+
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = '<p class="text-center text-slate-500 font-bold mt-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Loading Deliveries...</p>';
 
             try {
-                const res = await fetch('/api/rider/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) });
+                const res = await fetch('/api/rider/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
                 const data = await res.json();
                 
                 if(!data.success) { logout(); return; }
 
-                const container = document.getElementById('ordersContainer');
                 if(data.orders.length === 0) {
                     container.innerHTML = '<div class="text-center text-slate-500 mt-20"><i class="fa-solid fa-box-open text-5xl mb-4 opacity-50"></i><h3 class="text-xl font-black">No Active Deliveries</h3><p class="text-sm">You have delivered all shipped orders.</p></div>';
                     return;
@@ -111,18 +150,18 @@
                             </div>
                         </div>
 
-                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-transform active:scale-95"><i class="fa-solid fa-shield-halved mr-2"></i> Verify & Deliver</button>
+                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform active:scale-95"><i class="fa-solid fa-shield-halved mr-2"></i> Verify & Deliver</button>
                     </div>`;
                 }).join('');
 
-            } catch(e) { document.getElementById('ordersContainer').innerHTML = '<p class="text-center text-red-400 font-bold mt-10">Connection Error.</p>'; }
+            } catch(e) { container.innerHTML = '<p class="text-center text-red-400 font-bold mt-10">Connection Error.</p>'; }
         }
 
-        // 🔥 OTP VERIFICATION PROCESS
-        function confirmDelivery(id, amount) {
+        // 🔥 OTP LOGIC WITH RIDER DATA
+        function confirmDelivery(orderId, amount) {
             Swal.fire({
                 title: 'Send OTP?',
-                html: `A verification code will be sent to the customer's email. Collect <b class="text-emerald-400 text-xl">৳${amount}</b> cash.`,
+                html: `A verification code and receipt will be sent to the customer's email. Collect <b class="text-emerald-400 text-xl">৳${amount}</b> cash.`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#3b82f6',
@@ -133,7 +172,7 @@
                 if (result.isConfirmed) {
                     Swal.fire({title: 'Sending Email...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
                     
-                    const res = await fetch('/api/rider/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id}) });
+                    const res = await fetch('/api/rider/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({riderId: rider.id, orderId}) });
                     const data = await res.json();
                     
                     if(data.success) {
@@ -152,7 +191,7 @@
                         if(otp) {
                             Swal.fire({title: 'Verifying...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
                             
-                            const verifyRes = await fetch('/api/rider/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, otp}) });
+                            const verifyRes = await fetch('/api/rider/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({riderId: rider.id, orderId, otp}) });
                             const verifyData = await verifyRes.json();
                             
                             if(verifyData.success) {
@@ -169,7 +208,7 @@
             });
         }
 
-        function logout() { sessionStorage.removeItem('riderPass'); location.reload(); }
+        function logout() { localStorage.removeItem('rider'); location.reload(); }
     </script>
 </body>
 </html>
