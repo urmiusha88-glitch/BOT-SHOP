@@ -9,101 +9,131 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050b14; color: white; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; overflow-x: hidden; }
-        .glass-panel { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: white; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
+        .app-container { max-width: 480px; margin: 0 auto; background-color: #0f172a; min-height: 100dvh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.8); overflow: hidden; }
+        
+        /* Animations */
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .animate-slide-right { animation: slideInRight 0.3s ease-out forwards; }
+
+        .glass-panel { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
         .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; color: white; outline: none; font-size: 16px; }
-        .input-box:focus { border-color: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.3); }
+        .input-box:focus { border-color: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.3); background: rgba(15,23,42,0.9); }
         .tab-active { border-bottom: 2px solid #10b981; color: #10b981; }
-        .tab-inactive { color: #64748b; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+        .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
+        .nav-tab.active { color: #10b981; border-color: #10b981; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
         
         .r-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-        .badge-rookie { background: linear-gradient(135deg, #94a3b8, #475569, #94a3b8); color: white; }
-        .badge-bronze { background: linear-gradient(135deg, #d97706, #78350f, #d97706); color: white; box-shadow: 0 0 10px rgba(217, 119, 6, 0.5); }
-        .badge-silver { background: linear-gradient(135deg, #cbd5e1, #64748b, #cbd5e1); color: #0f172a; text-shadow: none; box-shadow: 0 0 10px rgba(203, 213, 225, 0.5); }
-        .badge-gold { background: linear-gradient(135deg, #fbbf24, #b45309, #fbbf24); color: #451a03; text-shadow: none; box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
-        .badge-platinum { background: linear-gradient(135deg, #e2e8f0, #94a3b8, #f8fafc); color: #0f172a; text-shadow: none; box-shadow: 0 0 15px rgba(226, 232, 240, 0.6); }
-        .badge-diamond { background: linear-gradient(135deg, #67e8f9, #0284c7, #a5f3fc); color: #082f49; text-shadow: none; box-shadow: 0 0 20px rgba(6, 182, 212, 0.8); }
-        
+        .badge-rookie { background: linear-gradient(135deg, #94a3b8, #475569); color: white; }
+        .badge-bronze { background: linear-gradient(135deg, #d97706, #78350f); color: white; box-shadow: 0 0 10px rgba(217, 119, 6, 0.5); }
+        .badge-silver { background: linear-gradient(135deg, #cbd5e1, #64748b); color: #0f172a; text-shadow: none; box-shadow: 0 0 10px rgba(203, 213, 225, 0.5); }
+        .badge-gold { background: linear-gradient(135deg, #fbbf24, #b45309); color: #451a03; text-shadow: none; box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
+        .badge-platinum { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #0f172a; text-shadow: none; box-shadow: 0 0 15px rgba(226, 232, 240, 0.6); }
+        .badge-diamond { background: linear-gradient(135deg, #67e8f9, #0284c7); color: #082f49; text-shadow: none; box-shadow: 0 0 20px rgba(6, 182, 212, 0.8); }
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
-        .nav-tab.active { color: #10b981; border-color: #10b981; }
+        
+        .card-hover { transition: transform 0.2s; } .card-hover:active { transform: scale(0.98); }
     </style>
 </head>
-<body class="min-h-screen bg-[#050b14]">
+<body>
 
-    <div id="authSection" class="min-h-screen flex flex-col items-center justify-center p-4">
-        <div class="w-full max-w-md">
+    <div class="app-container sm:border-x sm:border-slate-800">
+        
+        <div id="authSection" class="flex-1 flex flex-col justify-center p-6 w-full animate-slide-up">
             <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-4xl text-slate-900 mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-4"><i class="fa-solid fa-motorcycle"></i></div>
-                <h1 class="text-3xl font-black tracking-tight text-white">RIDER <span class="text-emerald-400">PORTAL</span></h1>
-            </div>
-            <div class="glass-panel p-8 rounded-3xl shadow-2xl">
-                <div class="flex gap-6 mb-6 border-b border-slate-700">
-                    <button id="loginTab" onclick="switchTab('login')" class="pb-2 font-bold tab-active w-1/2">Login</button>
-                    <button id="regTab" onclick="switchTab('reg')" class="pb-2 font-bold tab-inactive w-1/2 border-transparent border-b-2">Register</button>
+                <div class="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-4xl text-slate-900 mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-6 transform rotate-12">
+                    <i class="fa-solid fa-motorcycle -rotate-12"></i>
                 </div>
-                <div id="loginForm" class="space-y-5">
+                <h1 class="text-4xl font-black tracking-tight text-white">RIDER <span class="text-emerald-400">APP</span></h1>
+            </div>
+
+            <div class="glass-panel p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+                <div class="flex gap-6 mb-6 border-b border-slate-700/50">
+                    <button id="loginTab" onclick="switchTab('login')" class="pb-3 font-bold uppercase text-sm tracking-widest tab-active w-1/2 transition-colors">Login</button>
+                    <button id="regTab" onclick="switchTab('reg')" class="pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors">Register</button>
+                </div>
+
+                <div id="loginForm" class="space-y-4 animate-slide-right">
                     <input type="email" id="lEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
-                    <button onclick="login()" id="btnLogin" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-colors shadow-[0_0_15px_rgba(16,185,129,0.4)] mt-2 w-full">Login</button>
+                    <button onclick="login()" id="btnLogin" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] mt-4 active:scale-95">Enter App <i class="fa-solid fa-arrow-right ml-2"></i></button>
                 </div>
-                <div id="regForm" class="hidden space-y-5">
+
+                <div id="regForm" class="hidden space-y-4">
                     <input type="text" id="rName" placeholder="Full Name" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="tel" id="rPhone" placeholder="Phone Number" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="email" id="rEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="password" id="rPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
-                    <button onclick="register()" id="btnReg" class="w-full bg-slate-100 hover:bg-white text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest mt-2 w-full">Register</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="dashSection" class="hidden flex-col h-screen w-full fixed inset-0 bg-[#050b14]">
-        <div class="shrink-0 bg-slate-900 border-b border-slate-800 shadow-lg z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-slate-900 overflow-hidden border-2 border-emerald-400 shadow-lg" id="topAvatar"><i class="fa-solid fa-motorcycle"></i></div>
-                    <div><h2 class="text-xl font-black leading-tight text-white" id="riderNameDisplay">Rider</h2><p class="text-xs text-emerald-400 font-bold uppercase tracking-widest mt-0.5" id="riderBadgeDisplay">Rookie</p></div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div id="gpsStatus" class="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-2" title="GPS Tracking"></div>
-                    <button onclick="logout()" class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl font-bold transition-colors"><i class="fa-solid fa-power-off"></i></button>
+                    <button onclick="register()" id="btnReg" class="w-full bg-slate-100 hover:bg-white text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest mt-4 active:scale-95 shadow-lg">Sign Up</button>
                 </div>
             </div>
         </div>
 
-        <div class="shrink-0 bg-slate-900/50 border-b border-slate-800 z-40 backdrop-blur-md">
-            <div class="max-w-7xl mx-auto px-4 flex justify-center sm:justify-start gap-4 sm:gap-8 pt-3">
-                <button onclick="switchDashTab('active')" id="dtab-active" class="nav-tab active pb-3 px-2 sm:px-4 font-bold text-xs sm:text-sm uppercase tracking-widest border-b-2 border-emerald-500">Active</button>
-                <button onclick="switchDashTab('history')" id="dtab-history" class="nav-tab text-slate-500 pb-3 px-2 sm:px-4 font-bold text-xs sm:text-sm uppercase tracking-widest border-b-2 border-transparent">History</button>
-                <button onclick="switchDashTab('profile')" id="dtab-profile" class="nav-tab text-slate-500 pb-3 px-2 sm:px-4 font-bold text-xs sm:text-sm uppercase tracking-widest border-b-2 border-transparent">Profile</button>
-            </div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <div class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-                <div id="view-active" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20"></div>
-                <div id="view-history" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20"></div>
-
-                <div id="view-profile" class="hidden max-w-2xl mx-auto pb-20">
-                    <div class="glass-panel p-6 sm:p-10 rounded-[32px] shadow-2xl text-center">
-                        <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto flex items-center justify-center text-5xl text-white font-black shadow-[0_0_20px_rgba(16,185,129,0.3)] mb-4 overflow-hidden border-4 border-slate-700" id="profAvatar"></div>
-                        <div id="profBadgeHtml" class="mb-4"></div>
-                        <h3 class="text-3xl font-black mb-1 text-white" id="profName">Name</h3>
-                        <p class="text-slate-400 font-bold text-sm mb-8" id="profEmail">email</p>
-
-                        <div class="grid grid-cols-2 gap-4 mb-10">
-                            <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700"><p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Total Delivered</p><p class="text-4xl font-black text-emerald-400" id="profCount">0</p></div>
-                            <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700"><p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Next Rank</p><p class="text-lg font-black text-blue-400 mt-2" id="profNext">10 left</p></div>
+        <div id="dashSection" class="hidden flex-col h-[100dvh] w-full animate-slide-up" style="animation-delay: 0.1s; opacity: 0;">
+            
+            <div class="shrink-0 bg-slate-900 border-b border-slate-800 shadow-lg z-50">
+                <div class="px-5 py-4 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-slate-900 overflow-hidden border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" id="topAvatar">
+                            <i class="fa-solid fa-user-astronaut"></i>
                         </div>
-
-                        <div class="text-left space-y-5 bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
-                            <h3 class="font-black text-xl text-white mb-4 flex items-center"><i class="fa-solid fa-gear text-emerald-500 mr-3"></i> Settings</h3>
-                            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between"><p class="font-bold text-sm text-slate-300">Update Profile Picture</p><div class="upload-btn-wrapper"><button class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-lg text-xs font-bold transition-colors">Choose Image</button><input type="file" id="fileAvatar" accept="image/*" /></div></div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email</label><input type="email" id="setEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-5 py-4 font-bold outline-none text-white focus:border-emerald-500"></div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Change Password</label><input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-5 py-4 font-bold outline-none text-white focus:border-emerald-500"></div>
-                            <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest mt-2 w-full">Save Changes</button>
+                        <div>
+                            <h2 class="text-xl font-black leading-tight text-white" id="riderNameDisplay">Rider</h2>
+                            <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5" id="riderBadgeDisplay">Rookie</p>
                         </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div id="gpsStatus" class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_currentColor]"></div>
+                        <button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-xl font-bold transition-colors active:scale-95"><i class="fa-solid fa-power-off text-xl"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="shrink-0 bg-slate-900/80 border-b border-slate-800 z-40 backdrop-blur-md">
+                <div class="px-2 flex justify-between pt-3">
+                    <button onclick="switchDashTab('active')" id="dtab-active" class="nav-tab active pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-emerald-500 w-1/3 text-center transition-colors">Active</button>
+                    <button onclick="switchDashTab('history')" id="dtab-history" class="nav-tab text-slate-500 pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-transparent w-1/3 text-center transition-colors">History</button>
+                    <button onclick="switchDashTab('profile')" id="dtab-profile" class="nav-tab text-slate-500 pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-transparent w-1/3 text-center transition-colors">Profile</button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar relative">
+                <div id="view-active" class="p-4 space-y-4 pb-10 absolute inset-0 w-full animate-slide-right"></div>
+                <div id="view-history" class="p-4 space-y-4 pb-10 hidden absolute inset-0 w-full"></div>
+
+                <div id="view-profile" class="p-6 hidden absolute inset-0 w-full text-center pb-20">
+                    <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto flex items-center justify-center text-5xl text-white font-black shadow-[0_0_30px_rgba(16,185,129,0.3)] mb-4 overflow-hidden border-4 border-slate-700" id="profAvatar"></div>
+                    <div id="profBadgeHtml" class="mb-4"></div>
+                    <h3 class="text-3xl font-black mb-1 text-white" id="profName">Name</h3>
+                    <p class="text-slate-400 font-bold text-sm mb-8" id="profEmail">email</p>
+
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 shadow-inner">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Total Delivered</p>
+                            <p class="text-3xl font-black text-emerald-400" id="profCount">0</p>
+                        </div>
+                        <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 shadow-inner">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Next Rank</p>
+                            <p class="text-base font-black text-blue-400 mt-2" id="profNext">10 left</p>
+                        </div>
+                    </div>
+
+                    <div class="text-left space-y-5 bg-slate-900/60 p-5 rounded-2xl border border-slate-800 shadow-lg">
+                        <h3 class="font-black text-lg text-white mb-2 flex items-center"><i class="fa-solid fa-gear text-emerald-500 mr-2"></i> Settings</h3>
+                        <div class="bg-[rgba(255,255,255,0.02)] p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
+                            <p class="font-bold text-xs text-slate-300">Update Photo</p>
+                            <div class="upload-btn-wrapper">
+                                <button class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-bold active:scale-95">Choose</button>
+                                <input type="file" id="fileAvatar" accept="image/*" />
+                            </div>
+                        </div>
+                        <div><input type="email" id="setEmail" class="input-box w-full p-4 rounded-xl font-bold text-sm" placeholder="Email Address"></div>
+                        <div><input type="password" id="setPass" class="input-box w-full p-4 rounded-xl font-bold text-sm" placeholder="New Password (Optional)"></div>
+                        <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl uppercase tracking-widest mt-2 active:scale-95 shadow-[0_0_15px_rgba(59,130,246,0.4)]">Save Profile</button>
                     </div>
                 </div>
             </div>
@@ -111,61 +141,52 @@
     </div>
 
     <script>
-        const swalDark = { background: '#1e293b', color: '#fff' };
+        const swalDark = { background: 'rgba(15,23,42,0.95)', color: '#fff', backdrop: 'rgba(0,0,0,0.8)' };
         let rider = null; try { const r = localStorage.getItem('riderSession'); if(r) rider = JSON.parse(r); } catch(e){}
-        let base64Avatar = '';
-        let gpsInterval;
+        let base64Avatar = ''; let gpsInterval;
 
         if(rider && rider.id) { loadRiderData(); }
 
         function switchTab(t) {
-            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('regForm').classList.add('hidden');
-            document.getElementById('loginTab').className = 'pb-2 font-bold tab-inactive border-transparent border-b-2 w-1/2'; 
-            document.getElementById('regTab').className = 'pb-2 font-bold tab-inactive border-transparent border-b-2 w-1/2';
-            if(t === 'login') { document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('loginTab').className = 'pb-2 font-bold tab-active w-1/2'; }
-            else { document.getElementById('regForm').classList.remove('hidden'); document.getElementById('regTab').className = 'pb-2 font-bold tab-active w-1/2'; }
+            const lForm = document.getElementById('loginForm'); const rForm = document.getElementById('regForm');
+            lForm.classList.add('hidden'); rForm.classList.add('hidden');
+            lForm.classList.remove('animate-slide-right'); rForm.classList.remove('animate-slide-right');
+            
+            document.getElementById('loginTab').className = 'pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors'; 
+            document.getElementById('regTab').className = 'pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors';
+            
+            if(t === 'login') { lForm.classList.remove('hidden'); void lForm.offsetWidth; lForm.classList.add('animate-slide-right'); document.getElementById('loginTab').classList.replace('tab-inactive', 'tab-active'); }
+            else { rForm.classList.remove('hidden'); void rForm.offsetWidth; rForm.classList.add('animate-slide-right'); document.getElementById('regTab').classList.replace('tab-inactive', 'tab-active'); }
         }
 
         function switchDashTab(t) {
             ['active', 'history', 'profile'].forEach(tab => {
-                document.getElementById('view-'+tab).classList.add('hidden');
-                document.getElementById('dtab-'+tab).classList.remove('active', 'border-emerald-500', 'text-white'); 
-                document.getElementById('dtab-'+tab).classList.add('text-slate-500', 'border-transparent');
+                const el = document.getElementById('view-'+tab); el.classList.add('hidden'); el.classList.remove('animate-slide-right');
+                document.getElementById('dtab-'+tab).className = 'nav-tab text-slate-500 pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-transparent w-1/3 text-center transition-colors';
             });
-            document.getElementById('view-'+t).classList.remove('hidden');
-            document.getElementById('dtab-'+t).classList.remove('text-slate-500', 'border-transparent'); 
-            document.getElementById('dtab-'+t).classList.add('active', 'border-emerald-500', 'text-white');
-            if(t === 'active') fetchOrders();
-            if(t === 'history') fetchHistory();
+            const view = document.getElementById('view-'+t);
+            view.classList.remove('hidden'); void view.offsetWidth; view.classList.add('animate-slide-right');
+            document.getElementById('dtab-'+t).className = 'nav-tab active pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-emerald-500 w-1/3 text-center text-white transition-colors';
+            if(t === 'active') fetchOrders(); if(t === 'history') fetchHistory();
         }
 
-        function getRiderBadge(count) {
-            if(count >= 100) return { html: '<span class="r-badge badge-diamond"><i class="fa-solid fa-gem mr-1"></i> DIAMOND</span>', name: 'Diamond' };
-            if(count >= 50) return { html: '<span class="r-badge badge-platinum"><i class="fa-solid fa-star mr-1"></i> PLATINUM</span>', name: 'Platinum' };
-            if(count >= 30) return { html: '<span class="r-badge badge-gold"><i class="fa-solid fa-medal mr-1"></i> GOLD</span>', name: 'Gold' };
-            if(count >= 20) return { html: '<span class="r-badge badge-silver"><i class="fa-solid fa-medal mr-1"></i> SILVER</span>', name: 'Silver' };
-            if(count >= 10) return { html: '<span class="r-badge badge-bronze"><i class="fa-solid fa-medal mr-1"></i> BRONZE</span>', name: 'Bronze' };
-            return { html: '<span class="r-badge badge-rookie"><i class="fa-solid fa-seedling mr-1"></i> ROOKIE</span>', name: 'Rookie' };
+        function getRiderBadge(c) {
+            if(c>=100) return {html:'<span class="r-badge badge-diamond"><i class="fa-solid fa-gem mr-1"></i> DIAMOND</span>', name:'Diamond'};
+            if(c>=50) return {html:'<span class="r-badge badge-platinum"><i class="fa-solid fa-star mr-1"></i> PLATINUM</span>', name:'Platinum'};
+            if(c>=30) return {html:'<span class="r-badge badge-gold"><i class="fa-solid fa-medal mr-1"></i> GOLD</span>', name:'Gold'};
+            if(c>=20) return {html:'<span class="r-badge badge-silver"><i class="fa-solid fa-medal mr-1"></i> SILVER</span>', name:'Silver'};
+            if(c>=10) return {html:'<span class="r-badge badge-bronze"><i class="fa-solid fa-medal mr-1"></i> BRONZE</span>', name:'Bronze'};
+            return {html:'<span class="r-badge badge-rookie"><i class="fa-solid fa-seedling mr-1"></i> ROOKIE</span>', name:'Rookie'};
         }
-        function getNextRankInfo(count) {
-            if(count < 10) return `${10 - count} to Bronze`; if(count < 20) return `${20 - count} to Silver`;
-            if(count < 30) return `${30 - count} to Gold`; if(count < 50) return `${50 - count} to Platinum`;
-            if(count < 100) return `${100 - count} to Diamond`; return 'Max Rank Achieved!';
-        }
+        function getNextRankInfo(c) { if(c<10) return `${10-c} to Bronze`; if(c<20) return `${20-c} to Silver`; if(c<30) return `${30-c} to Gold`; if(c<50) return `${50-c} to Platinum`; if(c<100) return `${100-c} to Diamond`; return 'Max Rank Achieved!'; }
 
-        // 🔥 LOCATION TRACKING LOGIC
         function startTracking() {
-            if ("geolocation" in navigator) {
-                // Instantly get once
-                sendLoc();
-                // Then every 30 seconds
-                gpsInterval = setInterval(sendLoc, 30000);
-            }
+            if ("geolocation" in navigator) { sendLoc(); gpsInterval = setInterval(sendLoc, 30000); }
         }
         function sendLoc() {
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                document.getElementById('gpsStatus').classList.replace('bg-red-500', 'bg-emerald-500'); // Green Indicator
-                await fetch('/api/rider/location', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ riderId: rider.id, lat: pos.coords.latitude, lng: pos.coords.longitude }) });
+                document.getElementById('gpsStatus').classList.replace('bg-red-500', 'bg-emerald-500'); 
+                await fetch('/api/rider/location', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ riderId: rider.id, lat: pos.coords.latitude, lng: pos.coords.longitude }) });
             }, (err) => { document.getElementById('gpsStatus').classList.replace('bg-emerald-500', 'bg-red-500'); }, { enableHighAccuracy: true });
         }
 
@@ -174,73 +195,108 @@
             const data = await res.json();
             if(data.success) {
                 rider = data.rider; localStorage.setItem('riderSession', JSON.stringify(rider));
-                document.getElementById('authSection').classList.add('hidden');
-                document.getElementById('dashSection').classList.remove('hidden'); document.getElementById('dashSection').classList.add('flex');
+                
+                document.getElementById('authSection').style.opacity = 0;
+                setTimeout(() => {
+                    document.getElementById('authSection').classList.add('hidden');
+                    const ds = document.getElementById('dashSection'); ds.classList.remove('hidden'); ds.classList.add('flex');
+                    void ds.offsetWidth; ds.style.opacity = 1;
+                }, 300);
+
                 document.getElementById('riderNameDisplay').innerText = rider.name;
                 const badge = getRiderBadge(rider.deliveryCount); document.getElementById('riderBadgeDisplay').innerText = badge.name;
-                let avHtml = rider.avatar ? `<img src="${rider.avatar}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-motorcycle"></i>`;
-                document.getElementById('topAvatar').innerHTML = avHtml; document.getElementById('profAvatar').innerHTML = rider.avatar ? `<img src="${rider.avatar}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user-astronaut text-slate-500"></i>`;
+                let avHtml = rider.avatar ? `<img src="${rider.avatar}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user-astronaut text-slate-700"></i>`;
+                document.getElementById('topAvatar').innerHTML = avHtml; document.getElementById('profAvatar').innerHTML = avHtml;
                 document.getElementById('profName').innerText = rider.name; document.getElementById('profEmail').innerText = rider.email; document.getElementById('profCount').innerText = rider.deliveryCount; document.getElementById('profBadgeHtml').innerHTML = badge.html; document.getElementById('profNext').innerText = getNextRankInfo(rider.deliveryCount); document.getElementById('setEmail').value = rider.email; base64Avatar = rider.avatar || '';
                 
-                fetchOrders();
-                startTracking(); // Start GPS!
+                fetchOrders(); startTracking();
             } else { logout(); }
         }
 
         async function login() { 
             const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value;
-            if(!email || !password) return; const btn = document.getElementById('btnLogin'); btn.innerText = "Checking...";
+            if(!email || !password) return; const btn = document.getElementById('btnLogin'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...';
             const res = await fetch('/api/rider/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password}) }); 
-            const data = await res.json(); btn.innerText = "LOGIN";
-            if(data.success) { rider = { id: data.rider.id }; loadRiderData(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title: data.error || 'Login Failed'}); } 
+            const data = await res.json(); btn.innerHTML = 'Enter App <i class="fa-solid fa-arrow-right ml-2"></i>';
+            if(data.success) { rider = { id: data.rider.id }; loadRiderData(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title: data.error || 'Login Failed', background:'#1e293b', color:'#fff'}); } 
         }
 
         async function register() { 
             const name = document.getElementById('rName').value; const phone = document.getElementById('rPhone').value; const email = document.getElementById('rEmail').value; const password = document.getElementById('rPass').value;
-            if(!name || !email || !phone || !password) return; const btn = document.getElementById('btnReg'); btn.innerText = "Creating...";
+            if(!name || !email || !phone || !password) return; const btn = document.getElementById('btnReg'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating...';
             const res = await fetch('/api/rider/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, phone, email, password}) }); 
-            const data = await res.json(); btn.innerText = "REGISTER";
+            const data = await res.json(); btn.innerHTML = 'Sign Up';
             if(data.success) { Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); } else { Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); } 
         }
 
         async function fetchOrders() {
-            const container = document.getElementById('view-active'); container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold mt-20"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4"></i><br>Finding Orders...</div>';
+            const container = document.getElementById('view-active'); container.innerHTML = '<div class="text-center text-slate-500 font-bold mt-32"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-emerald-500"></i><br>Locating Orders...</div>';
             try {
                 const res = await fetch('/api/rider/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
                 const data = await res.json();
-                if(data.orders.length === 0) { container.innerHTML = '<div class="col-span-full text-center text-slate-500 mt-24"><i class="fa-solid fa-box-open text-6xl mb-4 opacity-30"></i><h3 class="text-xl font-black text-white">No Active Deliveries</h3></div>'; return; }
+                if(data.orders.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 mt-32"><i class="fa-solid fa-box-open text-6xl mb-4 opacity-20"></i><h3 class="text-xl font-black text-white">No Pending Orders</h3><p class="text-xs mt-2 font-bold">You are all caught up!</p></div>'; return; }
+                
                 container.innerHTML = data.orders.map(o => {
                     let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor); let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
-                    return `<div class="glass-panel p-6 rounded-3xl relative overflow-hidden shadow-lg border border-slate-700/50 flex flex-col justify-between h-full"><div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div><div><div class="flex justify-between items-start mb-5"><div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p><h3 class="font-black text-xl leading-tight text-white">${o.user.firstName}</h3></div><a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] active:scale-95 text-xl"><i class="fa-solid fa-phone"></i></a></div><div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5"><p class="text-sm text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2 text-lg"></i> ${o.street}, ${o.city}</p></div><div class="mb-6 pb-5 border-b border-slate-700"><p class="text-base font-bold text-slate-200 leading-snug"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Product'} <span class="text-[11px] text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded ml-1">${varStr}</span></p></div></div><div><div class="flex justify-between items-end mb-5"><div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash (COD)</p><p class="text-4xl font-black text-emerald-400 tracking-tight">৳${o.dueCod}</p></div></div><button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-95 text-sm"><i class="fa-solid fa-shield-halved mr-2"></i> Verify & Deliver</button></div></div>`;
+                    return `
+                    <div class="glass-panel p-6 rounded-3xl relative overflow-hidden shadow-lg card-hover">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
+                        <div class="flex justify-between items-start mb-5">
+                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p><h3 class="font-black text-xl leading-tight text-white">${o.user.firstName}</h3></div>
+                            <a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] active:scale-95 text-xl"><i class="fa-solid fa-phone"></i></a>
+                        </div>
+                        <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-slate-700/50 mb-5">
+                            <p class="text-sm text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2 text-lg align-middle"></i> ${o.street}, ${o.city} <br><span class="ml-7 text-slate-500 font-mono text-[10px] mt-1 inline-block bg-black/30 px-2 py-0.5 rounded">ZIP: ${o.postcode}</span></p>
+                        </div>
+                        <div class="mb-6 pb-5 border-b border-slate-700/50">
+                            <p class="text-sm font-bold text-slate-200 leading-snug"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Unknown Product'} <span class="text-[10px] text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded ml-1 mt-2 inline-block">${varStr}</span></p>
+                        </div>
+                        <div class="flex justify-between items-end mb-5">
+                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash</p><p class="text-4xl font-black text-emerald-400 tracking-tight">৳${o.dueCod}</p></div>
+                        </div>
+                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-95 text-sm transition-transform"><i class="fa-solid fa-shield-halved mr-2"></i> Deliver & Verify</button>
+                    </div>`;
                 }).join('');
-            } catch(e) { container.innerHTML = '<div class="col-span-full text-center text-red-400 font-bold mt-20">Error.</div>'; }
+            } catch(e) { container.innerHTML = '<div class="text-center text-red-400 font-bold mt-20">Network Error.</div>'; }
         }
 
         async function fetchHistory() {
-            const container = document.getElementById('view-history'); container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold mt-20"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4"></i><br>Loading History...</div>';
+            const container = document.getElementById('view-history'); container.innerHTML = '<div class="text-center text-slate-500 font-bold mt-32"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-emerald-500"></i><br>Loading Logs...</div>';
             try {
                 const res = await fetch('/api/rider/history', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
                 const data = await res.json();
-                if(data.history.length === 0) { container.innerHTML = '<div class="col-span-full text-center text-slate-500 mt-24"><i class="fa-solid fa-clock-rotate-left text-6xl mb-4 opacity-30"></i><h3 class="text-xl font-black text-white">No History</h3></div>'; return; }
+                if(data.history.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 mt-32"><i class="fa-solid fa-clock-rotate-left text-6xl mb-4 opacity-20"></i><h3 class="text-xl font-black text-white">No History</h3></div>'; return; }
+                
                 container.innerHTML = data.history.map(o => {
-                    return `<div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md flex flex-col justify-between"><div class="flex justify-between items-start mb-4"><div><h4 class="font-bold text-lg text-white mb-1">${o.user.firstName}</h4><p class="text-[11px] text-slate-400 font-mono">ID: #${o.id}</p></div><span class="bg-emerald-900/40 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase border border-emerald-500/20"><i class="fa-solid fa-check mr-1"></i> Delivered</span></div><div class="bg-slate-900/80 p-4 rounded-xl flex justify-between items-center"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cash Collected</span><span class="text-xl font-black text-emerald-400">৳${o.dueCod}</span></div></div>`;
+                    const d = new Date(o.createdAt).toLocaleDateString();
+                    return `
+                    <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700 shadow-md card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div><h4 class="font-bold text-lg text-white mb-1">${o.user.firstName}</h4><p class="text-[10px] text-slate-400 font-mono">#${o.id} • ${d}</p></div>
+                            <span class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase"><i class="fa-solid fa-check mr-1"></i> Delivered</span>
+                        </div>
+                        <div class="bg-[rgba(255,255,255,0.03)] p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cash Collected</span>
+                            <span class="text-lg font-black text-emerald-400">৳${o.dueCod}</span>
+                        </div>
+                    </div>`;
                 }).join('');
-            } catch(e) { container.innerHTML = '<div class="col-span-full text-center text-red-400">Error.</div>'; }
+            } catch(e) { container.innerHTML = '<div class="text-center text-red-400 font-bold mt-20">Network Error.</div>'; }
         }
 
         function confirmDelivery(orderId, amount) {
-            Swal.fire({ title: 'Send OTP?', html: `Code will be sent to customer. Collect <b class="text-emerald-400 text-3xl block mt-3">৳${amount}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#3b82f6', cancelButtonColor: '#ef4444', confirmButtonText: 'Send Code', ...swalDark }).then(async (result) => {
+            Swal.fire({ title: 'Send OTP?', html: `Code will be sent to customer. Collect <b class="text-emerald-400 text-3xl block mt-3">৳${amount}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#10b981', cancelButtonColor: '#ef4444', confirmButtonText: 'Send Code', ...swalDark }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.fire({title: 'Sending...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
                     const res = await fetch('/api/rider/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({riderId: rider.id, orderId}) });
                     const data = await res.json();
                     if(data.success) {
-                        const { value: otp } = await Swal.fire({ title: 'Enter OTP', input: 'text', inputLabel: "Customer's 6-digit code", inputPlaceholder: '123456', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'Verify', ...swalDark });
+                        const { value: otp } = await Swal.fire({ title: 'Enter OTP', input: 'text', inputLabel: "Customer's 6-digit code", inputPlaceholder: '123456', showCancelButton: true, confirmButtonColor: '#3b82f6', confirmButtonText: 'Verify', ...swalDark });
                         if(otp) {
                             Swal.fire({title: 'Verifying...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
                             const verifyRes = await fetch('/api/rider/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({riderId: rider.id, orderId, otp}) });
                             const verifyData = await verifyRes.json();
-                            if(verifyData.success) { Swal.fire({title: 'Awesome! 🎉', text: 'Delivered.', icon: 'success', ...swalDark}); loadRiderData(); } 
+                            if(verifyData.success) { Swal.fire({title: 'Success! 🎉', text: 'Delivered.', icon: 'success', ...swalDark}); loadRiderData(); } 
                             else { Swal.fire('Error', verifyData.error, 'error', ...swalDark); }
                         }
                     } else { Swal.fire('Error', data.error, 'error', ...swalDark); }
@@ -259,13 +315,13 @@
 
         async function saveSettings() {
             const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value;
-            document.getElementById('btnSaveSet').innerText = "Saving...";
+            document.getElementById('btnSaveSet').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
             const res = await fetch('/api/rider/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({riderId: rider.id, email, password, avatar: base64Avatar}) }); 
-            const data = await res.json(); document.getElementById('btnSaveSet').innerText = "Save Changes";
-            if(data.success) { toast('success', 'Updated!'); loadRiderData(); } else Swal.fire({title:'Error', icon:'error', ...swalDark}); 
+            const data = await res.json(); document.getElementById('btnSaveSet').innerText = "Save Profile";
+            if(data.success) { Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', showConfirmButton:false, timer:1500, ...swalDark}); loadRiderData(); } else Swal.fire('Error', 'Update failed', 'error'); 
         }
 
-        function logout() { clearInterval(gpsInterval); localStorage.removeItem('riderSession'); location.reload(); }
+        function logout() { clearInterval(gpsInterval); localStorage.removeItem('riderSession'); document.body.style.opacity = 0; setTimeout(()=>location.reload(), 300); }
     </script>
 </body>
 </html>
