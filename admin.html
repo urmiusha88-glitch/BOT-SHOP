@@ -81,6 +81,18 @@
         <div class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
             <div id="statsTab" class="tab-content">
                 <h1 class="text-4xl font-black mb-8 text-white tracking-tight">Command Center</h1>
+                
+                <div class="glass-panel p-6 rounded-3xl mb-8 flex flex-col md:flex-row justify-between items-center border border-red-500/30 bg-red-500/10 shadow-lg">
+                    <div class="mb-4 md:mb-0 text-center md:text-left">
+                        <h3 class="font-bold text-white text-lg"><i class="fa-solid fa-triangle-exclamation text-red-500 mr-2 animate-pulse"></i> Maintenance Mode</h3>
+                        <p class="text-slate-400 text-xs mt-1">Enable this to show the maintenance page to all users.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="maintenanceToggle" class="sr-only peer" onchange="toggleMaintenance()">
+                        <div class="w-14 h-7 bg-slate-700 rounded-full peer peer-checked:bg-red-500 after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full shadow-inner"></div>
+                    </label>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500 hover:scale-[1.02] transition-transform"><p class="text-slate-400 font-bold mb-1 uppercase tracking-widest text-xs">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div>
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500 hover:scale-[1.02] transition-transform"><p class="text-slate-400 font-bold mb-1 uppercase tracking-widest text-xs">Total Advance Collected</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">৳0</h2></div>
@@ -124,7 +136,23 @@
         
         async function checkAuth() { 
             document.getElementById('loginSection').style.opacity = 0; setTimeout(()=>document.getElementById('loginSection').classList.add('hidden'), 300);
-            document.getElementById('dashSection').classList.remove('hidden'); document.getElementById('mobileHeader').classList.remove('hidden'); loadAllData(); 
+            document.getElementById('dashSection').classList.remove('hidden'); document.getElementById('mobileHeader').classList.remove('hidden'); 
+            loadAllData(); 
+            loadSettings(); // 🔥 LOAD MAINTENANCE SETTINGS
+        }
+
+        // 🔥 MAINTENANCE LOGIC
+        async function loadSettings() { 
+            try {
+                const res = await fetch('/api/admin/settings'); const data = await res.json(); 
+                document.getElementById('maintenanceToggle').checked = data.isMaintenance; 
+            } catch(e) {}
+        }
+        
+        async function toggleMaintenance() { 
+            const status = document.getElementById('maintenanceToggle').checked; 
+            await fetch('/api/admin/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ password: pass, status }) }); 
+            toast('success', status ? 'Maintenance Mode ON' : 'Maintenance Mode OFF'); 
         }
 
         function showTab(tabId, btnElement) { 
@@ -173,9 +201,10 @@
         async function editUserBadge(id, currentPoints) { const { value: amount } = await Swal.fire({ title: 'Set User Points', input: 'number', inputValue: currentPoints, showCancelButton: true, ...swalDark }); if (amount !== undefined) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'refCount', id, amount})}); loadAllData(); toast('success', 'Updated'); } }
         async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Balance (৳)', input: 'number', inputValue: currentBalance, showCancelButton: true, ...swalDark }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); toast('success', 'Updated'); } }
         async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban?' : 'BAN?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
+        
         async function deleteProduct(id) { if(confirm('Delete?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
         async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
-        async function updateOrderStatus(id, status) { Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark}); await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); Swal.close(); loadAllData(); toast('success', status); }
+        async function updateOrderStatus(id, status) { Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark}); await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); Swal.close(); loadAllData(); toast('success', `Marked as ${status}`); }
     </script>
 </body>
 </html>
