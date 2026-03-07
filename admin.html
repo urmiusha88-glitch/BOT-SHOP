@@ -9,31 +9,50 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { background-color: #050b14; color: #e2e8f0; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .glow-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); } .glow-btn:hover { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); transform: translateY(-3px); }
-        .glow-input { transition: all 0.3s; } .glow-input:focus { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); border-color: #3b82f6; background: rgba(15,23,42,0.9); }
-        .tab-btn { transition: all 0.3s; } .tab-btn.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #60a5fa; padding-left: 1.5rem; }
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
-        .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); }
+        body { background-color: #050b14; color: #e2e8f0; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+        
+        /* Floating Orbs */
+        .blob { position: absolute; filter: blur(100px); opacity: 0.3; animation: float 20s infinite alternate; pointer-events: none; }
+        .blob-1 { top: -10%; right: -10%; width: 500px; height: 500px; background: #3b82f6; }
+        .blob-2 { bottom: -10%; left: -10%; width: 600px; height: 600px; background: #10b981; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(-50px, 50px); } }
+
+        /* Animations */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glow-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); } .glow-btn:hover { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); transform: translateY(-2px); }
+        .glow-input { transition: all 0.3s; } .glow-input:focus { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); border-color: #3b82f6; background: rgba(15,23,42,0.9); transform: translateY(-2px); }
+        
+        .tab-btn { transition: all 0.3s; } 
+        .tab-btn.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #60a5fa; padding-left: 1.5rem; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
+        
+        .table-row-hover { transition: all 0.2s; }
+        .table-row-hover:hover { background: rgba(59,130,246,0.05); transform: scale(1.01); box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 12px; }
+
         .sidebar-open { transform: translateX(0); } .sidebar-closed { transform: translateX(-100%); }
         @media (min-width: 768px) { .sidebar-closed { transform: translateX(0); } }
+        
         .status-pill { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; }
-        .st-pending { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid #facc15; }
-        .st-received { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #60a5fa; }
-        .st-shipped { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid #c084fc; }
-        .st-delivered { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #34d399; }
+        .st-pending { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.5); }
+        .st-received { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.5); }
+        .st-shipped { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.5); }
+        .st-delivered { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.5); }
     </style>
 </head>
-<body class="h-screen overflow-hidden selection:bg-blue-500 selection:text-white bg-grid relative flex flex-col md:flex-row">
+<body class="h-screen overflow-hidden flex flex-col md:flex-row relative">
     
-    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none"></div>
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
 
-    <div id="loginSection" class="fixed inset-0 h-screen flex justify-center items-center z-[100] backdrop-blur-md bg-black/50">
-        <div class="glass-panel p-10 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-[90%] max-w-md text-center relative border border-slate-700/50">
-            <h2 class="text-4xl font-black mb-8 text-white tracking-tight">Admin Core</h2>
-            <input type="password" id="adminPass" class="w-full px-6 py-5 bg-slate-900/80 border border-slate-700 rounded-2xl mb-6 text-white glow-input outline-none font-bold text-center tracking-[0.3em] text-xl" placeholder="••••••••">
-            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-black glow-btn tracking-widest uppercase">Authenticate</button>
+    <div id="loginSection" class="fixed inset-0 h-screen flex justify-center items-center z-[100] backdrop-blur-md bg-black/60">
+        <div class="glass-panel p-10 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-[90%] max-w-md text-center border border-slate-700/50 animate-slide-up">
+            <div class="w-20 h-20 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-3xl text-white mb-6 shadow-[0_0_30px_rgba(59,130,246,0.6)]"><i class="fa-solid fa-fingerprint"></i></div>
+            <h2 class="text-3xl font-black mb-8 text-white tracking-tight">Admin Core</h2>
+            <input type="password" id="adminPass" class="w-full px-6 py-4 bg-slate-900/80 border border-slate-700 rounded-2xl mb-6 text-white glow-input font-black text-center tracking-[0.3em] text-xl" placeholder="••••••••">
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black glow-btn tracking-widest uppercase active:scale-95">Authenticate</button>
         </div>
     </div>
 
@@ -42,151 +61,121 @@
         <button onclick="toggleSidebar()" class="text-white text-2xl"><i class="fa-solid fa-bars"></i></button>
     </div>
 
-    <div id="dashSection" class="hidden flex-1 flex h-full relative z-10 overflow-hidden">
+    <div id="dashSection" class="hidden flex-1 flex h-full relative z-10 overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
         <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-        <div id="sidebar" class="w-72 glass-panel border-r border-slate-800/80 flex flex-col p-8 space-y-2 shadow-2xl absolute md:relative z-50 h-full sidebar-closed transition-transform duration-300 bg-[#050b14] md:bg-transparent">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-black text-white tracking-tighter hidden md:block">AURA <span class="text-blue-500">ADMIN</span></h2>
+        <div id="sidebar" class="w-72 glass-panel border-r border-slate-800/80 flex flex-col p-6 space-y-2 shadow-2xl absolute md:relative z-50 h-full sidebar-closed transition-transform duration-400 bg-[#050b14] md:bg-transparent">
+            <div class="flex justify-between items-center mb-10 pl-2">
+                <h2 class="text-2xl font-black text-white tracking-tighter">AURA <span class="text-blue-500">ADMIN</span></h2>
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-400 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
-            <button onclick="showTab('orders', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-box mr-4 w-5"></i> Orders</button>
-            <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-shirt mr-4 w-5"></i> Products</button>
-            <button onclick="showTab('riders', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-motorcycle mr-4 w-5"></i> Riders (GPS)</button>
-            <button onclick="showTab('users', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-users mr-4 w-5"></i> Users</button>
-            <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-money-bill-transfer mr-4 w-5"></i> Deposits</button>
+            <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5 text-lg"></i> Overview</button>
+            <button onclick="showTab('orders', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-box mr-4 w-5 text-lg"></i> Orders</button>
+            <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-shirt mr-4 w-5 text-lg"></i> Products</button>
+            <button onclick="showTab('riders', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-motorcycle mr-4 w-5 text-lg"></i> Riders</button>
+            <button onclick="showTab('users', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-users mr-4 w-5 text-lg"></i> Users</button>
+            <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-wallet mr-4 w-5 text-lg"></i> Deposits</button>
+            <div class="mt-auto pt-4 border-t border-slate-800 text-center"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">v8.0 Next-Gen</p></div>
         </div>
 
         <div class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
-            <div id="statsTab" class="tab-content animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Command Center</h1>
+            <div id="statsTab" class="tab-content">
+                <h1 class="text-4xl font-black mb-8 text-white tracking-tight">Command Center</h1>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div>
-                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Advance</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">৳0</h2></div>
+                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500 hover:scale-[1.02] transition-transform"><p class="text-slate-400 font-bold mb-1 uppercase tracking-widest text-xs">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div>
+                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500 hover:scale-[1.02] transition-transform"><p class="text-slate-400 font-bold mb-1 uppercase tracking-widest text-xs">Total Advance Collected</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">৳0</h2></div>
                 </div>
             </div>
 
-            <div id="ordersTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Manage Orders</h1>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Customer & Address</th><th class="p-6">Product Ordered</th><th class="p-6">Payment</th><th class="p-6 text-right">Status & Action</th></tr></thead><tbody id="adminOrderList" class="divide-y divide-slate-700/30"></tbody></table></div>
+            <div id="ordersTab" class="tab-content hidden">
+                <h1 class="text-4xl font-black mb-8 text-white tracking-tight">Manage Orders</h1>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6 rounded-tl-[32px]">Customer</th><th class="p-6">Product</th><th class="p-6">Payment</th><th class="p-6 text-right rounded-tr-[32px]">Action</th></tr></thead><tbody id="adminOrderList" class="divide-y divide-slate-800"></tbody></table></div>
             </div>
 
-            <div id="ridersTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4"><h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">Fleet Management</h1><button onclick="addRiderManually()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold transition-colors"><i class="fa-solid fa-plus mr-2"></i> Add Rider</button></div>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider Info</th><th class="p-6">Deliveries (Badge)</th><th class="p-6">Live GPS Status</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="adminRiderList" class="divide-y divide-slate-700/30"></tbody></table></div>
+            <div id="ridersTab" class="tab-content hidden">
+                <div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black text-white tracking-tight">Fleet Management</h1><button onclick="addRiderManually()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg"><i class="fa-solid fa-plus mr-2"></i> Add Rider</button></div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6 rounded-tl-[32px]">Rider Info</th><th class="p-6">Deliveries</th><th class="p-6">Live GPS</th><th class="p-6 text-right rounded-tr-[32px]">Actions</th></tr></thead><tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody></table></div>
             </div>
 
-            <div id="usersTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4"><h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">User Base</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search user email..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl text-white outline-none font-bold w-full md:w-72"></div>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name & Roles</th><th class="p-6">Email / Ref</th><th class="p-6">Wallet (BDT)</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
+            <div id="usersTab" class="tab-content hidden">
+                <div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black text-white tracking-tight">User Base</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search user email..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl text-white outline-none focus:border-blue-500 transition-colors font-bold w-72"></div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6 rounded-tl-[32px]">Name & Roles</th><th class="p-6">Email</th><th class="p-6">Wallet</th><th class="p-6 text-right rounded-tr-[32px]">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div>
             </div>
 
-            <div id="productsTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]"><h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Inventory</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Item Name</th><th class="p-6">Price (BDT)</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-700/30"></tbody></table></div></div>
-            <div id="depositsTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]"><h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Deposit Queue</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID / Method</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-700/30"></tbody></table></div></div>
+            <div id="productsTab" class="tab-content hidden"><h1 class="text-4xl font-black mb-8 text-white tracking-tight">Inventory</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6 rounded-tl-[32px]">Item</th><th class="p-6">Price</th><th class="p-6">Stock</th><th class="p-6 text-right rounded-tr-[32px]">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-800"></tbody></table></div></div>
+            <div id="depositsTab" class="tab-content hidden"><h1 class="text-4xl font-black mb-8 text-white tracking-tight">Deposits</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6 rounded-tl-[32px]">User</th><th class="p-6">TrxID</th><th class="p-6">Amount</th><th class="p-6 text-right rounded-tr-[32px]">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
         </div>
     </div>
 
     <script>
-        const swalDark = { background: '#1e293b', color: '#fff' };
-        const toast = (icon, title) => Swal.fire({ toast: true, position: 'top-end', icon, title, showConfirmButton: false, timer: 1500, ...swalDark });
+        const swalDark = { background: 'rgba(15, 23, 42, 0.95)', color: '#fff', backdrop: 'rgba(0,0,0,0.8)' };
+        const toast = (icon, title) => Swal.fire({ toast: true, position: 'top-end', icon, title, showConfirmButton: false, timer: 1500, background: '#1e293b', color: '#fff' });
         
         let pass = sessionStorage.getItem('adminPass'); let globalUsers = []; let globalRiders = [];
         if(pass) checkAuth();
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('sidebar-closed'); document.getElementById('sidebar').classList.toggle('sidebar-open'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
-        async function login() { pass = document.getElementById('adminPass').value; const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title:'Access Denied'}); } }
-        async function checkAuth() { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashSection').classList.remove('hidden'); document.getElementById('mobileHeader').classList.remove('hidden'); loadAllData(); }
+        
+        async function login() { 
+            pass = document.getElementById('adminPass').value; 
+            const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); 
+            if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else { toast('error', 'Access Denied'); } 
+        }
+        
+        async function checkAuth() { 
+            document.getElementById('loginSection').style.opacity = 0; setTimeout(()=>document.getElementById('loginSection').classList.add('hidden'), 300);
+            document.getElementById('dashSection').classList.remove('hidden'); document.getElementById('mobileHeader').classList.remove('hidden'); loadAllData(); 
+        }
 
         function showTab(tabId, btnElement) { 
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); if(btnElement) btnElement.classList.add('active'); if(window.innerWidth < 768) toggleSidebar(); 
+            document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden'); el.classList.remove('animate-slide-up'); }); 
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
+            const activeTab = document.getElementById(tabId + 'Tab');
+            activeTab.classList.remove('hidden'); 
+            void activeTab.offsetWidth; // Trigger reflow for animation
+            activeTab.classList.add('animate-slide-up');
+            if(btnElement) btnElement.classList.add('active'); if(window.innerWidth < 768) toggleSidebar(); 
         }
 
         async function loadAllData() {
             const res = await fetch('/api/admin/stats'); const data = await res.json();
             document.getElementById('statUsers').innerText = data.users; document.getElementById('statRev').innerText = "৳" + data.revenue.toFixed(0);
-            
             globalUsers = data.userList; renderUsers(globalUsers);
             globalRiders = data.riderList; renderRiders(globalRiders);
             
-            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400 font-mono">${d.trxId}<br><span class="text-blue-400 font-black text-xs uppercase">${d.method}</span></td><td class="p-6 font-black text-emerald-400 text-lg">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg font-bold text-xs mr-2 hover:bg-emerald-500 hover:text-white">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-500 hover:text-white">Reject</button>` : `<span class="font-black text-[10px] text-slate-500">${d.status}</span>`}</td></tr>`).join('');
-            document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${p.name}</td><td class="p-6 text-blue-400 font-black text-lg">৳${p.price}</td><td class="p-6 text-slate-400 font-bold">${p.stock} units</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="table-row-hover"><td class="p-6 font-bold">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400 font-mono">${d.trxId}<br><span class="text-blue-400 font-black text-[10px] uppercase">${d.method}</span></td><td class="p-6 font-black text-emerald-400 text-lg">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-bold text-xs mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-red-500 hover:text-white transition-colors">Reject</button>` : `<span class="font-black text-[10px] text-slate-500">${d.status}</span>`}</td></tr>`).join('');
+            document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="table-row-hover"><td class="p-6 font-bold">${p.name}</td><td class="p-6 text-emerald-400 font-black text-lg">৳${p.price}</td><td class="p-6 text-slate-400 font-bold">${p.stock}</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
             
             document.getElementById('adminOrderList').innerHTML = data.orders.map(o => {
-                let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor); let varStr = varText.length>0 ? `<br><span class="text-emerald-400 text-[10px] bg-emerald-900/30 px-2 py-1 rounded mt-1 inline-block">Variant: ${varText.join(' - ')}</span>` : '';
+                let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor); let varStr = varText.length>0 ? `<span class="text-emerald-400 text-[10px] bg-emerald-900/30 px-2 py-1 rounded mt-2 inline-block">${varText.join(' - ')}</span>` : '';
                 let sClass = o.status === 'PENDING' ? 'st-pending' : (o.status === 'RECEIVED' ? 'st-received' : (o.status === 'SHIPPED' ? 'st-shipped' : 'st-delivered'));
                 let actionBtns = '';
-                if(o.status === 'PENDING') actionBtns = `<button onclick="updateOrderStatus(${o.id}, 'RECEIVED')" class="text-[10px] bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest w-full mb-1">Receive Order</button>`;
-                else if(o.status === 'RECEIVED') actionBtns = `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest w-full mb-1">Mark Shipped</button><button onclick="updateOrderStatus(${o.id}, 'DELIVERED')" class="text-[10px] bg-emerald-600 text-white px-4 py-2 rounded uppercase font-bold w-full">Delivered</button>`;
-                else if(o.status === 'SHIPPED') actionBtns = `<button onclick="updateOrderStatus(${o.id}, 'DELIVERED')" class="text-[10px] bg-emerald-600 text-white px-4 py-2 rounded uppercase font-bold w-full">Delivered</button>`;
+                if(o.status === 'PENDING') actionBtns = `<button onclick="updateOrderStatus(${o.id}, 'RECEIVED')" class="text-[10px] bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg uppercase font-bold tracking-widest w-full mb-1 transition-colors">Receive Order</button>`;
+                else if(o.status === 'RECEIVED') actionBtns = `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg uppercase font-bold tracking-widest w-full mb-1 transition-colors">Mark Shipped</button>`;
                 
-                return `<tr class="hover:bg-slate-800/20"><td class="p-6"><p class="font-bold text-white mb-1">${o.user.firstName}</p><p class="text-xs text-blue-400 mb-1">${o.phone || 'N/A'}</p><p class="text-xs text-slate-400">${o.street || ''}, ${o.city || ''} - ${o.postcode || ''}</p></td><td class="p-6 align-top"><p class="font-bold text-slate-200">${o.product ? o.product.name : 'Deleted'} ${varStr}</p><p class="text-[10px] text-slate-500 mt-2">Order #${o.id}</p></td><td class="p-6"><p class="text-xs text-slate-400 mb-1">Total: ৳${o.priceTotal}</p><p class="text-xs text-slate-400 mb-1">Advance: <span class="text-emerald-400 font-bold">৳${o.advancePaid}</span></p><p class="text-xs text-slate-400">Due (COD): <span class="text-red-400 font-black">৳${o.dueCod}</span></p></td><td class="p-6 text-right align-top"><span class="status-pill ${sClass} mb-3">${o.status}</span><br>${actionBtns}</td></tr>`
+                return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold mb-1">${o.user.firstName}</p><p class="text-xs text-blue-400 mb-1">${o.phone || 'N/A'}</p><p class="text-xs text-slate-400 leading-relaxed">${o.street || ''}, ${o.city || ''} - ${o.postcode || ''}</p></td><td class="p-6 align-top"><p class="font-bold text-slate-200">${o.product ? o.product.name : 'Deleted'}</p>${varStr}<p class="text-[10px] text-slate-500 mt-2 font-mono">#${o.id}</p></td><td class="p-6"><p class="text-xs text-slate-400 mb-1">Total: ৳${o.priceTotal}</p><p class="text-xs text-slate-400 mb-1">Advance: <span class="text-emerald-400 font-bold">৳${o.advancePaid}</span></p><p class="text-xs text-slate-400">COD: <span class="text-red-400 font-black text-sm">৳${o.dueCod}</span></p></td><td class="p-6 text-right align-top"><span class="status-pill ${sClass} mb-3">${o.status}</span><br>${actionBtns}</td></tr>`
             }).join('');
         }
 
-        // 🔥 RIDER MANAGEMENT RENDER
         function renderRiders(riders) {
             document.getElementById('adminRiderList').innerHTML = riders.map(r => {
-                let locHtml = r.lastLat ? `<a href="https://www.google.com/maps/search/?api=1&query=${r.lastLat},${r.lastLng}" target="_blank" class="bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors"><i class="fa-solid fa-location-dot mr-1"></i> View on Map</a>` : '<span class="text-[10px] text-slate-500">Offline / No GPS</span>';
-                
-                return `<tr class="hover:bg-slate-800/20">
-                    <td class="p-6">
-                        <p class="font-bold text-white mb-1">${r.name}</p>
-                        <p class="text-xs text-slate-400"><i class="fa-solid fa-phone mr-1"></i> ${r.phone}</p>
-                        <p class="text-[10px] text-slate-500 mt-1">${r.email}</p>
-                    </td>
-                    <td class="p-6">
-                        <p class="text-xl font-black text-emerald-400">${r.deliveryCount}</p>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Successful</p>
-                    </td>
-                    <td class="p-6 align-middle">${locHtml}</td>
-                    <td class="p-6 text-right whitespace-nowrap">
-                        <button onclick="editRiderCount(${r.id}, ${r.deliveryCount})" class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg mr-2 hover:bg-emerald-500 hover:text-white transition-colors" title="Edit Delivery Count (Badge)"><i class="fa-solid fa-medal"></i></button>
-                        <button onclick="deleteRider(${r.id})" class="bg-red-500/10 text-red-400 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Delete Rider"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>`;
+                let locHtml = r.lastLat ? `<a href="https://www.google.com/maps/search/?api=1&query=${r.lastLat},${r.lastLng}" target="_blank" class="bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors"><i class="fa-solid fa-location-dot mr-1"></i> Map</a>` : '<span class="text-[10px] text-slate-500">Offline</span>';
+                return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold mb-1">${r.name}</p><p class="text-xs text-slate-400"><i class="fa-solid fa-phone mr-1"></i> ${r.phone}</p><p class="text-[10px] text-slate-500 mt-1">${r.email}</p></td><td class="p-6"><p class="text-xl font-black text-emerald-400">${r.deliveryCount}</p><p class="text-[10px] text-slate-400 uppercase">Delivered</p></td><td class="p-6 align-middle">${locHtml}</td><td class="p-6 text-right whitespace-nowrap"><button onclick="editRiderCount(${r.id}, ${r.deliveryCount})" class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg mr-2 hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-medal"></i></button><button onclick="deleteRider(${r.id})" class="bg-red-500/10 text-red-400 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td></tr>`;
             }).join('');
         }
 
-        // 🔥 USER MANAGEMENT RENDER
         function filterUsers() { const q = document.getElementById('userSearch').value.toLowerCase(); renderUsers(globalUsers.filter(u => u.firstName.toLowerCase().includes(q) || (u.email && u.email.toLowerCase().includes(q)))); }
-        function renderUsers(users) { 
-            document.getElementById('userListBody').innerHTML = users.map(u => `<tr class="hover:bg-slate-800/20 ${u.isBanned ? 'opacity-50' : ''}"><td class="p-6 font-bold text-white flex items-center">${u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover mr-3 border border-slate-600">` : `<div class="w-8 h-8 rounded-full bg-slate-700 mr-3 flex items-center justify-center">${u.firstName.charAt(0)}</div>`} <div class="flex flex-col"><span>${u.firstName} ${u.role === 'ADMIN' ? '<span class="text-[10px] text-blue-500 font-black">ADMIN</span>' : ''}</span> ${u.isBanned?'<span class="text-[10px] text-red-500 font-black">BANNED</span>':''}</div></td><td class="p-6 text-sm text-slate-400">${u.email}</td><td class="p-6 text-emerald-400 font-black text-xl">৳${u.balanceBdt.toFixed(2)}</td><td class="p-6 text-right whitespace-nowrap"><button onclick="editBalance(${u.id}, ${u.balanceBdt})" class="bg-blue-500/20 text-blue-400 p-2 rounded-lg mr-2 hover:bg-blue-500 hover:text-white transition-colors" title="Edit Wallet"><i class="fa-solid fa-wallet"></i></button><button onclick="editUserBadge(${u.id}, ${u.refCount})" class="bg-yellow-500/20 text-yellow-400 p-2 rounded-lg mr-2 hover:bg-yellow-500 hover:text-white transition-colors" title="Edit User Badge/Points"><i class="fa-solid fa-star"></i></button><button onclick="toggleBan(${u.id}, ${u.isBanned})" class="${u.isBanned?'bg-red-500 text-white':'bg-red-500/10 text-red-400'} p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Ban User"><i class="fa-solid fa-ban"></i></button></td></tr>`).join(''); 
-        }
+        function renderUsers(users) { document.getElementById('userListBody').innerHTML = users.map(u => `<tr class="table-row-hover ${u.isBanned ? 'opacity-50' : ''}"><td class="p-6 font-bold flex items-center">${u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover mr-3 border border-slate-600">` : `<div class="w-8 h-8 rounded-full bg-slate-800 mr-3 flex items-center justify-center">${u.firstName.charAt(0)}</div>`} <div class="flex flex-col"><span>${u.firstName} ${u.role === 'ADMIN' ? '<span class="text-[10px] text-blue-500 font-black ml-1">ADMIN</span>' : ''}</span> ${u.isBanned?'<span class="text-[10px] text-red-500 font-black">BANNED</span>':''}</div></td><td class="p-6 text-sm text-slate-400">${u.email}</td><td class="p-6 text-emerald-400 font-black text-lg">৳${u.balanceBdt.toFixed(2)}</td><td class="p-6 text-right whitespace-nowrap"><button onclick="editBalance(${u.id}, ${u.balanceBdt})" class="bg-blue-500/20 text-blue-400 p-2 rounded-lg mr-2 hover:bg-blue-500 hover:text-white transition-colors"><i class="fa-solid fa-wallet"></i></button><button onclick="editUserBadge(${u.id}, ${u.refCount})" class="bg-yellow-500/20 text-yellow-400 p-2 rounded-lg mr-2 hover:bg-yellow-500 hover:text-white transition-colors"><i class="fa-solid fa-star"></i></button><button onclick="toggleBan(${u.id}, ${u.isBanned})" class="${u.isBanned?'bg-red-500 text-white':'bg-red-500/10 text-red-400'} p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors"><i class="fa-solid fa-ban"></i></button></td></tr>`).join(''); }
 
-        // --- RIDER ACTIONS ---
-        async function addRiderManually() {
-            const { value: formValues } = await Swal.fire({
-                title: 'Add New Rider',
-                html: `<input id="swal-n" class="swal2-input" placeholder="Full Name"><input id="swal-e" class="swal2-input" placeholder="Email"><input id="swal-p" class="swal2-input" placeholder="Phone"><input id="swal-pw" class="swal2-input" placeholder="Password (PIN)">`,
-                focusConfirm: false, showCancelButton: true, ...swalDark,
-                preConfirm: () => { return [ document.getElementById('swal-n').value, document.getElementById('swal-e').value, document.getElementById('swal-p').value, document.getElementById('swal-pw').value ] }
-            });
-            if (formValues && formValues[0]) {
-                await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'add', name: formValues[0], email: formValues[1], phone: formValues[2], riderPass: formValues[3]})}); 
-                loadAllData(); toast('success', 'Rider Added');
-            }
-        }
-        async function editRiderCount(id, current) {
-            const { value: count } = await Swal.fire({ title: 'Edit Delivery Count', text: 'This changes their Rank Badge', input: 'number', inputValue: current, showCancelButton: true, ...swalDark });
-            if (count !== undefined) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'editCount', id, count})}); loadAllData(); toast('success', 'Badge Updated'); }
-        }
-        async function deleteRider(id) {
-            if(confirm('Delete this Rider completely?')) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'delete', id})}); loadAllData(); }
-        }
-
-        // --- USER ACTIONS ---
-        async function editUserBadge(id, currentPoints) {
-            const { value: amount } = await Swal.fire({ title: 'Set User Points/Badge', input: 'number', inputValue: currentPoints, showCancelButton: true, ...swalDark });
-            if (amount !== undefined) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'refCount', id, amount})}); loadAllData(); toast('success', 'User Badge Updated'); }
-        }
-        async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Wallet BDT', input: 'number', inputValue: currentBalance, showCancelButton: true, ...swalDark }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); toast('success', 'Updated'); } }
-        async function toggleAdmin(id, currentRole) { const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN'; if(confirm(`Change role to ${newRole}?`)) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'role', id, role: newRole})}); loadAllData(); } }
-        async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban user?' : 'BAN this user?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
-        
-        async function deleteProduct(id) { if(confirm('Delete Product?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
+        async function addRiderManually() { const { value: formValues } = await Swal.fire({ title: 'Add Rider', html: `<input id="swal-n" class="swal2-input" placeholder="Name"><input id="swal-e" class="swal2-input" placeholder="Email"><input id="swal-p" class="swal2-input" placeholder="Phone"><input id="swal-pw" class="swal2-input" placeholder="Password">`, focusConfirm: false, showCancelButton: true, ...swalDark, preConfirm: () => { return [ document.getElementById('swal-n').value, document.getElementById('swal-e').value, document.getElementById('swal-p').value, document.getElementById('swal-pw').value ] } }); if (formValues && formValues[0]) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'add', name: formValues[0], email: formValues[1], phone: formValues[2], riderPass: formValues[3]})}); loadAllData(); toast('success', 'Rider Added'); } }
+        async function editRiderCount(id, current) { const { value: count } = await Swal.fire({ title: 'Edit Delivery Count', input: 'number', inputValue: current, showCancelButton: true, ...swalDark }); if (count !== undefined) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'editCount', id, count})}); loadAllData(); toast('success', 'Updated'); } }
+        async function deleteRider(id) { if(confirm('Delete Rider?')) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'delete', id})}); loadAllData(); } }
+        async function editUserBadge(id, currentPoints) { const { value: amount } = await Swal.fire({ title: 'Set User Points', input: 'number', inputValue: currentPoints, showCancelButton: true, ...swalDark }); if (amount !== undefined) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'refCount', id, amount})}); loadAllData(); toast('success', 'Updated'); } }
+        async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Balance (৳)', input: 'number', inputValue: currentBalance, showCancelButton: true, ...swalDark }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); toast('success', 'Updated'); } }
+        async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban?' : 'BAN?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
+        async function deleteProduct(id) { if(confirm('Delete?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
         async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
-        async function updateOrderStatus(id, status) { Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark}); await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); Swal.close(); loadAllData(); toast('success', `Marked as ${status}`); }
+        async function updateOrderStatus(id, status) { Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark}); await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); Swal.close(); loadAllData(); toast('success', status); }
     </script>
 </body>
 </html>
