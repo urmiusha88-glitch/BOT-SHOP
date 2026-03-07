@@ -25,58 +25,27 @@ app.use((req, res, next) => {
 
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
-// 🔥 ADVANCED BOT WIZARD (Sizes, Colors & Multi-Image Upload)
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('🛍️ 1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in BDT (৳)?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.price = parseFloat(ctx.message.text); ctx.reply('🪄 3. Description?'); return ctx.wizard.next(); },
-  (ctx) => { ctx.wizard.state.abilities = ctx.message.text; ctx.reply('📦 4. Stock Quantity?'); return ctx.wizard.next(); },
-  (ctx) => { 
-      ctx.wizard.state.stock = parseInt(ctx.message.text) || 1; 
-      ctx.reply('📏 5. Available Sizes? (Comma separated, e.g., M, L, XL. Or type "none")'); 
-      return ctx.wizard.next(); 
-  },
-  (ctx) => {
-      const txt = ctx.message.text;
-      ctx.wizard.state.sizes = txt.toLowerCase() === 'none' ? [] : txt.split(',').map(s=>s.trim());
-      ctx.reply('🎨 6. Available Colors? (Comma separated, e.g., Black, Red. Or type "none")');
-      return ctx.wizard.next();
-  },
-  (ctx) => {
-      const txt = ctx.message.text;
-      ctx.wizard.state.colors = txt.toLowerCase() === 'none' ? [] : txt.split(',').map(s=>s.trim());
-      ctx.wizard.state.imageIds = [];
-      ctx.reply('📸 7. Send Product Photos one by one.\n\n✅ When you are done sending all photos, type: /finish');
-      return ctx.wizard.next();
-  },
+  (ctx) => { ctx.wizard.state.stock = parseInt(ctx.message.text) || 1; ctx.reply('📏 4. Sizes? (Comma separated or "none")'); return ctx.wizard.next(); },
+  (ctx) => { ctx.wizard.state.sizes = ctx.message.text.toLowerCase() === 'none' ? [] : ctx.message.text.split(',').map(s=>s.trim()); ctx.reply('🎨 5. Colors? (Comma separated or "none")'); return ctx.wizard.next(); },
+  (ctx) => { ctx.wizard.state.colors = ctx.message.text.toLowerCase() === 'none' ? [] : ctx.message.text.split(',').map(s=>s.trim()); ctx.wizard.state.imageIds = []; ctx.reply('📸 6. Send Photos one by one.\n✅ Type /finish when done.'); return ctx.wizard.next(); },
   async (ctx) => { 
       if (ctx.message.text === '/finish') {
-          if (ctx.wizard.state.imageIds.length === 0) {
-              ctx.reply('❌ You must send at least 1 photo! Send a photo or type /cancel');
-              return;
-          }
+          if (ctx.wizard.state.imageIds.length === 0) { ctx.reply('❌ Send at least 1 photo!'); return; }
           const { name, price, abilities, stock, sizes, colors, imageIds } = ctx.wizard.state; 
-          try {
-              await prisma.product.create({ data: { name, price, abilities, stock, sizes, colors, imageIds } }); 
-              ctx.reply(`🎉 *Product Added to Store Successfully!*`, { parse_mode: 'Markdown' }); 
-          } catch(e) { ctx.reply(`❌ Error: ${e.message}`); }
+          try { await prisma.product.create({ data: { name, price, abilities, stock, sizes, colors, imageIds } }); ctx.reply(`🎉 *Product Added!*`, { parse_mode: 'Markdown' }); } catch(e) { ctx.reply(`❌ Error: ${e.message}`); }
           return ctx.scene.leave(); 
       }
-
-      if (ctx.message.photo) {
-          const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-          ctx.wizard.state.imageIds.push(fileId);
-          ctx.reply(`🖼️ Photo received! (${ctx.wizard.state.imageIds.length} total). Send another or type /finish`);
-          return;
-      }
-      ctx.reply('❌ Please send a photo, or type /finish to complete.');
+      if (ctx.message.photo) { ctx.wizard.state.imageIds.push(ctx.message.photo[ctx.message.photo.length - 1].file_id); ctx.reply(`🖼️ Photo received! (${ctx.wizard.state.imageIds.length} total). Send another or /finish`); return; }
   }
 );
 
 const stage = new Scenes.Stage([addProductWizard]); bot.use(session()); bot.use(stage.middleware());
 bot.start((ctx) => { ctx.reply(`🌟 *STORE ADMIN*\nYour ID: \`${ctx.from.id}\``, { parse_mode: 'Markdown' }); });
 bot.command('addproduct', (ctx) => { if (ctx.from.id.toString() !== ADMIN_ID) return; ctx.scene.enter('ADD_PRODUCT_SCENE'); });
-bot.command('cancel', (ctx) => { ctx.reply('Canceled.'); return ctx.scene.leave(); });
 
 async function processDeposit(id, action) {
   const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } });
@@ -85,21 +54,14 @@ async function processDeposit(id, action) {
       if (dep.user.referredBy && !dep.user.referralRewardPaid) {
           const pastDeps = await prisma.deposit.findMany({ where: { userId: dep.userId, status: 'APPROVED' } });
           const totalDeps = pastDeps.reduce((sum, d) => sum + d.amountBdt, 0) + dep.amountBdt;
-          if (totalDeps >= 500.0) { 
-              const referrer = await prisma.user.findUnique({ where: { refCode: dep.user.referredBy } }); 
-              if (referrer) await prisma.user.update({ where: { id: referrer.id }, data: { balanceBdt: { increment: 100.0 } } }); 
-              await prisma.user.update({ where: { id: dep.userId }, data: { referralRewardPaid: true } }); 
-          }
+          if (totalDeps >= 500.0) { const referrer = await prisma.user.findUnique({ where: { refCode: dep.user.referredBy } }); if (referrer) await prisma.user.update({ where: { id: referrer.id }, data: { balanceBdt: { increment: 100.0 } } }); await prisma.user.update({ where: { id: dep.userId }, data: { referralRewardPaid: true } }); }
       }
-      await prisma.user.update({ where: { id: dep.userId }, data: { balanceBdt: { increment: dep.amountBdt } } }); 
-      await prisma.deposit.update({ where: { id }, data: { status: 'APPROVED' } }); return { success: true, msg: `Approved: ৳${dep.amountBdt}` };
+      await prisma.user.update({ where: { id: dep.userId }, data: { balanceBdt: { increment: dep.amountBdt } } }); await prisma.deposit.update({ where: { id }, data: { status: 'APPROVED' } }); return { success: true, msg: `Approved: ৳${dep.amountBdt}` };
     } else { await prisma.deposit.update({ where: { id }, data: { status: 'REJECTED' } }); return { success: true, msg: 'Rejected' }; }
   } return { success: false, msg: 'Error' };
 }
 bot.action(/approve_(.+)/, async (ctx) => { const res = await processDeposit(parseInt(ctx.match[1]), 'APPROVE'); ctx.editMessageText(`✅ ${res.msg}`); });
 bot.action(/reject_(.+)/, async (ctx) => { const res = await processDeposit(parseInt(ctx.match[1]), 'REJECT'); ctx.editMessageText(`❌ ${res.msg}`); });
-bot.action(/ship_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'SHIPPED' } }); ctx.editMessageText(`📦 Status updated to SHIPPED!`); });
-bot.action(/deliver_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'DELIVERED' } }); ctx.editMessageText(`✅ Status updated to DELIVERED!`); });
 
 const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-color: #0b1121; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; font-family: Arial, sans-serif;"><div style="background-color: #2563eb; padding: 20px; text-align: center;"><h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">AURA STORE</h1></div><div style="padding: 30px; color: #e2e8f0;">`;
 const emailFooter = `</div><div style="background-color: #0f172a; padding: 15px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE.</p></div></div>`;
@@ -115,8 +77,6 @@ app.post('/api/register', async (req, res) => {
         
         const verifyToken = crypto.randomBytes(32).toString('hex');
         await prisma.user.create({ data: { firstName: name, email, password, country, refCode: generateRefCode(), referredBy, ipAddress: ip, verifyToken, isVerified: false } });
-        if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `🆕 *NEW USER*\nName: ${name}\nEmail: ${email}\nIP: \`${ip}\``, { parse_mode: 'Markdown' }).catch(e => {});
-
         const host = req.headers['x-forwarded-host'] || req.get('host');
         const verifyLink = `https://${host}/api/verify-email/${verifyToken}`;
         const mailOptions = { from: `"AURA STORE" <${process.env.EMAIL_USER}>`, to: email, subject: 'Verify Your Identity', html: `${emailHeader}<h2 style="color: #ffffff;">Welcome, ${name}!</h2><p>Please verify your email:</p><div style="text-align: center; margin: 30px 0;"><a href="${verifyLink}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">VERIFY ACCOUNT</a></div><p style="background-color: #1e293b; padding: 10px; border-radius: 5px; word-break: break-all; color: #3b82f6; font-size: 12px;">${verifyLink}</p>${emailFooter}` };
@@ -134,18 +94,16 @@ app.get('/api/verify-email/:token', async (req, res) => {
 
 app.post('/api/login', async (req, res) => {
     try {
-        let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress; if(ip && ip.includes(',')) ip = ip.split(',')[0];
         const user = await prisma.user.findUnique({ where: { email: req.body.email } });
         if (user && user.password === req.body.password) { 
             if(user.isBanned) return res.status(403).json({ success: false, error: 'Banned' }); 
             if(!user.isVerified) return res.status(403).json({ success: false, error: 'Please verify your email.' }); 
-            if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `🔑 *LOGIN*\nName: ${user.firstName}\nEmail: ${user.email}\nIP: \`${ip}\``, { parse_mode: 'Markdown' }).catch(e => {});
             res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceBdt: user.balanceBdt, refCode: user.refCode, role: user.role, avatar: user.avatar, refCount: user.refCount } }); 
         } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); }
     } catch(e) { res.status(500).json({ success: false, error: 'Server error' }); }
 });
 
-// 🔥 CART CHECKOUT LOGIC WITH SIZES & COLORS
+// 🔥 CART CHECKOUT LOGIC + EMAIL RECEIPT
 app.post('/api/checkout', async (req, res) => {
     const { userId, cartItems, address } = req.body;
     try {
@@ -155,12 +113,15 @@ app.post('/api/checkout', async (req, res) => {
       const ADVANCE_FEE = 200;
       if(user.balanceBdt < ADVANCE_FEE) return res.json({ success: false, error: 'Insufficient Balance! You need at least ৳200 advance booking money.' });
       
-      let total = 0; let itemsToBuy = [];
+      let total = 0; let itemsToBuy = []; let receiptItemsHtml = '';
       for (let item of cartItems) {
         const prod = await prisma.product.findUnique({ where: { id: parseInt(item.id) } });
         if(!prod || prod.stock <= 0) continue;
         total += prod.price; 
         itemsToBuy.push({ prod, size: item.size, color: item.color });
+        
+        let varTxt = []; if(item.size) varTxt.push(item.size); if(item.color) varTxt.push(item.color);
+        receiptItemsHtml += `<p style="margin: 5px 0; color: #cbd5e1;">• ${prod.name} ${varTxt.length>0 ? `[${varTxt.join(', ')}]` : ''} - <b>৳${prod.price}</b></p>`;
       }
       
       if(itemsToBuy.length === 0) return res.json({ success: false, error: 'Items out of stock or invalid.' });
@@ -172,18 +133,39 @@ app.post('/api/checkout', async (req, res) => {
       
       let adminOrderMsg = `📦 *NEW PHYSICAL ORDER*\n\n👤 *Customer:* ${user.firstName}\n📞 *Phone:* ${address.phone}\n🏠 *Address:* ${address.street}, ${address.city} - ${address.postcode}\n\n🛒 *Items Ordered:*\n`;
 
-      let purchaseRecords = [];
       for (let itm of itemsToBuy) { 
-          let itemAdvance = actualAdvance / itemsToBuy.length;
-          let itemDue = totalDue / itemsToBuy.length;
-          let p = await prisma.purchase.create({ data: { userId: user.id, productId: itm.prod.id, selectedSize: itm.size, selectedColor: itm.color, priceTotal: itm.prod.price, advancePaid: itemAdvance, dueCod: itemDue, phone: address.phone, street: address.street, city: address.city, postcode: address.postcode, status: 'PROCESSING' } }); 
-          purchaseRecords.push(p.id);
+          let itemAdvance = actualAdvance / itemsToBuy.length; let itemDue = totalDue / itemsToBuy.length;
+          // 🔥 Status is explicitly set to PENDING
+          await prisma.purchase.create({ data: { userId: user.id, productId: itm.prod.id, selectedSize: itm.size, selectedColor: itm.color, priceTotal: itm.prod.price, advancePaid: itemAdvance, dueCod: itemDue, phone: address.phone, street: address.street, city: address.city, postcode: address.postcode, status: 'PENDING' } }); 
           await prisma.product.update({ where: { id: itm.prod.id }, data: { stock: { decrement: 1 } } });
           adminOrderMsg += `- ${itm.prod.name} [Size: ${itm.size || 'N/A'}, Color: ${itm.color || 'N/A'}] (৳${itm.prod.price})\n`;
       }
       adminOrderMsg += `\n💰 *Total:* ৳${total}\n✅ *Advance Paid:* ৳${actualAdvance}\n🚚 *Due (COD):* ৳${totalDue}`;
 
-      if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, adminOrderMsg, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🚚 Mark Shipped', callback_data: `ship_${purchaseRecords[0]}` }, { text: '✅ Delivered', callback_data: `deliver_${purchaseRecords[0]}` }]] } });
+      if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, adminOrderMsg, { parse_mode: 'Markdown' });
+
+      // 🔥 SEND DIGITAL RECEIPT TO CUSTOMER EMAIL
+      const receiptMail = { 
+          from: `"AURA STORE" <${process.env.EMAIL_USER}>`, to: user.email, subject: 'Order Confirmed - Your Receipt', 
+          html: `${emailHeader}
+                <h2 style="color: #10b981; margin-bottom: 5px;">Order Confirmed! 🎉</h2>
+                <p style="color: #94a3b8; font-size: 14px;">Thank you for shopping with AURA STORE. Your order is now pending for admin review.</p>
+                <div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 25px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Order Details</h3>
+                    ${receiptItemsHtml}
+                    <div style="margin-top: 15px; border-top: 1px dashed #334155; padding-top: 15px;">
+                        <p style="margin: 5px 0; color: #e2e8f0;"><strong>Total Price:</strong> ৳${total}</p>
+                        <p style="margin: 5px 0; color: #34d399;"><strong>Advance Paid:</strong> ৳${actualAdvance}</p>
+                        <p style="margin: 5px 0; color: #ef4444; font-size: 18px;"><strong>Due on Delivery (COD):</strong> ৳${totalDue}</p>
+                    </div>
+                </div>
+                <div style="background-color: #0f172a; padding: 15px; border-radius: 8px;">
+                    <p style="margin: 0; color: #94a3b8; font-size: 12px;"><strong>Delivery Address:</strong><br>${address.street}, ${address.city} - ${address.postcode}<br>Phone: ${address.phone}</p>
+                </div>
+                ${emailFooter}` 
+      };
+      if(process.env.EMAIL_USER && process.env.EMAIL_PASS) transporter.sendMail(receiptMail).catch(e=>{});
+
       res.json({ success: true, newBalance: user.balanceBdt - actualAdvance, advance: actualAdvance, due: totalDue });
     } catch(e) { res.status(500).json({ success: false, error: 'Server Error' }); }
 });
@@ -197,6 +179,7 @@ app.get('/api/library/:userId', async (req, res) => { res.json(await prisma.purc
 app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
 app.post('/api/deposit', async (req, res) => { const { userId, method, amountBdt, senderNumber, trxId } = req.body; try { const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } }); const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ৳${amountBdt}\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] } }); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); } });
 
+// Admin APIs
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { const recentPurchases = await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); let revenue = recentPurchases.reduce((acc, p) => acc + p.advancePaid, 0); res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany(), userList: await prisma.user.findMany({ take: 20, orderBy: { createdAt: 'desc' } }), orders: recentPurchases, revenue }); });
 app.post('/api/admin/order/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); await prisma.purchase.update({ where: { id: parseInt(req.body.id) }, data: { status: req.body.status } }); res.json({success:true}); });
