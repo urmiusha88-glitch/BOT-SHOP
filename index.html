@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA DIGITAL STORE | Premium Physical Store</title>
+    <title>AURA STORE | Premium Physical Store</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#050b14">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3503/3503827.png">
-    <meta name="mobile-web-app-capable" content="yes">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -26,19 +24,18 @@
         .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
         .prof-tab.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
-        
         .r-badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; letter-spacing: 1px; margin-left: 6px; display: inline-block; box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 2px 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b, #ef4444); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
         .badge-basic { background: linear-gradient(135deg, #94a3b8, #475569, #94a3b8); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-
-        .theme-bkash { background: linear-gradient(135deg, #e2136e, #b30b54); } .theme-nagad { background: linear-gradient(135deg, #f37021, #d65b15); }
-        .peer-checked\:border-bkash:checked ~ div { border-color: #e2136e; background-color: rgba(226, 19, 110, 0.1); color: #e2136e; } .peer-checked\:border-nagad:checked ~ div { border-color: #f37021; background-color: rgba(243, 112, 33, 0.1); color: #f37021; }
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
-        
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .status-processing { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.5); }
         .status-shipped { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.5); }
         .status-delivered { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); }
+        
+        /* Select Dropdowns */
+        .variant-select { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px; rounded: 8px; outline: none; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; }
+        .variant-select:focus { border-color: #3b82f6; }
     </style>
 </head>
 <body>
@@ -59,37 +56,39 @@
         <div class="max-w-xl mx-auto"><input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search products..." class="w-full bg-slate-800/50 border border-slate-700 rounded-full px-6 py-4 outline-none focus:border-blue-500 font-bold shadow-lg text-white"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-10" id="product-list">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10" id="product-list">
         <p class="text-center text-slate-500 col-span-full">Loading Store...</p>
     </div>
 
     <div class="md:hidden fixed bottom-0 left-0 w-full bg-[#0b1121] border-t border-slate-800 h-16 flex justify-around items-center z-50" id="mobileBottomNav"></div>
 
+    <div id="imageModal" class="fixed inset-0 bg-black/95 hidden z-[100] justify-center items-center flex-col backdrop-blur-md">
+        <button onclick="closeGallery()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-red-500 rounded-full text-white text-xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        <img id="galleryMainImg" src="" class="max-h-[70vh] max-w-[90vw] object-contain rounded-2xl shadow-2xl mb-6">
+        <div id="galleryThumbnails" class="flex gap-4 overflow-x-auto max-w-[90vw] p-2 custom-scrollbar"></div>
+    </div>
+
     <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full md:w-[450px] bg-[#0b1121] border-l border-slate-800 z-[70] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl">
-        <div class="p-6 border-b border-slate-800 flex justify-between items-center"><h2 class="text-2xl font-black"><i class="fa-solid fa-box mr-2"></i> Checkout</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-800 rounded-full hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="p-6 border-b border-slate-800 flex justify-between items-center"><h2 class="text-2xl font-black"><i class="fa-solid fa-cart-shopping mr-2 text-blue-500"></i> My Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-800 rounded-full hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
         
         <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
             <div id="cartItemsContainer" class="space-y-4 mb-6"></div>
-            
             <div id="addressSection" class="hidden bg-slate-900 border border-slate-800 p-5 rounded-2xl">
                 <h3 class="font-black text-white mb-4 uppercase tracking-widest text-xs"><i class="fa-solid fa-truck-fast text-blue-500 mr-2"></i> Delivery Details</h3>
                 <div class="space-y-3">
                     <input type="text" id="cPhone" placeholder="Mobile Number" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none text-white focus:border-blue-500">
                     <input type="text" id="cStreet" placeholder="House/Street/Village" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none text-white focus:border-blue-500">
-                    <div class="flex gap-2">
-                        <input type="text" id="cCity" placeholder="City/District" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none text-white focus:border-blue-500">
-                        <input type="text" id="cZip" placeholder="Postcode" class="w-24 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none text-white focus:border-blue-500">
-                    </div>
+                    <div class="flex gap-2"><input type="text" id="cCity" placeholder="City/District" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none text-white focus:border-blue-500"><input type="text" id="cZip" placeholder="Postcode" class="w-24 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none text-white focus:border-blue-500"></div>
                 </div>
             </div>
         </div>
 
         <div class="p-6 border-t border-slate-800 bg-slate-900/50">
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-400 text-sm">Subtotal:</span><span id="cartTotal" class="font-bold text-white text-lg">৳0</span></div>
-            <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-800"><span class="font-bold text-slate-400 text-sm">Advance Booking:</span><span class="font-black text-emerald-400 text-lg">- ৳200</span></div>
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-800"><span class="font-bold text-slate-400 text-sm">Advance Booking:</span><span id="cartAdvance" class="font-black text-emerald-400 text-lg">- ৳0</span></div>
             <div class="flex justify-between items-center mb-6"><span class="font-black text-white uppercase tracking-widest">Due (COD):</span><span id="cartDue" class="text-3xl font-black text-blue-500">৳0</span></div>
             <button onclick="processOrder()" id="btnConfirmOrder" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-colors"><i class="fa-solid fa-check-circle mr-2"></i> Confirm Order</button>
-            <p class="text-center text-[10px] text-slate-500 mt-3 font-bold">200 TK will be deducted from your wallet to confirm.</p>
+            <p class="text-center text-[10px] text-slate-500 mt-3 font-bold">Advance booking fee will be deducted from your wallet.</p>
         </div>
     </div>
 
@@ -98,15 +97,15 @@
             <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/50"><h2 class="text-2xl font-black"><i class="fa-solid fa-user text-blue-500 mr-2"></i> Account</h2><button onclick="closeProfile()" class="w-10 h-10 bg-slate-700 hover:bg-red-500 text-white rounded-full"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="flex border-b border-slate-800 bg-slate-900 px-6 pt-4 gap-6 overflow-x-auto custom-scrollbar"><button onclick="switchProfTab('overview')" id="tab-overview" class="prof-tab active pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap">Profile</button><button onclick="switchProfTab('orders')" id="tab-orders" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap">My Orders</button><button onclick="switchProfTab('funds')" id="tab-funds" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap">Wallet</button><button onclick="switchProfTab('settings')" id="tab-settings" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap">Settings</button></div>
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
-                <div id="sec-overview" class="space-y-6 text-center animate-[fadeIn_0.3s]">
+                <div id="sec-overview" class="space-y-6 text-center">
                     <div class="w-24 h-24 bg-slate-800 rounded-full mx-auto flex items-center justify-center text-4xl text-white font-black shadow-lg overflow-hidden border-2 border-slate-700" id="pAvatarContainer"></div>
                     <div><h3 class="text-3xl font-black flex justify-center items-center gap-2 flex-wrap" id="pNameContainer"></h3><p class="text-slate-400 font-bold" id="pEmail"></p></div>
                     <div class="bg-slate-800 p-5 rounded-2xl text-left border border-slate-700 flex justify-between items-center"><div><p class="text-xs text-slate-400 font-bold uppercase mb-1">Referral Code</p><p class="text-2xl font-mono font-black text-emerald-400" id="pRef">---</p></div><div class="text-right"><span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Earn ৳100 / Deposit</span></div></div>
                     <button onclick="window.logout()" class="text-red-500 font-bold hover:underline"><i class="fa-solid fa-right-from-bracket"></i> Secure Logout</button>
                 </div>
-                <div id="sec-orders" class="hidden space-y-4 animate-[fadeIn_0.3s]"><div id="pOrdersList"></div></div>
-                <div id="sec-funds" class="hidden space-y-4 animate-[fadeIn_0.3s]"><div id="pFundsList"></div></div>
-                <div id="sec-settings" class="hidden space-y-5 animate-[fadeIn_0.3s] text-left">
+                <div id="sec-orders" class="hidden space-y-4"><div id="pOrdersList"></div></div>
+                <div id="sec-funds" class="hidden space-y-4"><div id="pFundsList"></div></div>
+                <div id="sec-settings" class="hidden space-y-5 text-left">
                     <h3 class="font-black text-xl mb-4">Edit Profile</h3>
                     <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between"><div class="flex items-center gap-4"><div class="w-16 h-16 rounded-full overflow-hidden bg-slate-900 border border-slate-600" id="settingAvatarPreview"></div><div><p class="font-bold text-sm">Profile Picture</p><div class="upload-btn-wrapper mt-1"><button class="bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors">Choose Image</button><input type="file" id="fileAvatar" accept="image/*" /></div></div></div><button onclick="removeAvatar()" class="text-red-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div>
                     <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Email</label><input type="email" id="setEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500"></div>
@@ -137,8 +136,6 @@
         let user = null; try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){ localStorage.removeItem('user'); }
         let allProducts = []; let cart = []; let base64Avatar = '';
 
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); }); }
-
         function getBadge(role) { return role === 'ADMIN' ? '<span class="r-badge badge-admin">ADMIN</span>' : '<span class="r-badge badge-basic">USER</span>'; }
 
         async function init() {
@@ -160,13 +157,14 @@
                 let avHtml = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<span class="text-lg font-black">${uName.charAt(0).toUpperCase()}</span>`;
                 let displayBal = `৳${parseFloat(user.balanceBdt).toFixed(0)}`;
 
-                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-full font-black border border-emerald-500/30 mr-2 hover:bg-emerald-600/40 transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><button onclick="openProfileDashboard('orders')" class="hidden sm:block bg-purple-600/20 text-purple-400 px-4 py-2 rounded-full font-bold text-sm mr-2 hover:bg-purple-600/40 transition-colors"><i class="fa-solid fa-box mr-1"></i> Orders</button><div class="hidden sm:flex items-center bg-slate-800 px-4 py-1.5 rounded-full font-black border border-slate-700 shadow-[0_0_10px_rgba(59,130,246,0.3)] mr-2"><span class="mr-2 pr-2 border-r border-slate-600 text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-400">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_10px_rgba(59,130,246,0.5)] mr-2 hover:bg-blue-500 transition-colors"><i class="fa-solid fa-cart-shopping"></i></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700 overflow-hidden hover:bg-slate-700 transition-colors">${avHtml}</button>`;
+                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-full font-black border border-emerald-500/30 mr-2 hover:bg-emerald-600/40 transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><button onclick="openProfileDashboard('orders')" class="hidden sm:block bg-purple-600/20 text-purple-400 px-4 py-2 rounded-full font-bold text-sm mr-2 hover:bg-purple-600/40 transition-colors"><i class="fa-solid fa-box mr-1"></i> Orders</button><div class="hidden sm:flex items-center bg-slate-800 px-4 py-1.5 rounded-full font-black border border-slate-700 shadow-[0_0_10px_rgba(59,130,246,0.3)] mr-2"><span class="mr-2 pr-2 border-r border-slate-600 text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-400">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_10px_rgba(59,130,246,0.5)] mr-2 hover:bg-blue-500 transition-colors"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700 overflow-hidden hover:bg-slate-700 transition-colors">${avHtml}</button>`;
                 
-                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-store text-xl"></i><span class="text-[10px] mt-1 font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center hover:text-blue-400 transition-colors"><i class="fa-solid fa-cart-shopping text-xl"></i><span class="text-[10px] mt-1 font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-400 flex flex-col items-center hover:text-emerald-300 transition-colors"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1 font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center hover:text-white transition-colors"><div class="w-6 h-6 bg-slate-800 rounded-full overflow-hidden border border-slate-600 flex justify-center items-center">${avHtml}</div><span class="text-[10px] mt-1 font-bold">Profile</span></button>`;
+                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-store text-xl"></i><span class="text-[10px] mt-1 font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center hover:text-blue-400 transition-colors relative"><i class="fa-solid fa-cart-shopping text-xl"></i><span id="cartCountMob" class="absolute top-0 right-2 bg-red-500 text-white text-[8px] w-3 h-3 rounded-full flex items-center justify-center font-bold hidden">0</span><span class="text-[10px] mt-1 font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-400 flex flex-col items-center hover:text-emerald-300 transition-colors"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1 font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center hover:text-white transition-colors"><div class="w-6 h-6 bg-slate-800 rounded-full overflow-hidden border border-slate-600 flex justify-center items-center">${avHtml}</div><span class="text-[10px] mt-1 font-bold">Profile</span></button>`;
             } else {
                 authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-neon hover:bg-blue-500 transition-colors">Login</button>`;
                 mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-neon hover:bg-blue-500 transition-colors">Login / Register</button>`;
             }
+            updateCartBadge();
         }
 
         async function loadProducts() { 
@@ -174,83 +172,125 @@
             catch(e) { document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-400 font-bold py-10">Error loading products.</div>'; } 
         }
 
+        // 🔥 PRODUCT RENDER WITH SIZES, COLORS & MULTI-IMAGE GALLERY
         function renderProducts(list) {
             const container = document.getElementById('product-list');
             if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10">No items available.</div>';
             
             container.innerHTML = list.map(p => {
+                let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="sz-${p.id}" class="variant-select rounded-lg"><option value="">Select Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
+                let colorOpts = p.colors && p.colors.length > 0 ? `<select id="cl-${p.id}" class="variant-select rounded-lg"><option value="">Select Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
+                let variantHtml = (sizeOpts || colorOpts) ? `<div class="flex gap-2 mb-4">${sizeOpts}${colorOpts}</div>` : `<div class="mb-4 text-xs text-slate-500 font-bold">Standard Variant</div>`;
+
                 let btnHtml = p.stock <= 0 
                     ? `<button disabled class="w-full bg-red-900/30 text-red-500 py-3 rounded-xl font-black uppercase text-xs cursor-not-allowed border border-red-900/50"><i class="fa-solid fa-ban mr-2"></i> Sold Out</button>`
-                    : `<button onclick="buyNow(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black uppercase text-xs transition-colors shadow-lg"><i class="fa-solid fa-cart-shopping mr-2"></i> Order Now</button>`;
+                    : `<div class="flex gap-2"><button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-1 bg-slate-800 hover:bg-blue-600 text-white py-3 rounded-xl font-black uppercase text-xs transition-colors border border-slate-700 shadow-lg"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNow(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black uppercase text-xs transition-colors shadow-lg"><i class="fa-solid fa-bolt mr-2"></i> Buy Now</button></div>`;
                 
-                let imgHtml = p.imageId ? `<img src="/api/photo/${p.imageId}" onerror="this.src='https://placehold.co/400x400/1e293b/475569?text=Product'" class="w-full h-full object-cover">` : `<i class="fa-solid fa-box-open text-5xl text-slate-700"></i>`;
-                let stockBadge = p.stock <= 0 ? `<div class="absolute top-2 left-2 bg-red-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">OUT OF STOCK</div>` : `<div class="absolute top-2 left-2 bg-slate-800/80 border border-slate-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">In Stock: ${p.stock}</div>`;
+                // Read imageIds array (multi-image) or fallback to single imageId
+                let mainImage = (p.imageIds && p.imageIds.length > 0) ? p.imageIds[0] : p.imageId;
+                let imgHtml = mainImage ? `<img src="/api/photo/${mainImage}" onclick="openGallery(${p.id})" onerror="this.src='https://placehold.co/400x400/1e293b/475569?text=Product'" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-500">` : `<i class="fa-solid fa-box-open text-5xl text-slate-700"></i>`;
+                let stockBadge = p.stock <= 0 ? `<div class="absolute top-2 left-2 bg-red-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">OUT OF STOCK</div>` : `<div class="absolute top-2 left-2 bg-slate-800/80 border border-slate-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">Stock: ${p.stock}</div>`;
+                let galleryBadge = (p.imageIds && p.imageIds.length > 1) ? `<div class="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-white text-[10px] font-bold"><i class="fa-regular fa-images"></i> +${p.imageIds.length - 1}</div>` : '';
                 
-                return `<div class="product-card p-4 flex flex-col justify-between"><div><div class="w-full h-56 bg-slate-800 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative shadow-inner">${imgHtml}${stockBadge}<div class="absolute top-2 right-2 bg-black/60 backdrop-blur px-2 py-1 rounded border border-white/10 text-yellow-400 text-[10px] font-black">★ ${p.rating ? p.rating.toFixed(1) : '5.0'}</div></div><h3 class="text-xl font-black mb-1 leading-tight">${p.name}</h3><p class="text-slate-400 text-[10px] mb-4 line-clamp-2">${p.abilities}</p><p class="text-2xl font-black text-emerald-400 mb-4">৳${p.price}</p></div>${btnHtml}</div>`;
+                return `<div class="product-card p-4 flex flex-col justify-between"><div><div class="w-full h-64 bg-slate-800 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative shadow-inner">${imgHtml}${stockBadge}${galleryBadge}</div><h3 class="text-xl font-black mb-1 leading-tight">${p.name}</h3><p class="text-slate-400 text-[10px] mb-3 line-clamp-2">${p.abilities}</p><p class="text-2xl font-black text-emerald-400 mb-3">৳${p.price}</p>${variantHtml}</div>${btnHtml}</div>`;
             }).join('');
         }
 
+        // 🔥 FULL SCREEN IMAGE GALLERY LOGIC
+        function openGallery(productId) {
+            const p = allProducts.find(x => x.id === productId);
+            if(!p || !p.imageIds || p.imageIds.length === 0) return;
+            const modal = document.getElementById('imageModal');
+            const mainImg = document.getElementById('galleryMainImg');
+            const thumbs = document.getElementById('galleryThumbnails');
+            
+            mainImg.src = `/api/photo/${p.imageIds[0]}`;
+            thumbs.innerHTML = p.imageIds.map(id => `<img src="/api/photo/${id}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">`).join('');
+            
+            modal.classList.replace('hidden', 'flex');
+        }
+        function closeGallery() { document.getElementById('imageModal').classList.replace('flex', 'hidden'); }
+
         function filterProducts() { const q = document.getElementById('searchInput').value.toLowerCase(); renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q))); }
-        
         function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
         
+        function updateCartBadge() {
+            const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob');
+            if(!cDesk || !cMob) return;
+            if(cart.length > 0) { cDesk.innerText = cart.length; cMob.innerText = cart.length; cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); } 
+            else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); }
+        }
+
+        // 🔥 CART LOGIC WITH SIZE & COLOR CHECK
+        function addToCart(id, name, price) {
+            if(!user) return location.href='/login';
+            let sEl = document.getElementById(`sz-${id}`); let cEl = document.getElementById(`cl-${id}`);
+            let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
+            if(sEl && !size) return Swal.fire('Error', 'Please select a Size first!', 'warning', ...swalDark);
+            if(cEl && !color) return Swal.fire('Error', 'Please select a Color first!', 'warning', ...swalDark);
+            
+            const pInfo = allProducts.find(x=>x.id===id);
+            let img = (pInfo && pInfo.imageIds && pInfo.imageIds.length>0) ? pInfo.imageIds[0] : null;
+
+            cart.push({ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }); 
+            renderCart(); updateCartBadge(); toast('success', 'Added to Cart'); 
+        }
+
         function buyNow(id, name, price) {
             if(!user) return location.href='/login';
-            cart = [{id, name, price: parseFloat(price)}]; 
+            let sEl = document.getElementById(`sz-${id}`); let cEl = document.getElementById(`cl-${id}`);
+            let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
+            if(sEl && !size) return Swal.fire('Error', 'Please select a Size first!', 'warning', ...swalDark);
+            if(cEl && !color) return Swal.fire('Error', 'Please select a Color first!', 'warning', ...swalDark);
+            
+            const pInfo = allProducts.find(x=>x.id===id); let img = (pInfo && pInfo.imageIds && pInfo.imageIds.length>0) ? pInfo.imageIds[0] : null;
+            
+            cart = [{ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }]; 
             document.getElementById('addressSection').classList.remove('hidden');
-            renderCart();
-            toggleCart();
+            renderCart(); updateCartBadge(); toggleCart();
         }
-        function removeFromCart(index) { cart.splice(index, 1); renderCart(); if(cart.length === 0) document.getElementById('addressSection').classList.add('hidden'); }
+
+        function removeFromCart(cartId) { cart = cart.filter(i => i.cartId !== cartId); renderCart(); updateCartBadge(); if(cart.length === 0) document.getElementById('addressSection').classList.add('hidden'); }
         
         function renderCart() {
             const container = document.getElementById('cartItemsContainer');
-            if(cart.length === 0) { container.innerHTML = '<p class="text-center text-slate-500 font-bold mt-10">Cart is empty</p>'; document.getElementById('cartTotal').innerText = '৳0'; document.getElementById('cartDue').innerText = '৳0'; return; }
+            if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-cart-arrow-down text-4xl mb-3"></i><br><p class="font-bold">Cart is empty</p></div>'; document.getElementById('cartTotal').innerText = '৳0'; document.getElementById('cartDue').innerText = '৳0'; document.getElementById('cartAdvance').innerText = '- ৳0'; return; }
             
+            document.getElementById('addressSection').classList.remove('hidden'); // Show address if cart has items
             let sum = 0; 
-            container.innerHTML = cart.map((i, index) => { sum += i.price; return `<div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center border border-slate-700"><div><p class="font-bold text-sm">${i.name}</p><p class="text-emerald-400 font-black">৳${i.price}</p></div><button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button></div>`; }).join('');
+            container.innerHTML = cart.map(i => { 
+                sum += i.price; 
+                let imgHtml = i.img ? `<img src="/api/photo/${i.img}" class="w-12 h-12 object-cover rounded-lg border border-slate-600">` : `<div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div>`;
+                let variants = []; if(i.size) variants.push(`Size: ${i.size}`); if(i.color) variants.push(`Color: ${i.color}`);
+                let varHtml = variants.length > 0 ? `<p class="text-[10px] text-slate-400 mt-1">${variants.join(' | ')}</p>` : '';
+
+                return `<div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center border border-slate-700"><div class="flex items-center gap-3">${imgHtml}<div><p class="font-bold text-sm leading-tight">${i.name}</p>${varHtml}<p class="text-emerald-400 font-black mt-1">৳${i.price}</p></div></div><button onclick="removeFromCart(${i.cartId})" class="text-red-500 hover:text-red-400 bg-red-500/10 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash"></i></button></div>`; 
+            }).join('');
             
             document.getElementById('cartTotal').innerText = `৳${sum}`;
             let advance = sum > 0 ? 200 : 0;
-            if(sum < 200) advance = sum; // If product is < 200
+            if(sum < 200) advance = sum; 
             let due = sum - advance;
+            document.getElementById('cartAdvance').innerText = `- ৳${advance}`;
             document.getElementById('cartDue').innerText = `৳${due}`;
         }
         
         async function processOrder() {
             if(cart.length === 0 || !user) return;
             const phone = document.getElementById('cPhone').value; const street = document.getElementById('cStreet').value; const city = document.getElementById('cCity').value; const zip = document.getElementById('cZip').value;
-            if(!phone || !street || !city) return Swal.fire('Error', 'Please fill all address fields.', 'error', ...swalDark);
+            if(!phone || !street || !city) return Swal.fire('Error', 'Please fill all required delivery details.', 'error', ...swalDark);
             
             Swal.fire({title: 'Processing Order...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
             
-            const res = await fetch('/api/checkout', { 
-                method: 'POST', headers: {'Content-Type':'application/json'}, 
-                body: JSON.stringify({userId: user.id, cartItems: cart.map(i=>i.id), address: { phone, street, city, postcode: zip }}) 
-            });
+            const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, cartItems: cart, address: { phone, street, city, postcode: zip }}) });
             const data = await res.json();
             
             if(data.success) {
                 user.balanceBdt = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); 
-                cart = []; toggleCart(); renderAuth(); renderProducts(allProducts); document.getElementById('addressSection').classList.add('hidden');
-                
-                Swal.fire({
-                    title: 'Order Confirmed! 🎉', 
-                    html: `<p class="mb-2 text-sm text-slate-400">Advance Paid: <b>৳${data.advance}</b></p><p class="text-sm font-bold text-emerald-400">Due on Delivery: <b>৳${data.due}</b></p>`, 
-                    icon: 'success', showConfirmButton: true, confirmButtonText: 'View Order Status', ...swalDark
-                }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
+                cart = []; updateCartBadge(); toggleCart(); renderAuth(); renderProducts(allProducts); document.getElementById('addressSection').classList.add('hidden');
+                Swal.fire({ title: 'Order Confirmed! 🎉', html: `<p class="mb-2 text-sm text-slate-400">Advance Paid: <b>৳${data.advance}</b></p><p class="text-sm font-bold text-emerald-400">Due on Delivery: <b>৳${data.due}</b></p>`, icon: 'success', showConfirmButton: true, confirmButtonText: 'View Order Status', ...swalDark }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
             } else Swal.fire({title:'Booking Failed', text: data.error, icon:'error', ...swalDark});
         }
-
-        document.getElementById('fileAvatar').addEventListener('change', function(e) {
-            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
-            reader.onload = function(event) { const img = new Image(); img.onload = function() {
-                    const canvas = document.createElement('canvas'); const MAX_W = 256; const MAX_H = 256; let w = img.width; let h = img.height;
-                    if(w>h){if(w>MAX_W){h*=MAX_W/w; w=MAX_W;}}else{if(h>MAX_H){w*=MAX_H/h; h=MAX_H;}} canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
-                    base64Avatar = canvas.toDataURL('image/jpeg', 0.8); document.getElementById('settingAvatarPreview').innerHTML = `<img src="${base64Avatar}" class="w-full h-full object-cover">`;
-                }; img.src = event.target.result;
-            }; reader.readAsDataURL(file);
-        });
 
         async function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
@@ -263,15 +303,14 @@
             
             document.getElementById('profileModal').classList.replace('hidden', 'flex'); switchProfTab(defaultTab);
             
-            // Fetch Orders
             fetch('/api/library/' + user.id).then(r=>r.json()).then(data => { 
                 document.getElementById('pOrdersList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No orders yet.</p>' : data.map(p => {
                     let statusClass = p.status === 'SHIPPED' ? 'status-shipped' : (p.status === 'DELIVERED' ? 'status-delivered' : 'status-processing');
-                    return `<div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-3"><div class="flex justify-between items-start mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div><div><h4 class="font-bold text-sm">${p.product.name}</h4><p class="text-[10px] text-slate-400 mt-1">Total: ৳${p.priceTotal} • Paid: ৳${p.advancePaid}</p></div></div><span class="status-badge ${statusClass}">${p.status}</span></div><div class="bg-slate-900/50 p-2 rounded-xl flex justify-between items-center px-4"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To Pay on Delivery:</span><span class="text-sm font-black text-emerald-400">৳${p.dueCod}</span></div></div>`;
+                    let varText = []; if(p.selectedSize) varText.push(p.selectedSize); if(p.selectedColor) varText.push(p.selectedColor);
+                    let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
+                    return `<div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-3"><div class="flex justify-between items-start mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div><div><h4 class="font-bold text-sm">${p.product.name} <span class="text-blue-400 text-[10px] ml-1">${varStr}</span></h4><p class="text-[10px] text-slate-400 mt-1">Total: ৳${p.priceTotal} • Paid: ৳${p.advancePaid}</p></div></div><span class="status-badge ${statusClass}">${p.status}</span></div><div class="bg-slate-900/50 p-2 rounded-xl flex justify-between items-center px-4"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To Pay on Delivery:</span><span class="text-sm font-black text-emerald-400">৳${p.dueCod}</span></div></div>`;
                 }).join(''); 
             });
-            
-            // Fetch Funds
             fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 mb-3"><div><p class="font-black text-sm uppercase">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-400 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-400 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span></div>`; }).join(''); });
         }
         function closeProfile() { document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
@@ -281,7 +320,7 @@
 
         function openFund() { if(!user) return location.href='/login'; document.getElementById('fundModal').classList.replace('hidden', 'flex'); document.getElementById('fBdt').value = ''; updateFundUI(); }
         function closeFund() { document.getElementById('fundModal').classList.replace('flex', 'hidden'); }
-        function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const title = document.getElementById('fundTitle'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 transition-all duration-500 flex justify-between items-center text-white shadow-md'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.add('theme-bkash'); btn.classList.add('theme-bkash'); icon.className = 'fa-solid fa-paper-plane'; } else if(method === 'nagad') { num = '01846849460'; header.classList.add('theme-nagad'); btn.classList.add('theme-nagad'); icon.className = 'fa-solid fa-fire'; } document.getElementById('fNumber').innerText = num; }
+        function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 transition-all duration-500 flex justify-between items-center text-white shadow-md'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.add('theme-bkash'); btn.classList.add('theme-bkash'); icon.className = 'fa-solid fa-paper-plane'; } else if(method === 'nagad') { num = '01846849460'; header.classList.add('theme-nagad'); btn.classList.add('theme-nagad'); icon.className = 'fa-solid fa-fire'; } document.getElementById('fNumber').innerText = num; }
         function copyNumber() { navigator.clipboard.writeText(document.getElementById('fNumber').innerText); toast('success', 'Copied!'); }
 
         document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', ...swalDark}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire({title:'Error', text:'TrxID already exists', icon:'error', ...swalDark}); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
