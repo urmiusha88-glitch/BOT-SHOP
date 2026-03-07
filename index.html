@@ -1,37 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AURA STORE | Premium Physical Store</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#050b14">
+    <meta name="theme-color" content="#0f172a">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { animation: { 'fade-in': 'fadeIn 0.5s ease-in-out', 'bounce-short': 'bounce 0.5s ease-in-out 1' } } }
+            theme: { extend: { animation: { 'fade-in': 'fadeIn 0.5s ease-in-out', 'bounce-short': 'bounce 0.5s ease-in-out 1', 'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite' } } }
         }
     </script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* 1. Theme Variables for Light/Dark Mode */
+        /* Feature 1: Dynamic Theme Variables */
         :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; --glass: rgba(255,255,255,0.9); }
-        .dark { --bg: #050b14; --text: #e2e8f0; --card: #1e293b; --border: #334155; --glass: rgba(15,23,42,0.85); }
+        .dark { --bg: #050b14; --text: #e2e8f0; --card: #0f172a; --border: #1e293b; --glass: rgba(15,23,42,0.85); }
         
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; transition: background-color 0.5s, color 0.5s; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; transition: background-color 0.3s, color 0.3s; overflow-x: hidden; }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
 
-        /* 2. Splash Screen */
-        #splashScreen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; items-center; transition: opacity 0.5s; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: auto; }
+        /* Feature 3: Splash Screen */
+        #splashScreen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.6s ease-out; }
+        .spinner { width: 60px; height: 60px; border: 6px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         
-        /* 3. Neon Glow & Hover */
+        /* Feature 2: Neon Glow & Glassmorphism */
+        .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(100px); opacity: 0.15; animation: float 20s infinite alternate; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; }
+        .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: #8b5cf6; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(100px, 50px); } }
+        
         .glass { background: var(--glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-        .product-card { background: var(--card); border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .product-card:hover { transform: translateY(-8px) scale(1.02); border-color: #3b82f6; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15); }
+        .product-card { background: var(--card); border: 1px solid var(--border); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:hover { transform: translateY(-8px); border-color: #3b82f6; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2); }
         
         .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
@@ -40,73 +49,85 @@
         .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
         .badge-basic { background: linear-gradient(135deg, #94a3b8, #475569); color: white; }
         
-        .variant-select { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px; rounded: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; }
+        .variant-select { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px; rounded: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: 0.3s; }
+        .variant-select:focus { border-color: #3b82f6; }
         
-        /* 4. Timeline Progress */
-        .timeline-step { width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; }
-        .t-active { background: #10b981; color: white; box-shadow: 0 0 10px #10b981; }
+        /* Feature 6: Visual Order Timeline */
+        .timeline-step { width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10; position: relative; }
+        .t-active { background: #10b981; color: white; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
         .t-inactive { background: var(--border); color: #94a3b8; }
-        .t-line { flex-1; height: 4px; background: var(--border); margin: 0 8px; border-radius: 2px; }
+        .t-line { flex: 1; height: 4px; background: var(--border); margin: 0 -5px; z-index: 1; }
         .t-line.active { background: #10b981; }
 
-        /* Floating Actions */
-        .fab { position: fixed; right: 20px; z-index: 45; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        #btnScrollTop { bottom: 90px; background: #3b82f6; color: white; opacity: 0; pointer-events: none; }
-        #btnScrollTop.visible { opacity: 1; pointer-events: auto; }
-        @media (min-width: 768px) { #btnScrollTop { bottom: 30px; right: 30px; } }
+        /* Floating Action Buttons */
+        .fab { position: fixed; z-index: 45; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .fab:active { transform: scale(0.9); }
+        #btnScrollTop { bottom: 90px; right: 20px; background: #3b82f6; color: white; opacity: 0; pointer-events: none; transform: translateY(20px); }
+        #btnScrollTop.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        #btnFeedback { bottom: 90px; left: 20px; background: #4f46e5; color: white; }
+        @media (min-width: 768px) { #btnScrollTop { bottom: 30px; right: 30px; } #btnFeedback { bottom: 30px; left: 30px; } }
     </style>
 </head>
-<body class="dark"> <div id="splashScreen"><div class="spinner"></div></div>
+<body>
+
+    <div id="splashScreen"><div class="spinner"></div></div>
+
+    <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
     <div id="flashBanner" class="bg-gradient-to-r from-red-600 to-rose-500 text-white text-xs sm:text-sm font-bold py-2 text-center shadow-lg relative z-50">
-        <i class="fa-solid fa-bolt animate-pulse text-yellow-300 mr-2"></i> Flash Sale Ends In: <span id="countdownTimer" class="font-mono text-yellow-300 text-lg ml-2">00:00:00</span>
+        <i class="fa-solid fa-bolt animate-pulse text-yellow-300 mr-2"></i> Flash Sale Ends In: <span id="countdownTimer" class="font-mono text-yellow-300 text-lg ml-2 tracking-widest">00:00:00</span>
     </div>
 
     <div id="noticeBanner" class="hidden bg-gradient-to-r from-blue-700 to-indigo-800 text-white text-xs sm:text-sm font-bold py-1.5 shadow-lg overflow-hidden relative z-40 border-b border-indigo-400">
-        <div class="max-w-7xl mx-auto flex items-center px-4"><i class="fa-solid fa-bullhorn animate-pulse mr-3 text-yellow-300"></i><marquee id="noticeText" scrollamount="5" class="flex-1 tracking-widest uppercase"></marquee></div>
+        <div class="max-w-7xl mx-auto flex items-center px-4"><i class="fa-solid fa-bullhorn animate-pulse mr-3 text-yellow-300"></i><marquee id="noticeText" scrollamount="6" class="flex-1 tracking-widest uppercase"></marquee></div>
     </div>
 
     <nav class="glass sticky top-0 z-50 w-full h-16 sm:h-20 flex items-center px-4 shadow-lg">
         <div class="max-w-7xl mx-auto w-full flex justify-between items-center">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white hover:rotate-12 transition-transform"><i class="fa-solid fa-shirt text-xl"></i></div>
+            <div class="flex items-center gap-2 cursor-pointer group" onclick="location.reload()">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white group-hover:rotate-12 transition-transform"><i class="fa-solid fa-shirt text-xl"></i></div>
                 <span class="font-black text-2xl tracking-tighter hidden sm:block">AURA<span class="text-blue-500">STORE</span></span>
             </div>
             
             <div class="flex items-center gap-3">
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex justify-center items-center bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-yellow-400 transition-colors shadow-inner"><i id="themeIcon" class="fa-solid fa-sun"></i></button>
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex justify-center items-center bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-yellow-400 transition-colors shadow-inner" title="Toggle Theme">
+                    <i id="themeIcon" class="fa-solid fa-sun"></i>
+                </button>
                 <div id="authSection" class="flex items-center gap-3"></div>
             </div>
         </div>
     </nav>
 
-    <button onclick="openFeedback()" class="fab" style="bottom: 90px; left: 20px; right: auto; background: #4f46e5; color: white;" title="Give Feedback"><i class="fa-solid fa-comment-dots text-xl"></i></button>
-    
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab"><i class="fa-solid fa-arrow-up"></i></button>
+    <button onclick="openFeedback()" id="btnFeedback" class="fab hover:bg-indigo-500" title="Give Feedback"><i class="fa-solid fa-comment-dots text-xl"></i></button>
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500" title="Scroll to Top"><i class="fa-solid fa-arrow-up"></i></button>
 
     <div class="pt-10 pb-10 text-center relative z-10 px-4">
         <h1 class="text-4xl sm:text-6xl font-black mb-6 tracking-tight animate-fade-in">Premium <span class="text-blue-500">Collections</span></h1>
         
         <div class="max-w-xl mx-auto relative group">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none"><i class="fa-solid fa-magnifying-glass text-slate-400"></i></div>
-            <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search products..." class="w-full bg-[var(--card)] border border-[var(--border)] rounded-full pl-12 pr-6 py-4 outline-none focus:border-blue-500 font-bold shadow-lg transition-all text-[var(--text)]">
+            <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search products instantly..." class="w-full bg-[var(--card)] border border-[var(--border)] rounded-full pl-12 pr-6 py-4 outline-none focus:border-blue-500 font-bold shadow-lg transition-all text-[var(--text)]">
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 mb-6 flex justify-end">
-        <button onclick="toggleWishlistView()" id="wishlistBtnFilter" class="bg-rose-500/10 text-rose-500 border border-rose-500/30 px-4 py-2 rounded-full font-bold text-sm hover:bg-rose-500 hover:text-white transition-colors"><i class="fa-solid fa-heart mr-1"></i> View Wishlist</button>
+    <div class="max-w-7xl mx-auto px-4 mb-6 flex justify-end relative z-10">
+        <button onclick="toggleWishlistView()" id="wishlistBtnFilter" class="bg-rose-500/10 text-rose-500 border border-rose-500/30 px-4 py-2 rounded-full font-bold text-sm hover:bg-rose-500 hover:text-white transition-colors shadow-sm">
+            <i class="fa-solid fa-heart mr-1"></i> View Wishlist
+        </button>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10 min-h-[50vh]" id="product-list">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10 min-h-[50vh] relative z-10" id="product-list">
         <div class="product-card p-4 animate-pulse"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
         <div class="product-card p-4 animate-pulse"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
+        <div class="product-card p-4 animate-pulse hidden sm:block"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
+        <div class="product-card p-4 animate-pulse hidden lg:block"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
     </div>
 
-    <div class="md:hidden fixed bottom-0 left-0 w-full bg-[var(--bg)] border-t border-[var(--border)] h-16 flex justify-around items-center z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.1)]" id="mobileBottomNav"></div>
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-[var(--card)] border-t border-[var(--border)] h-[70px] flex justify-around items-center z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.2)] pb-2" id="mobileBottomNav"></div>
 
     <div id="quickViewModal" class="fixed inset-0 bg-black/80 hidden z-[100] justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-[var(--card)] w-full max-w-4xl rounded-3xl flex flex-col md:flex-row overflow-hidden shadow-2xl border border-[var(--border)] relative">
-            <button onclick="closeQuickView()" class="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors z-10"><i class="fa-solid fa-xmark"></i></button>
+            <button onclick="closeQuickView()" class="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors z-20"><i class="fa-solid fa-xmark"></i></button>
             <div class="w-full md:w-1/2 h-64 md:h-auto bg-slate-900 flex items-center justify-center p-4 relative" id="qvImageArea"></div>
             <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar">
                 <div id="qvDetailsArea"></div>
@@ -115,16 +136,22 @@
         </div>
     </div>
 
-    <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full md:w-[450px] bg-[var(--card)] border-l border-[var(--border)] z-[70] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl">
+    <div id="imageModal" class="fixed inset-0 bg-black/95 hidden z-[110] justify-center items-center flex-col backdrop-blur-md">
+        <button onclick="closeGallery()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-red-500 rounded-full text-white text-xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        <img id="galleryMainImg" src="" class="max-h-[70vh] max-w-[90vw] object-contain rounded-2xl shadow-2xl mb-6">
+        <div id="galleryThumbnails" class="flex gap-4 overflow-x-auto max-w-[90vw] p-2 custom-scrollbar"></div>
+    </div>
+
+    <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full md:w-[450px] bg-[var(--card)] border-l border-[var(--border)] z-[80] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl">
         <div class="p-6 border-b border-[var(--border)] flex justify-between items-center"><h2 class="text-2xl font-black text-[var(--text)]"><i class="fa-solid fa-cart-shopping mr-2 text-blue-500"></i> My Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-red-500 hover:text-white transition-colors text-[var(--text)]"><i class="fa-solid fa-xmark"></i></button></div>
         <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
             <div id="cartItemsContainer" class="space-y-4 mb-6"></div>
-            <div id="addressSection" class="hidden bg-[var(--bg)] border border-[var(--border)] p-5 rounded-2xl">
+            <div id="addressSection" class="hidden bg-[var(--bg)] border border-[var(--border)] p-5 rounded-2xl shadow-inner">
                 <h3 class="font-black mb-4 uppercase tracking-widest text-xs text-blue-500"><i class="fa-solid fa-truck-fast mr-2"></i> Delivery Details</h3>
                 <div class="space-y-3">
-                    <input type="text" id="cPhone" placeholder="Mobile Number" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)]">
-                    <input type="text" id="cStreet" placeholder="House/Street/Village" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)]">
-                    <div class="flex gap-2"><input type="text" id="cCity" placeholder="City/District" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)]"><input type="text" id="cZip" placeholder="Postcode" class="w-24 bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)]"></div>
+                    <input type="text" id="cPhone" placeholder="Mobile Number" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors">
+                    <input type="text" id="cStreet" placeholder="House/Street/Village" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors">
+                    <div class="flex gap-2"><input type="text" id="cCity" placeholder="City/District" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"><input type="text" id="cZip" placeholder="Postcode" class="w-24 bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"></div>
                 </div>
             </div>
         </div>
@@ -136,7 +163,7 @@
         </div>
     </div>
 
-    <div id="profileModal" class="fixed inset-0 bg-black/80 hidden z-[80] justify-center items-center px-4 backdrop-blur-sm">
+    <div id="profileModal" class="fixed inset-0 bg-black/80 hidden z-[90] justify-center items-center px-4 backdrop-blur-sm">
         <div class="bg-[var(--card)] w-full max-w-2xl max-h-[90vh] flex flex-col relative border border-[var(--border)] shadow-2xl overflow-hidden rounded-[32px]">
             <div class="p-6 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg)]"><h2 class="text-2xl font-black text-[var(--text)]"><i class="fa-solid fa-user text-blue-500 mr-2"></i> Account</h2><button onclick="closeProfile()" class="w-10 h-10 bg-slate-200 dark:bg-slate-800 text-[var(--text)] hover:bg-red-500 hover:text-white rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="flex border-b border-[var(--border)] bg-[var(--card)] px-6 pt-4 gap-6 overflow-x-auto custom-scrollbar"><button onclick="switchProfTab('overview')" id="tab-overview" class="prof-tab active pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap text-blue-500 border-b-2 border-blue-500">Profile</button><button onclick="switchProfTab('orders')" id="tab-orders" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">My Orders</button><button onclick="switchProfTab('funds')" id="tab-funds" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">Wallet</button><button onclick="switchProfTab('settings')" id="tab-settings" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">Settings</button></div>
@@ -145,57 +172,60 @@
                     <div class="w-24 h-24 bg-[var(--card)] border-2 border-[var(--border)] rounded-full mx-auto flex items-center justify-center text-4xl font-black shadow-lg overflow-hidden" id="pAvatarContainer"></div>
                     <div><h3 class="text-3xl font-black flex justify-center items-center gap-2 flex-wrap" id="pNameContainer"></h3><p class="text-slate-500 font-bold" id="pEmail"></p></div>
                     <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] flex justify-between items-center text-left shadow-sm"><div><p class="text-xs text-slate-500 font-bold uppercase mb-1">Referral Code</p><p class="text-2xl font-mono font-black text-emerald-500" id="pRef">---</p></div><div class="text-right"><span class="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-full">Earn ৳100 / Deposit</span></div></div>
-                    <button onclick="window.logout()" class="text-red-500 font-bold hover:underline"><i class="fa-solid fa-right-from-bracket"></i> Secure Logout</button>
+                    <button onclick="window.logout()" class="text-red-500 font-bold hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors"><i class="fa-solid fa-right-from-bracket mr-1"></i> Secure Logout</button>
                 </div>
                 <div id="sec-orders" class="hidden space-y-4 animate-fade-in"><div id="pOrdersList"></div></div>
                 <div id="sec-funds" class="hidden space-y-4 animate-fade-in"><div id="pFundsList"></div></div>
                 <div id="sec-settings" class="hidden space-y-5 text-left animate-fade-in">
                     <h3 class="font-black text-xl mb-4">Edit Profile</h3>
-                    <div class="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] flex justify-between items-center"><div class="flex items-center gap-4"><div class="w-16 h-16 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-900 border border-[var(--border)]" id="settingAvatarPreview"></div><div><p class="font-bold text-sm">Profile Picture</p><div class="upload-btn-wrapper mt-1"><button class="bg-blue-600/10 text-blue-500 px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors">Choose Image</button><input type="file" id="fileAvatar" accept="image/*" /></div></div></div><button onclick="removeAvatar()" class="text-red-500 bg-red-500/10 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button></div>
-                    <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Email</label><input type="email" id="setEmail" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500"></div>
-                    <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Password</label><input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500"></div>
-                    <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase mt-4 shadow-lg">Save Changes</button>
+                    <div class="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] flex justify-between items-center"><div class="flex items-center gap-4"><div class="w-16 h-16 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-900 border border-[var(--border)]" id="settingAvatarPreview"></div><div><p class="font-bold text-sm">Profile Picture</p><div class="upload-btn-wrapper mt-1"><button class="bg-blue-600/10 text-blue-500 px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors">Choose Image</button><input type="file" id="fileAvatar" accept="image/*" /></div></div></div><button onclick="removeAvatar()" class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white transition-colors p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button></div>
+                    <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Email</label><input type="email" id="setEmail" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors"></div>
+                    <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Password</label><input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors"></div>
+                    <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase mt-4 shadow-lg active:scale-95 transition-transform">Save Changes</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="fundModal" class="fixed inset-0 bg-black/80 hidden z-[90] justify-center items-center px-4 backdrop-blur-sm">
-        <div class="bg-[var(--card)] rounded-[32px] w-full max-w-md shadow-2xl relative overflow-hidden border border-[var(--border)]">
-            <div id="fundHeader" class="p-6 flex justify-between items-center text-white shadow-md bg-blue-600"><h2 class="text-2xl font-black"><i id="fundIcon" class="fa-solid fa-wallet mr-2"></i> Add Balance</h2><button onclick="closeFund()" class="w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="fundModal" class="fixed inset-0 bg-black/80 hidden z-[95] justify-center items-center px-4 backdrop-blur-sm">
+        <div class="bg-[var(--card)] rounded-[32px] w-full max-w-md shadow-2xl relative overflow-hidden border border-[var(--border)] animate-fade-in">
+            <div id="fundHeader" class="p-6 flex justify-between items-center text-white shadow-md bg-[#e2136e] transition-colors duration-300"><h2 class="text-2xl font-black"><i id="fundIcon" class="fa-solid fa-paper-plane mr-2"></i> Add Balance</h2><button onclick="closeFund()" class="w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
             <form id="depositForm" class="p-6 space-y-5 bg-[var(--bg)] text-[var(--text)]">
-                <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-3">Select Method</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#e2136e] peer-checked:text-[#e2136e] peer-checked:bg-[#e2136e]/10 text-xs uppercase tracking-widest transition-all">bKash</div></label><label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#f37021] peer-checked:text-[#f37021] peer-checked:bg-[#f37021]/10 text-xs uppercase tracking-widest transition-all">Nagad</div></label></div></div>
-                <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Amount (৳)</label><input type="number" id="fBdt" required class="w-full bg-[var(--card)] border border-[var(--border)] text-emerald-500 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500"></div>
-                <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)]"><p class="text-xs font-black text-slate-500 uppercase mb-2">Send Money To:</p><div onclick="copyNumber()" class="bg-[var(--bg)] border border-[var(--border)] px-4 py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500"><span id="fNumber" class="font-mono text-xl font-black tracking-widest">01846849460</span><i class="fa-regular fa-copy text-blue-500"></i></div></div>
-                <div class="space-y-3"><input type="text" id="fSender" required class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500" placeholder="Sender Number"><input type="text" id="fTrx" required class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-black uppercase tracking-widest outline-none focus:border-blue-500" placeholder="TrxID"></div>
-                <button type="submit" id="fBtn" class="w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all bg-blue-600 shadow-lg">Submit Request</button>
+                <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-3 ml-1">Select Method</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#e2136e] peer-checked:text-[#e2136e] peer-checked:bg-[#e2136e]/10 text-xs uppercase tracking-widest transition-all">bKash</div></label><label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#f37021] peer-checked:text-[#f37021] peer-checked:bg-[#f37021]/10 text-xs uppercase tracking-widest transition-all">Nagad</div></label></div></div>
+                <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Amount (৳)</label><input type="number" id="fBdt" required class="w-full bg-[var(--card)] border border-[var(--border)] text-emerald-500 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500 transition-colors"></div>
+                <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] shadow-sm"><p class="text-xs font-black text-slate-500 uppercase mb-2">Send Money To:</p><div onclick="copyNumber()" class="bg-[var(--bg)] border border-[var(--border)] px-4 py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors"><span id="fNumber" class="font-mono text-xl font-black tracking-widest">01846849460</span><i class="fa-regular fa-copy text-blue-500"></i></div></div>
+                <div class="space-y-3"><input type="text" id="fSender" required class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors" placeholder="Sender Number"><input type="text" id="fTrx" required class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-black uppercase tracking-widest outline-none focus:border-blue-500 transition-colors" placeholder="TrxID"></div>
+                <button type="submit" id="fBtn" class="w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all bg-[#e2136e] shadow-lg hover:opacity-90 active:scale-95">Submit Request</button>
             </form>
         </div>
     </div>
 
     <script>
-        const swalDark = { background: 'var(--card)', color: 'var(--text)' };
+        // ✅ DEFINED TOAST FUNCTION TO PREVENT ERRORS
+        const toast = (icon, title) => Swal.fire({ toast: true, position: 'top-end', icon, title, showConfirmButton: false, timer: 1500, background: 'var(--card)', color: 'var(--text)' });
+        
+        const swalDark = { background: 'var(--card)', color: 'var(--text)', backdrop: 'rgba(0,0,0,0.8)' };
         let user = null; try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){}
         let allProducts = []; let cart = []; let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]'); let base64Avatar = ''; let showOnlyWishlist = false;
 
         // 1. Theme Logic
         function toggleTheme() {
-            const body = document.body;
-            if(body.classList.contains('dark')) { body.classList.remove('dark'); localStorage.setItem('theme', 'light'); document.getElementById('themeIcon').className = 'fa-solid fa-moon'; } 
-            else { body.classList.add('dark'); localStorage.setItem('theme', 'dark'); document.getElementById('themeIcon').className = 'fa-solid fa-sun'; }
+            const html = document.documentElement;
+            if(html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); document.getElementById('themeIcon').className = 'fa-solid fa-moon'; } 
+            else { html.classList.add('dark'); localStorage.setItem('theme', 'dark'); document.getElementById('themeIcon').className = 'fa-solid fa-sun text-yellow-400'; }
         }
-        if(localStorage.getItem('theme') === 'light') toggleTheme();
+        if(localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); document.getElementById('themeIcon').className = 'fa-solid fa-moon'; }
 
-        // 10. Hide Splash Screen & 9. Start Countdown
+        // 3. Hide Splash Screen & 7. Start Flash Sale
         window.addEventListener('load', () => { 
-            setTimeout(() => { document.getElementById('splashScreen').style.opacity = '0'; setTimeout(()=>document.getElementById('splashScreen').style.display='none',500); }, 800);
+            setTimeout(() => { document.getElementById('splashScreen').style.opacity = '0'; setTimeout(()=>document.getElementById('splashScreen').style.display='none',600); }, 800);
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
             startFlashSaleTimer();
         });
 
-        // 9. Countdown Timer
+        // 7. Countdown Timer
         function startFlashSaleTimer() {
-            let time = 3600 * 5; // 5 hours fake timer
+            let time = 3600 * 5; 
             setInterval(() => {
                 let h = Math.floor(time / 3600); let m = Math.floor((time % 3600) / 60); let s = time % 60;
                 document.getElementById('countdownTimer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
@@ -203,7 +233,7 @@
             }, 1000);
         }
 
-        // 12. Scroll to Top logic
+        // 10. Scroll to Top logic
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('btnScrollTop');
             if (window.scrollY > 300) btn.classList.add('visible'); else btn.classList.remove('visible');
@@ -232,11 +262,11 @@
             const authDiv = document.getElementById('authSection'); const mobNav = document.getElementById('mobileBottomNav');
             if(user) {
                 const uName = user.name || user.firstName || 'User'; let avHtml = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<span class="text-lg font-black">${uName.charAt(0).toUpperCase()}</span>`; let displayBal = `৳${parseFloat(user.balanceBdt).toFixed(0)}`;
-                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-600/20 text-emerald-500 border border-emerald-500/30 px-4 py-2 rounded-full font-bold text-sm hidden sm:block hover:bg-emerald-600 hover:text-white transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><div class="hidden sm:flex items-center bg-[var(--card)] border border-[var(--border)] px-4 py-1.5 rounded-full font-black"><span class="mr-2 pr-2 border-r border-[var(--border)] text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-500">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden animate-bounce-short">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden hover:opacity-80 transition-opacity">${avHtml}</button>`;
-                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-store text-xl mb-1"></i><span class="text-[10px] font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center relative"><i class="fa-solid fa-cart-shopping text-xl mb-1"></i><span id="cartCountMob" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold hidden animate-bounce-short">0</span><span class="text-[10px] font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-500 flex flex-col items-center"><i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px] font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center"><div class="w-6 h-6 rounded-full overflow-hidden border border-[var(--border)] flex justify-center items-center mb-1">${avHtml}</div><span class="text-[10px] font-bold">Profile</span></button>`;
+                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-4 py-2 rounded-full font-bold text-sm hidden sm:block hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><div class="hidden sm:flex items-center bg-[var(--card)] border border-[var(--border)] px-4 py-1.5 rounded-full font-black shadow-sm"><span class="mr-2 pr-2 border-r border-[var(--border)] text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-500">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden animate-bounce-short">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden hover:opacity-80 transition-opacity">${avHtml}</button>`;
+                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center pt-2"><i class="fa-solid fa-store text-xl mb-1"></i><span class="text-[10px] font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center relative pt-2"><i class="fa-solid fa-cart-shopping text-xl mb-1"></i><span id="cartCountMob" class="absolute top-1 right-2 bg-red-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold hidden animate-bounce-short">0</span><span class="text-[10px] font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-500 flex flex-col items-center pt-2"><i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px] font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center pt-2"><div class="w-6 h-6 rounded-full overflow-hidden border border-[var(--border)] flex justify-center items-center mb-1">${avHtml}</div><span class="text-[10px] font-bold">Profile</span></button>`;
             } else {
-                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-500 transition-colors">Login</button>`;
-                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-lg">Login / Register</button>`;
+                authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-500 transition-colors active:scale-95">Login</button>`;
+                mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform">Login / Register</button>`;
             }
             updateCartBadge();
         }
@@ -246,7 +276,7 @@
             catch(e) { document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-500 font-bold py-10">Error loading.</div>'; } 
         }
 
-        // 4. Wishlist Toggle Function
+        // 4. Wishlist Logic
         function toggleWishlist(id) {
             if(wishlist.includes(id)) { wishlist = wishlist.filter(w=>w!==id); toast('info','Removed from Wishlist'); } 
             else { wishlist.push(id); toast('success','Added to Wishlist ❤️'); }
@@ -256,35 +286,35 @@
         function toggleWishlistView() {
             showOnlyWishlist = !showOnlyWishlist;
             const btn = document.getElementById('wishlistBtnFilter');
-            if(showOnlyWishlist) { btn.innerHTML = '<i class="fa-solid fa-arrow-left mr-1"></i> Back to Store'; btn.className = 'bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg'; } 
-            else { btn.innerHTML = '<i class="fa-solid fa-heart mr-1"></i> View Wishlist'; btn.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/30 px-4 py-2 rounded-full font-bold text-sm'; }
+            if(showOnlyWishlist) { btn.innerHTML = '<i class="fa-solid fa-arrow-left mr-1"></i> Back to Store'; btn.className = 'bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg transition-colors'; } 
+            else { btn.innerHTML = '<i class="fa-solid fa-heart mr-1"></i> View Wishlist'; btn.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/30 px-4 py-2 rounded-full font-bold text-sm transition-colors hover:bg-rose-500 hover:text-white'; }
             renderProducts(showOnlyWishlist ? allProducts.filter(p=>wishlist.includes(p.id)) : allProducts);
         }
 
-        // 7. Quick View Feature
+        // 5. Quick View Logic
         function openQuickView(id) {
             const p = allProducts.find(x=>x.id===id); if(!p) return;
             const img = (p.imageIds && p.imageIds.length>0) ? `/api/photo/${p.imageIds[0]}` : 'https://placehold.co/400x400';
             document.getElementById('qvImageArea').innerHTML = `<img src="${img}" class="max-w-full max-h-full object-contain rounded-xl drop-shadow-2xl">`;
             
             let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="qv-sz" class="variant-select"><option value="">Select Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
-            let colorOpts = p.colors && p.colors.length > 0 ? `<select id="qv-cl" class="variant-select mt-2"><option value="">Select Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
+            let colorOpts = p.colors && p.colors.length > 0 ? `<select id="qv-cl" class="variant-select mt-3"><option value="">Select Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
             
-            document.getElementById('qvDetailsArea').innerHTML = `<h2 class="text-3xl font-black mb-2 leading-tight">${p.name}</h2><p class="text-emerald-500 font-black text-2xl mb-4">৳${p.price}</p><p class="text-sm text-slate-500 mb-6 leading-relaxed">${p.abilities}</p><div class="mb-4">${sizeOpts}${colorOpts}</div><p class="text-xs font-bold ${p.stock>0?'text-blue-500':'text-red-500'}"><i class="fa-solid fa-box mr-1"></i> Stock: ${p.stock}</p>`;
+            document.getElementById('qvDetailsArea').innerHTML = `<h2 class="text-3xl font-black mb-2 leading-tight text-[var(--text)]">${p.name}</h2><p class="text-emerald-500 font-black text-3xl mb-4">৳${p.price}</p><p class="text-sm text-slate-500 mb-6 leading-relaxed">${p.abilities}</p><div class="mb-4">${sizeOpts}${colorOpts}</div><p class="text-xs font-bold ${p.stock>0?'text-blue-500':'text-red-500'} bg-blue-500/10 px-3 py-1 rounded inline-block"><i class="fa-solid fa-box mr-1"></i> Stock: ${p.stock}</p>`;
             
-            document.getElementById('qvActionArea').innerHTML = p.stock<=0 ? `<button disabled class="w-full bg-red-500/20 text-red-500 py-4 rounded-xl font-black uppercase tracking-widest cursor-not-allowed">Out of Stock</button>` : `<button onclick="addToCartQV(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-transform active:scale-95"><i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart</button>`;
+            document.getElementById('qvActionArea').innerHTML = p.stock<=0 ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-black uppercase tracking-widest cursor-not-allowed border border-red-500/20">Out of Stock</button>` : `<button onclick="addToCartQV(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-transform active:scale-95"><i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart</button>`;
             
             document.getElementById('quickViewModal').classList.replace('hidden', 'flex');
         }
         function closeQuickView() { document.getElementById('quickViewModal').classList.replace('flex','hidden'); }
+        
         function addToCartQV(id, name, price) {
             let sEl = document.getElementById(`qv-sz`); let cEl = document.getElementById(`qv-cl`); let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
-            if(sEl && !size) return Swal.fire('Error', 'Please select a Size!', 'warning', {background:'var(--card)',color:'var(--text)'});
-            if(cEl && !color) return Swal.fire('Error', 'Please select a Color!', 'warning', {background:'var(--card)',color:'var(--text)'});
+            if(sEl && !size) return toast('warning', 'Please select a Size!'); if(cEl && !color) return toast('warning', 'Please select a Color!');
             addToCartDirect(id, name, price, size, color); closeQuickView();
         }
 
-        // 8. Social Share
+        // 9. Social Share
         function shareProduct(id, name) {
             if (navigator.share) { navigator.share({ title: name, url: window.location.href }); } 
             else { navigator.clipboard.writeText(window.location.href); toast('success', 'Link Copied!'); }
@@ -300,20 +330,20 @@
                 let variantHtml = (sizeOpts || colorOpts) ? `<div class="flex gap-2 mb-4">${sizeOpts}${colorOpts}</div>` : `<div class="mb-4 text-xs text-slate-500 font-bold h-9 flex items-center">Standard Item</div>`;
 
                 let btnHtml = p.stock <= 0 
-                    ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-black uppercase text-xs cursor-not-allowed border border-red-500/30">Sold Out</button>`
-                    : `<div class="flex gap-2"><button onclick="addToCartUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-1 bg-[var(--bg)] border border-[var(--border)] hover:border-blue-500 text-blue-500 py-3 rounded-xl font-black transition-colors"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNowUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black uppercase text-xs transition-transform active:scale-95 shadow-lg"><i class="fa-solid fa-bolt mr-1"></i> Buy</button></div>`;
+                    ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-black uppercase text-xs cursor-not-allowed border border-red-500/20">Sold Out</button>`
+                    : `<div class="flex gap-2"><button onclick="addToCartUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-1 bg-[var(--bg)] border border-[var(--border)] hover:border-blue-500 text-blue-500 py-3 rounded-xl font-black transition-colors active:scale-95"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNowUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black uppercase text-xs transition-transform active:scale-95 shadow-lg"><i class="fa-solid fa-bolt mr-1"></i> Buy</button></div>`;
                 
                 let mainImage = (p.imageIds && p.imageIds.length > 0) ? p.imageIds[0] : p.imageId;
                 let imgHtml = mainImage ? `<img src="/api/photo/${mainImage}" onclick="openQuickView(${p.id})" onerror="this.src='https://placehold.co/400x400'" class="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex justify-center items-center"><i class="fa-solid fa-box text-5xl text-slate-400"></i></div>`;
                 
-                let wClass = wishlist.includes(p.id) ? "text-rose-500" : "text-slate-400 hover:text-rose-500";
-                let viewers = Math.floor(Math.random() * 20) + 5; // 8. Fake live viewers FOMO
+                let wClass = wishlist.includes(p.id) ? "text-rose-500 bg-rose-500/10 border-rose-500/30" : "text-slate-400 hover:text-rose-500 bg-[var(--card)] border-[var(--border)]";
+                let viewers = Math.floor(Math.random() * 20) + 5; // 8. Fake live viewers
 
                 return `
-                <div class="product-card p-4 flex flex-col justify-between relative group">
+                <div class="product-card p-4 flex flex-col justify-between relative group rounded-2xl animate-fade-in shadow-sm">
                     <div class="absolute top-6 right-6 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="toggleWishlist(${p.id})" class="w-8 h-8 bg-white/90 dark:bg-black/60 rounded-full flex justify-center items-center shadow border border-[var(--border)] transition-colors ${wClass}"><i class="fa-solid fa-heart text-sm"></i></button>
-                        <button onclick="shareProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')" class="w-8 h-8 bg-white/90 dark:bg-black/60 rounded-full flex justify-center items-center shadow border border-[var(--border)] text-blue-500 hover:text-blue-400 transition-colors"><i class="fa-solid fa-share-nodes text-sm"></i></button>
+                        <button onclick="toggleWishlist(${p.id})" class="w-8 h-8 rounded-full flex justify-center items-center shadow border transition-colors ${wClass}"><i class="fa-solid fa-heart text-xs"></i></button>
+                        <button onclick="shareProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')" class="w-8 h-8 bg-[var(--card)] rounded-full flex justify-center items-center shadow border border-[var(--border)] text-blue-500 hover:text-white hover:bg-blue-500 transition-colors"><i class="fa-solid fa-share-nodes text-xs"></i></button>
                     </div>
 
                     <div>
@@ -321,11 +351,11 @@
                             ${imgHtml}
                             <div class="absolute top-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-white text-[9px] font-bold"><i class="fa-regular fa-eye text-emerald-400 mr-1"></i> ${viewers} viewing</div>
                         </div>
-                        <h3 class="text-lg font-black mb-1 leading-tight text-[var(--text)] cursor-pointer hover:text-blue-500" onclick="openQuickView(${p.id})">${p.name}</h3>
+                        <h3 class="text-lg font-black mb-1 leading-tight text-[var(--text)] cursor-pointer hover:text-blue-500 transition-colors" onclick="openQuickView(${p.id})">${p.name}</h3>
                         <p class="text-xs text-slate-500 mb-3 line-clamp-1">${p.abilities}</p>
                         <div class="flex justify-between items-center mb-3">
                             <p class="text-xl font-black text-emerald-500">৳${p.price}</p>
-                            <span class="text-yellow-400 text-[10px] font-black bg-yellow-400/10 px-2 py-1 rounded"><i class="fa-solid fa-star"></i> 5.0</span>
+                            <span class="text-yellow-500 text-[10px] font-black bg-yellow-500/10 px-2 py-1 rounded"><i class="fa-solid fa-star"></i> 5.0</span>
                         </div>
                         ${variantHtml}
                     </div>
@@ -334,7 +364,7 @@
             }).join('');
         }
 
-        // Search & Autocomplete
+        // Live Search
         function filterProducts() { 
             const q = document.getElementById('searchInput').value.toLowerCase(); 
             let list = showOnlyWishlist ? allProducts.filter(p=>wishlist.includes(p.id)) : allProducts;
@@ -343,7 +373,7 @@
 
         // Cart Actions
         function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
-        function updateCartBadge() { const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob'); if(!cDesk || !cMob) return; if(cart.length > 0) { cDesk.innerText = cart.length; cMob.innerText = cart.length; cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); cDesk.classList.remove('animate-bounce-short'); void cDesk.offsetWidth; cDesk.classList.add('animate-bounce-short'); } else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); } }
+        function updateCartBadge() { const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob'); if(!cDesk || !cMob) return; if(cart.length > 0) { cDesk.innerText = cart.length; cMob.innerText = cart.length; cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); cDesk.classList.remove('animate-bounce-short'); void cDesk.offsetWidth; cDesk.classList.add('animate-bounce-short'); cMob.classList.remove('animate-bounce-short'); void cMob.offsetWidth; cMob.classList.add('animate-bounce-short'); } else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); } }
 
         function addToCartUI(id, name, price) {
             if(!user) return location.href='/login';
@@ -367,12 +397,12 @@
         
         function renderCart() {
             const container = document.getElementById('cartItemsContainer');
-            if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-cart-arrow-down text-4xl mb-3 opacity-50"></i><br><p class="font-bold">Cart is empty</p></div>'; document.getElementById('cartTotal').innerText = '৳0'; document.getElementById('cartDue').innerText = '৳0'; document.getElementById('cartAdvance').innerText = '- ৳0'; return; }
+            if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-cart-arrow-down text-4xl mb-3 opacity-30"></i><br><p class="font-bold text-sm">Cart is empty</p></div>'; document.getElementById('cartTotal').innerText = '৳0'; document.getElementById('cartDue').innerText = '৳0'; document.getElementById('cartAdvance').innerText = '- ৳0'; return; }
             document.getElementById('addressSection').classList.remove('hidden'); 
             let sum = 0; 
             container.innerHTML = cart.map(i => { 
                 sum += i.price; let imgHtml = i.img ? `<img src="/api/photo/${i.img}" class="w-12 h-12 object-cover rounded-lg border border-[var(--border)]">` : `<div class="w-12 h-12 bg-[var(--bg)] rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div>`; let variants = []; if(i.size) variants.push(`Size: ${i.size}`); if(i.color) variants.push(`Color: ${i.color}`); let varHtml = variants.length > 0 ? `<p class="text-[10px] text-blue-500 font-bold mt-1 bg-blue-500/10 px-2 py-0.5 rounded inline-block">${variants.join(', ')}</p>` : '';
-                return `<div class="bg-[var(--card)] p-4 rounded-xl flex justify-between items-center border border-[var(--border)] shadow-sm"><div class="flex items-center gap-3">${imgHtml}<div><p class="font-bold text-sm leading-tight text-[var(--text)]">${i.name}</p>${varHtml}<p class="text-emerald-500 font-black mt-1">৳${i.price}</p></div></div><button onclick="removeFromCart(${i.cartId})" class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white w-8 h-8 rounded-full transition-colors flex justify-center items-center"><i class="fa-solid fa-trash text-xs"></i></button></div>`; 
+                return `<div class="bg-[var(--bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--border)] shadow-sm mb-3 animate-slide-right"><div class="flex items-center gap-3">${imgHtml}<div><p class="font-bold text-sm leading-tight text-[var(--text)]">${i.name}</p>${varHtml}<p class="text-emerald-500 font-black mt-1">৳${i.price}</p></div></div><button onclick="removeFromCart(${i.cartId})" class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white w-8 h-8 rounded-full transition-colors flex justify-center items-center active:scale-90"><i class="fa-solid fa-trash text-xs"></i></button></div>`; 
             }).join('');
             document.getElementById('cartTotal').innerText = `৳${sum}`; let advance = sum > 0 ? 200 : 0; if(sum < 200) advance = sum; let due = sum - advance; document.getElementById('cartAdvance').innerText = `- ৳${advance}`; document.getElementById('cartDue').innerText = `৳${due}`;
         }
@@ -381,25 +411,24 @@
             if(cart.length === 0 || !user) return;
             const phone = document.getElementById('cPhone').value; const street = document.getElementById('cStreet').value; const city = document.getElementById('cCity').value; const zip = document.getElementById('cZip').value;
             if(!phone || !street || !city) return Swal.fire('Error', 'Please fill delivery details.', 'error');
-            Swal.fire({title: 'Processing Order...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, background:'var(--card)', color:'var(--text)'});
+            Swal.fire({title: 'Processing Order...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
             try {
                 const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, cartItems: cart, address: { phone, street, city, postcode: zip }}) });
                 const data = await res.json();
                 if(data.success) {
-                    user.balanceBdt = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); cart = []; updateCartBadge(); toggleCart(); renderAuth(); renderProducts(allProducts); document.getElementById('addressSection').classList.add('hidden');
-                    Swal.fire({ title: 'Order Sent! 🎉', html: `<p class="mb-2 text-sm">Advance Paid: <b>৳${data.advance}</b></p><p class="text-lg font-black text-emerald-500">Due (COD): ৳${data.due}</p><p class="text-xs text-blue-500 mt-3">Digital receipt sent to email.</p>`, icon: 'success', confirmButtonText: 'View Status', background:'var(--card)', color:'var(--text)' }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
-                } else Swal.fire({title:'Failed', text: data.error, icon:'error', background:'var(--card)', color:'var(--text)'});
+                    user.balanceBdt = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); cart = []; updateCartBadge(); toggleCart(); renderAuth(); renderProducts(allProducts); document.getElementById('addressSection').classList.add('hidden'); document.getElementById('depositForm').reset();
+                    Swal.fire({ title: 'Order Sent! 🎉', html: `<p class="mb-2 text-sm">Advance Paid: <b>৳${data.advance}</b></p><p class="text-lg font-black text-emerald-500">Due (COD): ৳${data.due}</p><p class="text-xs text-blue-500 mt-3">Digital receipt sent to email.</p>`, icon: 'success', confirmButtonColor: '#10b981', confirmButtonText: 'View Status', ...swalDark }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
+                } else Swal.fire({title:'Failed', text: data.error, icon:'error', ...swalDark});
             } catch(e) { Swal.fire('Error', 'Network Error', 'error'); }
         }
 
-        // 13. FIXED Feedback Function (Async Processing behind scenes)
+        // 13. FIXED Feedback Function (Async Background Processing)
         async function openFeedback() {
-            if(!user) return Swal.fire('Hey!', 'Login to send feedback.', 'info', {background:'var(--card)', color:'var(--text)'});
+            if(!user) return Swal.fire('Hey!', 'Please login to send feedback.', 'info', swalDark);
             const { value: formValues } = await Swal.fire({
                 title: 'Send Feedback',
-                html: `<input id="fb-sub" class="swal2-input !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)]" placeholder="Subject (e.g. Bug / UI)"><textarea id="fb-msg" class="swal2-textarea !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)]" placeholder="Write your message here..."></textarea>`,
-                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5',
-                background:'var(--card)', color:'var(--text)',
+                html: `<input id="fb-sub" class="swal2-input !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)]" placeholder="Subject (e.g. Bug / UI)"><textarea id="fb-msg" class="swal2-textarea !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)] custom-scrollbar" placeholder="Write your message here..."></textarea>`,
+                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5', ...swalDark,
                 preConfirm: () => {
                     const sub = document.getElementById('fb-sub').value; const msg = document.getElementById('fb-msg').value;
                     if(!sub || !msg) { Swal.showValidationMessage('Both fields required!'); return false; }
@@ -407,12 +436,15 @@
                 }
             });
             if(formValues) {
-                // Instantly show success!
-                Swal.fire({title: 'Sent!', text: 'Thanks for your feedback!', icon: 'success', background:'var(--card)', color:'var(--text)', timer: 2000, showConfirmButton: false});
-                // Fetch works silently in background
+                // Instantly show success without waiting for server!
+                Swal.fire({title: 'Sent!', text: 'Thanks for your feedback!', icon: 'success', timer: 2000, showConfirmButton: false, ...swalDark});
+                // Send to backend silently
                 fetch('/api/feedback', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: user.id, subject: formValues.subject, message: formValues.message}) }).catch(()=>{});
             }
         }
+
+        function openGallery(productId) { const p = allProducts.find(x => x.id === productId); if(!p || !p.imageIds || p.imageIds.length === 0) return; const modal = document.getElementById('imageModal'); const mainImg = document.getElementById('galleryMainImg'); const thumbs = document.getElementById('galleryThumbnails'); mainImg.src = `/api/photo/${p.imageIds[0]}`; thumbs.innerHTML = p.imageIds.map(id => `<img src="/api/photo/${id}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">`).join(''); modal.classList.replace('hidden', 'flex'); }
+        function closeGallery() { document.getElementById('imageModal').classList.replace('flex', 'hidden'); }
 
         // Profile & Order Timeline logic
         async function openProfileDashboard(defaultTab = 'overview') {
@@ -428,23 +460,23 @@
                 document.getElementById('pOrdersList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No orders yet.</p>' : data.map(p => {
                     let varText = []; if(p.selectedSize) varText.push(p.selectedSize); if(p.selectedColor) varText.push(p.selectedColor); let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
                     
-                    // 6. Order Timeline Builder
+                    // 6. Visual Order Timeline Builder
                     let tlStep = 1; if(p.status==='RECEIVED') tlStep=2; else if(p.status==='SHIPPED') tlStep=3; else if(p.status==='DELIVERED') tlStep=4;
                     let timeline = `
-                    <div class="flex items-center justify-between w-full mt-4 px-2">
-                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=1?'t-active':'t-inactive'}"><i class="fa-solid fa-clipboard-list"></i></div><span class="text-[8px] mt-1 font-bold ${tlStep>=1?'text-emerald-500':'text-slate-500'}">PENDING</span></div>
+                    <div class="flex items-center justify-between w-full mt-5 px-2">
+                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=1?'t-active':'t-inactive'}"><i class="fa-solid fa-clipboard-list"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=1?'text-emerald-500':'text-slate-500'}">PENDING</span></div>
                         <div class="t-line ${tlStep>=2?'active':''}"></div>
-                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=2?'t-active':'t-inactive'}"><i class="fa-solid fa-box-open"></i></div><span class="text-[8px] mt-1 font-bold ${tlStep>=2?'text-emerald-500':'text-slate-500'}">RECEIVED</span></div>
+                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=2?'t-active':'t-inactive'}"><i class="fa-solid fa-box-open"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=2?'text-emerald-500':'text-slate-500'}">RECEIVED</span></div>
                         <div class="t-line ${tlStep>=3?'active':''}"></div>
-                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=3?'t-active':'t-inactive'}"><i class="fa-solid fa-truck-fast"></i></div><span class="text-[8px] mt-1 font-bold ${tlStep>=3?'text-emerald-500':'text-slate-500'}">SHIPPED</span></div>
+                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=3?'t-active':'t-inactive'}"><i class="fa-solid fa-truck-fast"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=3?'text-emerald-500':'text-slate-500'}">SHIPPED</span></div>
                         <div class="t-line ${tlStep>=4?'active':''}"></div>
-                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=4?'t-active':'t-inactive'}"><i class="fa-solid fa-check"></i></div><span class="text-[8px] mt-1 font-bold ${tlStep>=4?'text-emerald-500':'text-slate-500'}">DONE</span></div>
+                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=4?'t-active':'t-inactive'}"><i class="fa-solid fa-check"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=4?'text-emerald-500':'text-slate-500'}">DONE</span></div>
                     </div>`;
 
-                    return `<div class="bg-[var(--bg)] border border-[var(--border)] p-5 rounded-2xl mb-4 shadow-sm"><div class="flex justify-between items-start mb-2"><div><h4 class="font-black text-sm text-[var(--text)]">${p.product.name} <span class="text-blue-500 text-[10px] ml-1">${varStr}</span></h4><p class="text-[10px] text-slate-500 mt-1">Order #${p.id} • ${new Date(p.createdAt).toLocaleDateString()}</p></div><span class="text-xs font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">৳${p.priceTotal}</span></div>${timeline}</div>`;
+                    return `<div class="bg-[var(--card)] border border-[var(--border)] p-5 rounded-3xl mb-4 shadow-sm"><div class="flex justify-between items-start mb-2"><div><h4 class="font-black text-sm text-[var(--text)]">${p.product.name} <span class="text-blue-500 text-[10px] ml-1 bg-blue-500/10 px-1 rounded">${varStr}</span></h4><p class="text-[10px] text-slate-500 mt-1">ID: #${p.id} • ${new Date(p.createdAt).toLocaleDateString()}</p></div><span class="text-xs font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">৳${p.priceTotal}</span></div>${timeline}</div>`;
                 }).join(''); 
             });
-            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-[var(--bg)] p-4 rounded-2xl flex justify-between items-center border border-[var(--border)] mb-3"><div><p class="font-black text-sm uppercase text-[var(--text)]">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-500 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-500 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span></div>`; }).join(''); });
+            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-[var(--card)] p-4 rounded-2xl flex justify-between items-center border border-[var(--border)] mb-3 shadow-sm"><div><p class="font-black text-sm uppercase text-[var(--text)]">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-500 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">${d.status}</span></div>`; }).join(''); });
         }
         function closeProfile() { document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
         function switchProfTab(tab) { document.querySelectorAll('.prof-tab').forEach(b => { b.classList.remove('active', 'text-blue-500', 'border-blue-500'); b.classList.add('text-slate-500', 'border-transparent'); }); document.getElementById('tab-'+tab).classList.add('active', 'text-blue-500', 'border-blue-500'); document.getElementById('tab-'+tab).classList.remove('text-slate-500', 'border-transparent'); document.getElementById('sec-overview').classList.add('hidden'); document.getElementById('sec-orders').classList.add('hidden'); document.getElementById('sec-funds').classList.add('hidden'); document.getElementById('sec-settings').classList.add('hidden'); document.getElementById('sec-'+tab).classList.remove('hidden'); }
@@ -458,18 +490,18 @@
             }; reader.readAsDataURL(file);
         });
 
-        async function saveSettings() { const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value; const btn = document.getElementById('btnSaveSet'); btn.innerText = "Saving..."; const res = await fetch('/api/user/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, email, password, avatar: base64Avatar}) }); const data = await res.json(); btn.innerText = "Save Changes"; if(data.success) { user.email = email; user.avatar = base64Avatar; localStorage.setItem('user', JSON.stringify(user)); toast('success', 'Saved!'); openProfileDashboard('overview'); renderAuth(); } else Swal.fire('Error', data.error, 'error'); }
+        async function saveSettings() { const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value; const btn = document.getElementById('btnSaveSet'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; const res = await fetch('/api/user/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, email, password, avatar: base64Avatar}) }); const data = await res.json(); btn.innerText = "Save Changes"; if(data.success) { user.email = email; user.avatar = base64Avatar; localStorage.setItem('user', JSON.stringify(user)); toast('success', 'Saved!'); openProfileDashboard('overview'); renderAuth(); } else Swal.fire('Error', data.error, 'error'); }
         function removeAvatar() { base64Avatar = ''; document.getElementById('settingAvatarPreview').innerHTML = `<span class="text-2xl font-black text-slate-500">${user.firstName.charAt(0).toUpperCase()}</span>`; saveSettings(); }
 
         // Fund logic
         function openFund() { if(!user) return location.href='/login'; document.getElementById('fundModal').classList.replace('hidden', 'flex'); document.getElementById('fBdt').value = ''; updateFundUI(); }
         function closeFund() { document.getElementById('fundModal').classList.replace('flex', 'hidden'); }
-        function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 flex justify-between items-center text-white shadow-md transition-colors'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.add('bg-[#e2136e]'); btn.classList.add('bg-[#e2136e]', 'hover:bg-[#b30b54]'); icon.className = 'fa-solid fa-paper-plane mr-2'; } else if(method === 'nagad') { num = '01846849460'; header.classList.add('bg-[#f37021]'); btn.classList.add('bg-[#f37021]', 'hover:bg-[#d65b15]'); icon.className = 'fa-solid fa-fire mr-2'; } document.getElementById('fNumber').innerText = num; }
+        function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 flex justify-between items-center text-white shadow-md transition-colors duration-300'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.replace('bg-[#f37021]','bg-[#e2136e]'); header.classList.add('bg-[#e2136e]'); btn.classList.add('bg-[#e2136e]', 'hover:bg-[#b30b54]'); icon.className = 'fa-solid fa-paper-plane mr-2'; } else if(method === 'nagad') { num = '01846849460'; header.classList.replace('bg-[#e2136e]','bg-[#f37021]'); header.classList.add('bg-[#f37021]'); btn.classList.add('bg-[#f37021]', 'hover:bg-[#d65b15]'); icon.className = 'fa-solid fa-fire mr-2'; } document.getElementById('fNumber').innerText = num; }
         function copyNumber() { navigator.clipboard.writeText(document.getElementById('fNumber').innerText); toast('success', 'Copied!'); }
 
-        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', background:'var(--card)', color:'var(--text)'}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire('Error', 'TrxID exists', 'error'); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
+        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', ...swalDark}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire('Error', 'TrxID exists', 'error'); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
 
-        window.logout = function() { localStorage.removeItem('user'); localStorage.removeItem('wishlist'); location.href='/login'; }
+        window.logout = function() { localStorage.removeItem('user'); localStorage.removeItem('wishlist'); document.body.style.opacity=0; setTimeout(()=>location.href='/login', 300); }
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
