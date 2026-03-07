@@ -31,7 +31,7 @@ model User {
   refCode            String?    @unique 
   referredBy         String?    
   referralRewardPaid Boolean    @default(false)
-  refCount           Int        @default(0) // Used for User Badges
+  refCount           Int        @default(0)
   ipAddress          String?    
   isVip              Boolean    @default(false)
   vipExpiry          DateTime?
@@ -55,10 +55,10 @@ model Rider {
   phone         String
   password      String
   avatar        String?  
-  deliveryCount Int      @default(0) // Used for Rider Badges
-  lastLat       Float?   // 🔥 Rider GPS Latitude
-  lastLng       Float?   // 🔥 Rider GPS Longitude
-  lastLocUpdate DateTime? // 🔥 Last time location was synced
+  deliveryCount Int      @default(0) 
+  lastLat       Float?   
+  lastLng       Float?   
+  lastLocUpdate DateTime? 
   isVerified    Boolean  @default(false)
   verifyToken   String?
   createdAt     DateTime @default(now())
@@ -109,4 +109,12 @@ model Notice {
   text      String
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+// 🔥 NEW: FLASH SALE MODEL
+model FlashSale {
+  id              Int      @id @default(1)
+  isActive        Boolean  @default(false)
+  endTime         DateTime @default(now())
+  discountPercent Int      @default(0)
 }
