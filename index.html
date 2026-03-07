@@ -9,12 +9,8 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { animation: { 'fade-in': 'fadeIn 0.5s ease-in-out', 'bounce-short': 'bounce 0.5s ease-in-out 1', 'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite' } } }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { animation: { 'fade-in': 'fadeIn 0.5s ease-in-out', 'bounce-short': 'bounce 0.5s ease-in-out 1' } } } }
     </script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,11 +21,9 @@
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
         
         .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
         .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-        .animate-slide-right { animation: slideInRight 0.4s ease-out forwards; }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
@@ -47,51 +41,47 @@
         .product-card { background: var(--card); border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .product-card:hover { transform: translateY(-8px) scale(1.02); border-color: #3b82f6; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2); }
         
-        .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
-        
-        .r-badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; letter-spacing: 1px; margin-left: 6px; display: inline-block; }
-        .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-        .badge-basic { background: linear-gradient(135deg, #94a3b8, #475569); color: white; }
+        /* 🔥 FIXED HIGH-TECH NEWS TICKER (Pure CSS) */
+        .ticker-wrap { width: 100%; overflow: hidden; background: linear-gradient(90deg, #0f172a, #1e293b); border-bottom: 1px solid #3b82f6; display: flex; align-items: center; height: 40px; position: relative; z-index: 40; }
+        .ticker-title { background: #3b82f6; color: white; font-weight: 900; padding: 0 20px; height: 100%; display: flex; align-items: center; z-index: 10; position: relative; box-shadow: 5px 0 15px rgba(0,0,0,0.5); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        .ticker-move { display: flex; white-space: nowrap; animation: tickerAnim 20s linear infinite; padding-left: 100%; }
+        .ticker-move:hover { animation-play-state: paused; cursor: default; }
+        .ticker-item { margin-right: 50px; font-weight: bold; color: #e2e8f0; font-size: 13px; letter-spacing: 1px; }
+        .ticker-item span { color: #facc15; margin-right: 10px; }
+        @keyframes tickerAnim { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
         
         .variant-select { background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: 0.3s; cursor: pointer; }
         .variant-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        
-        .timeline-step { width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10; position: relative; }
-        .t-active { background: #10b981; color: white; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
-        .t-inactive { background: var(--border); color: #94a3b8; }
-        .t-line { flex: 1; height: 4px; background: var(--border); margin: 0 -5px; z-index: 1; }
-        .t-line.active { background: #10b981; }
 
-        /* 🔥 Updated FAB Positions */
         .fab { position: fixed; z-index: 45; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .fab:active { transform: scale(0.9); }
         
         #btnScrollTop { bottom: 90px; right: 20px; background: #3b82f6; color: white; opacity: 0; pointer-events: none; transform: translateY(20px); }
         #btnScrollTop.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
-        
         #btnFeedback { bottom: 90px; left: 20px; background: #4f46e5; color: white; }
         #btnContact { bottom: 155px; left: 20px; background: #0ea5e9; color: white; } 
+        @media (min-width: 768px) { #btnScrollTop { bottom: 30px; right: 30px; } #btnFeedback { bottom: 30px; left: 30px; } #btnContact { bottom: 95px; left: 30px; } }
         
-        @media (min-width: 768px) { 
-            #btnScrollTop { bottom: 30px; right: 30px; } 
-            #btnFeedback { bottom: 30px; left: 30px; } 
-            #btnContact { bottom: 95px; left: 30px; } 
-        }
+        /* Drawer & Custom Scroll */
+        .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+        .timeline-step { width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10; position: relative; }
+        .t-active { background: #10b981; color: white; box-shadow: 0 0 10px rgba(16,185,129,0.5); } .t-inactive { background: var(--border); color: #94a3b8; }
+        .t-line { flex: 1; height: 4px; background: var(--border); margin: 0 -5px; z-index: 1; } .t-line.active { background: #10b981; }
     </style>
 </head>
 <body class="dark">
 
     <div id="splashScreen"><div class="spinner"></div></div>
-
     <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
-    <div id="flashBanner" class="bg-gradient-to-r from-red-600 to-rose-500 text-white text-xs sm:text-sm font-bold py-2 text-center shadow-lg relative z-50">
-        <i class="fa-solid fa-bolt animate-pulse text-yellow-300 mr-2"></i> Flash Sale Ends In: <span id="countdownTimer" class="font-mono text-yellow-300 text-lg ml-2 tracking-widest">00:00:00</span>
+    <div id="flashBanner" class="hidden bg-gradient-to-r from-red-600 to-rose-500 text-white text-xs sm:text-sm font-bold py-2 text-center shadow-lg relative z-50">
+        <i class="fa-solid fa-bolt animate-pulse text-yellow-300 mr-2"></i> MEGA FLASH SALE ENDS IN: <span id="countdownTimer" class="font-mono text-yellow-300 text-lg ml-2 tracking-widest">00:00:00</span>
     </div>
 
-    <div id="noticeBanner" class="hidden bg-gradient-to-r from-blue-700 to-indigo-800 text-white text-xs sm:text-sm font-bold py-1.5 shadow-lg overflow-hidden relative z-40 border-b border-indigo-400">
-        <div class="max-w-7xl mx-auto flex items-center px-4"><i class="fa-solid fa-bullhorn animate-pulse mr-3 text-yellow-300"></i><marquee id="noticeText" scrollamount="6" class="flex-1 tracking-widest uppercase"></marquee></div>
+    <div id="noticeWrapper" class="hidden ticker-wrap">
+        <div class="ticker-title"><i class="fa-solid fa-bullhorn animate-pulse mr-2 text-yellow-300"></i> UPDATES</div>
+        <div class="ticker-move" id="noticeText"></div>
     </div>
 
     <nav class="glass sticky top-0 z-50 w-full h-16 sm:h-20 flex items-center px-4 shadow-lg">
@@ -100,9 +90,8 @@
                 <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white group-hover:rotate-12 transition-transform"><i class="fa-solid fa-shirt text-xl"></i></div>
                 <span class="font-black text-2xl tracking-tighter hidden sm:block">AURA<span class="text-blue-500">STORE</span></span>
             </div>
-            
             <div class="flex items-center gap-3">
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex justify-center items-center bg-[var(--card)] border border-[var(--border)] text-[var(--text)] transition-colors shadow-sm hover:scale-105" title="Toggle Theme">
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex justify-center items-center bg-[var(--card)] border border-[var(--border)] text-[var(--text)] transition-colors shadow-sm hover:scale-105">
                     <i id="themeIcon" class="fa-solid fa-sun text-yellow-400"></i>
                 </button>
                 <div id="authSection" class="flex items-center gap-3"></div>
@@ -110,11 +99,9 @@
         </div>
     </nav>
 
-    <button onclick="openFeedback()" id="btnFeedback" class="fab hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(79,70,229,0.6)] animate-slide-up" style="animation-delay: 0.5s;" title="Give Feedback"><i class="fa-solid fa-comment-dots text-xl"></i></button>
-    
-    <button onclick="openContact()" id="btnContact" class="fab hover:bg-[#0ea5e9] hover:shadow-[0_0_20px_rgba(14,165,233,0.6)] animate-slide-up" style="animation-delay: 0.7s;" title="Contact Support"><i class="fa-solid fa-headset text-xl"></i></button>
-    
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500" title="Scroll to Top"><i class="fa-solid fa-arrow-up"></i></button>
+    <button onclick="openFeedback()" id="btnFeedback" class="fab hover:bg-indigo-500 animate-slide-up" style="animation-delay: 0.5s;" title="Give Feedback"><i class="fa-solid fa-comment-dots text-xl"></i></button>
+    <button onclick="openContact()" id="btnContact" class="fab hover:bg-[#0ea5e9] animate-slide-up" style="animation-delay: 0.7s;" title="Contact Support"><i class="fa-solid fa-headset text-xl"></i></button>
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500"><i class="fa-solid fa-arrow-up"></i></button>
 
     <div class="pt-10 pb-10 text-center relative z-10 px-4 animate-slide-up">
         <h1 class="text-4xl sm:text-6xl font-black mb-6 tracking-tight">Premium <span class="text-blue-500">Collections</span></h1>
@@ -129,8 +116,8 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10 min-h-[50vh] relative z-10" id="product-list">
-        <div class="product-card p-4 animate-pulse rounded-2xl"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
-        <div class="product-card p-4 animate-pulse rounded-2xl"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
+        <div class="product-card p-4 animate-pulse rounded-2xl"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div></div>
+        <div class="product-card p-4 animate-pulse rounded-2xl"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div></div>
     </div>
 
     <div class="md:hidden fixed bottom-0 left-0 w-full bg-[var(--card)] border-t border-[var(--border)] h-[70px] flex justify-around items-center z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.2)] pb-2 transition-colors" id="mobileBottomNav"></div>
@@ -140,8 +127,7 @@
             <button onclick="closeQuickView()" class="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors z-20"><i class="fa-solid fa-xmark"></i></button>
             <div class="w-full md:w-1/2 h-64 md:h-auto bg-slate-900 flex items-center justify-center p-4 relative" id="qvImageArea"></div>
             <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar bg-[var(--bg)] text-[var(--text)]">
-                <div id="qvDetailsArea"></div>
-                <div id="qvActionArea" class="mt-6 border-t border-[var(--border)] pt-6"></div>
+                <div id="qvDetailsArea"></div><div id="qvActionArea" class="mt-6 border-t border-[var(--border)] pt-6"></div>
             </div>
         </div>
     </div>
@@ -158,55 +144,14 @@
             <div id="cartItemsContainer" class="space-y-4 mb-6"></div>
             <div id="addressSection" class="hidden bg-[var(--card)] border border-[var(--border)] p-5 rounded-2xl shadow-sm animate-slide-up">
                 <h3 class="font-black mb-4 uppercase tracking-widest text-xs text-blue-500"><i class="fa-solid fa-truck-fast mr-2"></i> Delivery Details</h3>
-                <div class="space-y-3">
-                    <input type="text" id="cPhone" placeholder="Mobile Number" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors">
-                    <input type="text" id="cStreet" placeholder="House/Street/Village" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors">
-                    <div class="flex gap-2"><input type="text" id="cCity" placeholder="City/District" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"><input type="text" id="cZip" placeholder="Postcode" class="w-24 bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"></div>
-                </div>
+                <div class="space-y-3"><input type="text" id="cPhone" placeholder="Mobile Number" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"><input type="text" id="cStreet" placeholder="House/Street/Village" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"><div class="flex gap-2"><input type="text" id="cCity" placeholder="City/District" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"><input type="text" id="cZip" placeholder="Postcode" class="w-24 bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"></div></div>
             </div>
         </div>
         <div class="p-6 border-t border-[var(--border)] bg-[var(--card)]">
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-sm text-[var(--text)]">Subtotal:</span><span id="cartTotal" class="font-bold text-lg text-[var(--text)]">৳0</span></div>
-            <div class="flex justify-between items-center mb-4 pb-4 border-b border-[var(--border)]"><span class="font-bold text-sm text-slate-500">Advance Booking:</span><span id="cartAdvance" class="font-black text-emerald-500 text-lg">- ৳0</span></div>
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-[var(--border)]"><span class="font-bold text-sm text-slate-500">Advance:</span><span id="cartAdvance" class="font-black text-emerald-500 text-lg">- ৳0</span></div>
             <div class="flex justify-between items-center mb-6"><span class="font-black uppercase tracking-widest text-[var(--text)]">Due (COD):</span><span id="cartDue" class="text-3xl font-black text-blue-500">৳0</span></div>
             <button onclick="processOrder()" id="btnConfirmOrder" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-transform active:scale-95"><i class="fa-solid fa-check-circle mr-2"></i> Confirm Order</button>
-        </div>
-    </div>
-
-    <div id="profileModal" class="fixed inset-0 bg-black/80 hidden z-[90] justify-center items-center px-4 backdrop-blur-sm">
-        <div class="bg-[var(--card)] w-full max-w-2xl max-h-[90vh] flex flex-col relative border border-[var(--border)] shadow-2xl overflow-hidden rounded-[32px] animate-slide-up">
-            <div class="p-6 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg)]"><h2 class="text-2xl font-black text-[var(--text)]"><i class="fa-solid fa-user text-blue-500 mr-2"></i> Account</h2><button onclick="closeProfile()" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] text-[var(--text)] hover:bg-red-500 hover:text-white rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
-            <div class="flex border-b border-[var(--border)] bg-[var(--card)] px-6 pt-4 gap-6 overflow-x-auto custom-scrollbar"><button onclick="switchProfTab('overview')" id="tab-overview" class="prof-tab active pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap text-blue-500 border-b-2 border-blue-500">Profile</button><button onclick="switchProfTab('orders')" id="tab-orders" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">My Orders</button><button onclick="switchProfTab('funds')" id="tab-funds" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">Wallet</button><button onclick="switchProfTab('settings')" id="tab-settings" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">Settings</button></div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[var(--bg)] text-[var(--text)]">
-                <div id="sec-overview" class="space-y-6 text-center animate-fade-in">
-                    <div class="w-24 h-24 bg-[var(--card)] border-2 border-[var(--border)] rounded-full mx-auto flex items-center justify-center text-4xl font-black shadow-lg overflow-hidden" id="pAvatarContainer"></div>
-                    <div><h3 class="text-3xl font-black flex justify-center items-center gap-2 flex-wrap" id="pNameContainer"></h3><p class="text-slate-500 font-bold" id="pEmail"></p></div>
-                    <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] flex justify-between items-center text-left shadow-sm"><div><p class="text-xs text-slate-500 font-bold uppercase mb-1">Referral Code</p><p class="text-2xl font-mono font-black text-emerald-500" id="pRef">---</p></div><div class="text-right"><span class="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-full">Earn ৳100 / Deposit</span></div></div>
-                    <button onclick="window.logout()" class="text-red-500 font-bold hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors"><i class="fa-solid fa-right-from-bracket mr-1"></i> Secure Logout</button>
-                </div>
-                <div id="sec-orders" class="hidden space-y-4 animate-slide-right"><div id="pOrdersList"></div></div>
-                <div id="sec-funds" class="hidden space-y-4 animate-slide-right"><div id="pFundsList"></div></div>
-                <div id="sec-settings" class="hidden space-y-5 text-left animate-slide-right">
-                    <h3 class="font-black text-xl mb-4">Edit Profile</h3>
-                    <div class="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] flex justify-between items-center"><div class="flex items-center gap-4"><div class="w-16 h-16 rounded-full overflow-hidden bg-[var(--bg)] border border-[var(--border)]" id="settingAvatarPreview"></div><div><p class="font-bold text-sm">Profile Picture</p><div class="upload-btn-wrapper mt-1"><button class="bg-blue-600/10 text-blue-500 px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors">Choose Image</button><input type="file" id="fileAvatar" accept="image/*" /></div></div></div><button onclick="removeAvatar()" class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white transition-colors p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button></div>
-                    <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Email</label><input type="email" id="setEmail" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors"></div>
-                    <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Password</label><input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors"></div>
-                    <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase mt-4 shadow-lg active:scale-95 transition-transform">Save Changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="fundModal" class="fixed inset-0 bg-black/80 hidden z-[95] justify-center items-center px-4 backdrop-blur-sm">
-        <div class="bg-[var(--card)] rounded-[32px] w-full max-w-md shadow-2xl relative overflow-hidden border border-[var(--border)] animate-slide-up">
-            <div id="fundHeader" class="p-6 flex justify-between items-center text-white shadow-md bg-[#e2136e] transition-colors duration-300"><h2 class="text-2xl font-black"><i id="fundIcon" class="fa-solid fa-paper-plane mr-2"></i> Add Balance</h2><button onclick="closeFund()" class="w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
-            <form id="depositForm" class="p-6 space-y-5 bg-[var(--bg)] text-[var(--text)]">
-                <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-3 ml-1">Select Method</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#e2136e] peer-checked:text-[#e2136e] peer-checked:bg-[#e2136e]/10 text-xs uppercase tracking-widest transition-all bg-[var(--card)]">bKash</div></label><label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#f37021] peer-checked:text-[#f37021] peer-checked:bg-[#f37021]/10 text-xs uppercase tracking-widest transition-all bg-[var(--card)]">Nagad</div></label></div></div>
-                <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Amount (৳)</label><input type="number" id="fBdt" required class="w-full bg-[var(--card)] border border-[var(--border)] text-emerald-500 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500 transition-colors"></div>
-                <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] shadow-sm"><p class="text-xs font-black text-slate-500 uppercase mb-2">Send Money To:</p><div onclick="copyNumber()" class="bg-[var(--bg)] border border-[var(--border)] px-4 py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors"><span id="fNumber" class="font-mono text-xl font-black tracking-widest">01846849460</span><i class="fa-regular fa-copy text-blue-500"></i></div></div>
-                <div class="space-y-3"><input type="text" id="fSender" required class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors" placeholder="Sender Number"><input type="text" id="fTrx" required class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-black uppercase tracking-widest outline-none focus:border-blue-500 transition-colors" placeholder="TrxID"></div>
-                <button type="submit" id="fBtn" class="w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all bg-[#e2136e] shadow-lg hover:opacity-90 active:scale-95">Submit Request</button>
-            </form>
         </div>
     </div>
 
@@ -215,11 +160,13 @@
         const swalDark = { background: 'var(--card)', color: 'var(--text)', backdrop: 'rgba(0,0,0,0.8)' };
         let user = null; try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){}
         let allProducts = []; let cart = []; let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]'); let base64Avatar = ''; let showOnlyWishlist = false;
+        
+        let flashSaleActive = false; let flashDiscount = 0; let flashEnd = null;
 
         function applyTheme() {
             const isLight = localStorage.getItem('theme') === 'light';
-            if (isLight) { document.documentElement.classList.remove('dark'); const icon = document.getElementById('themeIcon'); if (icon) icon.className = 'fa-solid fa-moon text-slate-700'; } 
-            else { document.documentElement.classList.add('dark'); const icon = document.getElementById('themeIcon'); if (icon) icon.className = 'fa-solid fa-sun text-yellow-400'; }
+            if (isLight) { document.documentElement.classList.remove('dark'); document.getElementById('themeIcon').className = 'fa-solid fa-moon text-slate-700'; } 
+            else { document.documentElement.classList.add('dark'); document.getElementById('themeIcon').className = 'fa-solid fa-sun text-yellow-400'; }
         }
         function toggleTheme() { const isDark = document.documentElement.classList.contains('dark'); localStorage.setItem('theme', isDark ? 'light' : 'dark'); applyTheme(); }
         applyTheme();
@@ -227,37 +174,49 @@
         window.addEventListener('load', () => { 
             setTimeout(() => { document.getElementById('splashScreen').style.opacity = '0'; setTimeout(()=>document.getElementById('splashScreen').style.display='none',600); }, 800);
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
-            startFlashSaleTimer();
         });
-
-        function startFlashSaleTimer() {
-            let time = 3600 * 5; 
-            setInterval(() => {
-                let h = Math.floor(time / 3600); let m = Math.floor((time % 3600) / 60); let s = time % 60;
-                const el = document.getElementById('countdownTimer');
-                if(el) el.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                time > 0 ? time-- : time = 3600*5;
-            }, 1000);
-        }
 
         window.addEventListener('scroll', () => { const btn = document.getElementById('btnScrollTop'); if(btn) { if (window.scrollY > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); } });
 
-        function getBadge(role) { return role === 'ADMIN' ? '<span class="r-badge badge-admin">ADMIN</span>' : '<span class="r-badge badge-basic">USER</span>'; }
-
         async function init() {
-            renderAuth(); loadNotices();
-            if(user && user.id) { try { const res = await fetch('/api/user/' + user.id); const data = await res.json(); if(data.success) { user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); } else if(data.banned) { Swal.fire('Banned', 'Account suspended.', 'error').then(()=>window.logout()); return; } } catch(e) {} }
+            renderAuth(); loadNotices(); loadFlashSale();
+            if(user && user.id) { try { const res = await fetch('/api/user/' + user.id); const data = await res.json(); if(data.success) { user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); } } catch(e) {} }
             loadProducts();
         }
 
-        async function loadNotices() { try { const res = await fetch('/api/notices'); const notices = await res.json(); if(notices && notices.length > 0) { document.getElementById('noticeText').innerHTML = notices.map(n => `<span class="mx-10">• ${n.text}</span>`).join(''); document.getElementById('noticeBanner').classList.remove('hidden'); } } catch(e) {} }
+        async function loadNotices() { 
+            try { 
+                const res = await fetch('/api/notices'); const notices = await res.json(); 
+                if(notices && notices.length > 0) { 
+                    document.getElementById('noticeText').innerHTML = notices.map(n => `<span class="ticker-item"><span>•</span>${n.text}</span>`).join(''); 
+                    document.getElementById('noticeWrapper').classList.remove('hidden'); 
+                } 
+            } catch(e) {} 
+        }
+
+        // 🔥 FETCH FLASH SALE DATA
+        async function loadFlashSale() {
+            try {
+                const res = await fetch('/api/flashsale'); const data = await res.json();
+                if(data.isActive && new Date(data.endTime) > new Date()) {
+                    flashSaleActive = true; flashDiscount = data.discountPercent; flashEnd = new Date(data.endTime);
+                    document.getElementById('flashBanner').classList.remove('hidden');
+                    setInterval(() => {
+                        let diff = flashEnd - new Date();
+                        if(diff <= 0) { flashSaleActive = false; document.getElementById('flashBanner').classList.add('hidden'); renderProducts(allProducts); return; }
+                        let h = Math.floor(diff / (1000 * 60 * 60)); let m = Math.floor((diff / 1000 / 60) % 60); let s = Math.floor((diff / 1000) % 60);
+                        document.getElementById('countdownTimer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                    }, 1000);
+                }
+            } catch(e) {}
+        }
 
         function renderAuth() {
             const authDiv = document.getElementById('authSection'); const mobNav = document.getElementById('mobileBottomNav');
             if(user) {
                 const uName = user.name || user.firstName || 'User'; let avHtml = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<span class="text-lg font-black">${uName.charAt(0).toUpperCase()}</span>`; let displayBal = `৳${parseFloat(user.balanceBdt).toFixed(0)}`;
-                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-4 py-2 rounded-full font-bold text-sm hidden sm:block hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><div class="hidden sm:flex items-center bg-[var(--card)] border border-[var(--border)] px-4 py-1.5 rounded-full font-black shadow-sm"><span class="mr-2 pr-2 border-r border-[var(--border)] text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-500">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden animate-bounce-short">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden hover:opacity-80 transition-opacity">${avHtml}</button>`;
-                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center pt-2 transition-transform active:scale-95"><i class="fa-solid fa-store text-xl mb-1"></i><span class="text-[10px] font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 hover:text-blue-500 flex flex-col items-center relative pt-2 transition-colors active:scale-95"><i class="fa-solid fa-cart-shopping text-xl mb-1"></i><span id="cartCountMob" class="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span><span class="text-[10px] font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-500 flex flex-col items-center pt-2 transition-transform active:scale-95"><i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px] font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 hover:text-blue-500 flex flex-col items-center pt-2 transition-colors active:scale-95"><div class="w-6 h-6 rounded-full overflow-hidden border border-[var(--border)] flex justify-center items-center mb-1">${avHtml}</div><span class="text-[10px] font-bold">Profile</span></button>`;
+                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-4 py-2 rounded-full font-bold text-sm hidden sm:block hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><div class="hidden sm:flex items-center bg-[var(--card)] border border-[var(--border)] px-4 py-1.5 rounded-full font-black shadow-sm"><span class="mr-2 pr-2 border-r border-[var(--border)] text-sm flex items-center">${uName}</span><span class="text-emerald-500">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden hover:opacity-80 transition-opacity">${avHtml}</button>`;
+                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center pt-2 transition-transform active:scale-95"><i class="fa-solid fa-store text-xl mb-1"></i><span class="text-[10px] font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 hover:text-blue-500 flex flex-col items-center relative pt-2 transition-colors active:scale-95"><i class="fa-solid fa-cart-shopping text-xl mb-1"></i><span id="cartCountMob" class="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span><span class="text-[10px] font-bold">Cart</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 hover:text-blue-500 flex flex-col items-center pt-2 transition-colors active:scale-95"><div class="w-6 h-6 rounded-full overflow-hidden border border-[var(--border)] flex justify-center items-center mb-1">${avHtml}</div><span class="text-[10px] font-bold">Profile</span></button>`;
             } else {
                 authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-500 transition-colors active:scale-95">Login</button>`;
                 mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform">Login / Register</button>`;
@@ -290,8 +249,12 @@
             document.getElementById('qvImageArea').innerHTML = `<img src="${img}" class="max-w-full max-h-full object-contain rounded-xl drop-shadow-2xl">`;
             let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="qv-sz" class="variant-select"><option value="">Select Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
             let colorOpts = p.colors && p.colors.length > 0 ? `<select id="qv-cl" class="variant-select mt-3"><option value="">Select Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
-            document.getElementById('qvDetailsArea').innerHTML = `<h2 class="text-3xl font-black mb-2 leading-tight text-[var(--text)]">${p.name}</h2><p class="text-emerald-500 font-black text-3xl mb-4">৳${p.price}</p><p class="text-sm text-slate-500 mb-6 leading-relaxed">${p.abilities}</p><div class="mb-4">${sizeOpts}${colorOpts}</div><p class="text-xs font-bold ${p.stock>0?'text-blue-500':'text-red-500'} bg-blue-500/10 px-3 py-1 rounded inline-block"><i class="fa-solid fa-box mr-1"></i> Stock: ${p.stock}</p>`;
-            document.getElementById('qvActionArea').innerHTML = p.stock<=0 ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-black uppercase tracking-widest cursor-not-allowed border border-red-500/20">Out of Stock</button>` : `<button onclick="addToCartQV(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-transform active:scale-95"><i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart</button>`;
+            
+            let finalPrice = p.price; let priceHtml = `<p class="text-emerald-500 font-black text-3xl mb-4">৳${p.price}</p>`;
+            if(flashSaleActive) { finalPrice = p.price - (p.price * flashDiscount / 100); priceHtml = `<div class="mb-4"><p class="text-emerald-500 font-black text-3xl inline-block mr-3">৳${finalPrice}</p><del class="text-slate-500 text-lg font-bold">৳${p.price}</del> <span class="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded ml-2 align-top">-${flashDiscount}%</span></div>`; }
+            
+            document.getElementById('qvDetailsArea').innerHTML = `<h2 class="text-3xl font-black mb-2 leading-tight text-[var(--text)]">${p.name}</h2>${priceHtml}<p class="text-sm text-slate-500 mb-6 leading-relaxed">${p.abilities}</p><div class="mb-4">${sizeOpts}${colorOpts}</div><p class="text-xs font-bold ${p.stock>0?'text-blue-500':'text-red-500'} bg-blue-500/10 px-3 py-1 rounded inline-block"><i class="fa-solid fa-box mr-1"></i> Stock: ${p.stock}</p>`;
+            document.getElementById('qvActionArea').innerHTML = p.stock<=0 ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-black uppercase tracking-widest cursor-not-allowed border border-red-500/20">Out of Stock</button>` : `<button onclick="addToCartQV(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${finalPrice})" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-transform active:scale-95"><i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart</button>`;
             document.getElementById('quickViewModal').classList.replace('hidden', 'flex');
         }
         function closeQuickView() { document.getElementById('quickViewModal').classList.replace('flex','hidden'); }
@@ -312,9 +275,19 @@
                 let colorOpts = p.colors && p.colors.length > 0 ? `<select id="cl-${p.id}" class="variant-select mt-2"><option value="">Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
                 let variantHtml = (sizeOpts || colorOpts) ? `<div class="mb-4">${sizeOpts}${colorOpts}</div>` : `<div class="mb-4 text-xs text-slate-500 font-bold h-9 flex items-center">Standard Item</div>`;
 
+                let finalPrice = p.price;
+                let priceHtml = `<div class="flex justify-between items-center mb-3"><p class="text-xl font-black text-emerald-500">৳${p.price}</p><span class="text-yellow-500 text-[10px] font-black bg-yellow-500/10 px-2 py-1 rounded"><i class="fa-solid fa-star"></i> 5.0</span></div>`;
+                let flashBadge = '';
+
+                if(flashSaleActive) {
+                    finalPrice = p.price - (p.price * flashDiscount / 100);
+                    priceHtml = `<div class="flex justify-between items-end mb-3"><div><p class="text-xl font-black text-emerald-500 leading-none">৳${finalPrice}</p><del class="text-[10px] text-slate-500 font-bold">৳${p.price}</del></div><span class="text-yellow-500 text-[10px] font-black bg-yellow-500/10 px-2 py-1 rounded"><i class="fa-solid fa-star"></i> 5.0</span></div>`;
+                    flashBadge = `<div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-[0_0_10px_rgba(220,38,38,0.8)] z-10 animate-pulse">FLASH SALE -${flashDiscount}%</div>`;
+                }
+
                 let btnHtml = p.stock <= 0 
                     ? `<button disabled class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-black uppercase text-xs cursor-not-allowed border border-red-500/30">Sold Out</button>`
-                    : `<div class="flex gap-2"><button onclick="addToCartUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-1 bg-[var(--bg)] border border-[var(--border)] hover:border-blue-500 text-blue-500 py-3 rounded-xl font-black transition-colors active:scale-95"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNowUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black uppercase text-xs transition-transform active:scale-95 shadow-lg"><i class="fa-solid fa-bolt mr-1"></i> Buy</button></div>`;
+                    : `<div class="flex gap-2"><button onclick="addToCartUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${finalPrice})" class="flex-1 bg-[var(--bg)] border border-[var(--border)] hover:border-blue-500 text-blue-500 py-3 rounded-xl font-black transition-colors active:scale-95"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNowUI(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${finalPrice})" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black uppercase text-xs transition-transform active:scale-95 shadow-lg"><i class="fa-solid fa-bolt mr-1"></i> Buy</button></div>`;
                 
                 let mainImage = (p.imageIds && p.imageIds.length > 0) ? p.imageIds[0] : p.imageId;
                 let imgHtml = mainImage ? `<img src="/api/photo/${mainImage}" onclick="openQuickView(${p.id})" onerror="this.src='https://placehold.co/400x400'" class="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex justify-center items-center"><i class="fa-solid fa-box text-5xl text-slate-400"></i></div>`;
@@ -325,21 +298,19 @@
 
                 return `
                 <div class="product-card p-4 flex flex-col justify-between relative group rounded-2xl animate-slide-up shadow-sm" style="animation-delay: ${animDelay}s; opacity: 0;">
-                    <div class="absolute top-6 right-6 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    ${flashBadge}
+                    <div class="absolute top-16 right-6 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button onclick="toggleWishlist(${p.id})" class="w-8 h-8 rounded-full flex justify-center items-center shadow border transition-colors ${wClass}"><i class="fa-solid fa-heart text-xs"></i></button>
                         <button onclick="shareProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')" class="w-8 h-8 bg-[var(--card)] rounded-full flex justify-center items-center shadow border border-[var(--border)] text-blue-500 hover:text-white hover:bg-blue-500 transition-colors"><i class="fa-solid fa-share-nodes text-xs"></i></button>
                     </div>
                     <div>
                         <div class="w-full h-48 bg-[var(--bg)] rounded-xl mb-4 overflow-hidden relative shadow-inner">
                             ${imgHtml}
-                            <div class="absolute top-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-white text-[9px] font-bold"><i class="fa-regular fa-eye text-emerald-400 mr-1"></i> ${viewers} viewing</div>
+                            <div class="absolute top-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-white text-[9px] font-bold z-10"><i class="fa-regular fa-eye text-emerald-400 mr-1"></i> ${viewers} viewing</div>
                         </div>
                         <h3 class="text-lg font-black mb-1 leading-tight text-[var(--text)] cursor-pointer hover:text-blue-500 transition-colors" onclick="openQuickView(${p.id})">${p.name}</h3>
                         <p class="text-xs text-slate-500 mb-3 line-clamp-1">${p.abilities}</p>
-                        <div class="flex justify-between items-center mb-3">
-                            <p class="text-xl font-black text-emerald-500">৳${p.price}</p>
-                            <span class="text-yellow-500 text-[10px] font-black bg-yellow-500/10 px-2 py-1 rounded"><i class="fa-solid fa-star"></i> 5.0</span>
-                        </div>
+                        ${priceHtml}
                         ${variantHtml}
                     </div>
                     ${btnHtml}
@@ -416,7 +387,6 @@
             }
         }
 
-        // 🔥 NEW: Contact Support Function
         function openContact() {
             Swal.fire({
                 title: 'Contact Support',
@@ -431,14 +401,9 @@
                         </a>
                     </div>
                 `,
-                showConfirmButton: false,
-                showCloseButton: true,
-                ...swalDark
+                showConfirmButton: false, showCloseButton: true, ...swalDark
             });
         }
-
-        function openGallery(productId) { const p = allProducts.find(x => x.id === productId); if(!p || !p.imageIds || p.imageIds.length === 0) return; const modal = document.getElementById('imageModal'); const mainImg = document.getElementById('galleryMainImg'); const thumbs = document.getElementById('galleryThumbnails'); mainImg.src = `/api/photo/${p.imageIds[0]}`; thumbs.innerHTML = p.imageIds.map(id => `<img src="/api/photo/${id}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">`).join(''); modal.classList.replace('hidden', 'flex'); }
-        function closeGallery() { document.getElementById('imageModal').classList.replace('flex', 'hidden'); }
 
         async function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
@@ -479,7 +444,7 @@
         function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 flex justify-between items-center text-white shadow-md transition-colors duration-300'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.replace('bg-[#f37021]','bg-[#e2136e]'); header.classList.add('bg-[#e2136e]'); btn.classList.add('bg-[#e2136e]', 'hover:bg-[#b30b54]'); icon.className = 'fa-solid fa-paper-plane mr-2'; } else if(method === 'nagad') { num = '01846849460'; header.classList.replace('bg-[#e2136e]','bg-[#f37021]'); header.classList.add('bg-[#f37021]'); btn.classList.add('bg-[#f37021]', 'hover:bg-[#d65b15]'); icon.className = 'fa-solid fa-fire mr-2'; } document.getElementById('fNumber').innerText = num; }
         function copyNumber() { navigator.clipboard.writeText(document.getElementById('fNumber').innerText); toast('success', 'Copied!'); }
 
-        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', ...swalDark}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire('Error', 'TrxID exists', 'error'); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
+        document.getElementById('depositForm').addEventListener('submit', async (e) => { e.preventDefault(); const method = document.querySelector('input[name="method"]:checked').value; const amountBdt = parseFloat(document.getElementById('fBdt').value); const senderNumber = document.getElementById('fSender').value; const trxId = document.getElementById('fTrx').value; if(amountBdt <= 0) return; const btn = document.getElementById('fBtn'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; try { const res = await fetch('/api/deposit', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: user.id, method, amountBdt, senderNumber, trxId }) }); if((await res.json()).success) { closeFund(); Swal.fire({title:'Request Sent!', text:'Track it in Profile > Wallet.', icon:'success', background:'var(--card)', color:'var(--text)'}).then(() => openProfileDashboard('funds')); document.getElementById('depositForm').reset(); document.getElementById('fBdt').value = ''; } else Swal.fire('Error', 'TrxID exists', 'error'); } catch(e) {} btn.innerHTML = 'SUBMIT REQUEST'; });
 
         window.logout = function() { localStorage.removeItem('user'); localStorage.removeItem('wishlist'); document.body.style.opacity=0; setTimeout(()=>location.href='/login', 300); }
         document.addEventListener('DOMContentLoaded', init);
