@@ -29,6 +29,7 @@
         .badge-basic { background: linear-gradient(135deg, #94a3b8, #475569, #94a3b8); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
         
+        /* 🔥 NEW STATUS BADGES */
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .st-pending { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid #facc15; }
         .st-received { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #60a5fa; }
@@ -37,6 +38,9 @@
         
         .variant-select { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px; rounded: 8px; outline: none; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; }
         .variant-select:focus { border-color: #3b82f6; }
+        
+        .theme-bkash { background: linear-gradient(135deg, #e2136e, #b30b54); } .theme-nagad { background: linear-gradient(135deg, #f37021, #d65b15); }
+        .peer-checked\:border-bkash:checked ~ div { border-color: #e2136e; background-color: rgba(226, 19, 110, 0.1); color: #e2136e; } .peer-checked\:border-nagad:checked ~ div { border-color: #f37021; background-color: rgba(243, 112, 33, 0.1); color: #f37021; }
     </style>
 </head>
 <body>
@@ -71,6 +75,7 @@
 
     <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full md:w-[450px] bg-[#0b1121] border-l border-slate-800 z-[70] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl">
         <div class="p-6 border-b border-slate-800 flex justify-between items-center"><h2 class="text-2xl font-black"><i class="fa-solid fa-cart-shopping mr-2 text-blue-500"></i> My Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-800 rounded-full hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
+        
         <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
             <div id="cartItemsContainer" class="space-y-4 mb-6"></div>
             <div id="addressSection" class="hidden bg-slate-900 border border-slate-800 p-5 rounded-2xl">
@@ -82,6 +87,7 @@
                 </div>
             </div>
         </div>
+
         <div class="p-6 border-t border-slate-800 bg-slate-900/50">
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-400 text-sm">Subtotal:</span><span id="cartTotal" class="font-bold text-white text-lg">৳0</span></div>
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-800"><span class="font-bold text-slate-400 text-sm">Advance Booking:</span><span id="cartAdvance" class="font-black text-emerald-400 text-lg">- ৳0</span></div>
@@ -118,12 +124,37 @@
     <div id="fundModal" class="fixed inset-0 bg-black/80 hidden z-[90] justify-center items-center px-4 backdrop-blur-sm transition-all duration-300">
         <div class="bg-slate-900 rounded-[32px] w-full max-w-md shadow-2xl relative overflow-hidden transition-all duration-500" id="fundModalBox">
             <div id="fundHeader" class="p-6 transition-all duration-500 flex justify-between items-center text-white shadow-md bg-slate-800"><h2 class="text-2xl font-black flex items-center gap-2"><i id="fundIcon" class="fa-solid fa-wallet"></i> <span>Add Balance</span></h2><button onclick="closeFund()" class="w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
-            <form id="depositForm" class="p-6 space-y-5 bg-slate-900">
-                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-3">Select Method</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-3 text-center border-2 border-slate-700 rounded-xl font-black text-slate-500 peer-checked:border-bkash text-xs uppercase tracking-widest">bKash</div></label><label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-3 text-center border-2 border-slate-700 rounded-xl font-black text-slate-500 peer-checked:border-nagad text-xs uppercase tracking-widest">Nagad</div></label></div></div>
-                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Add Balance (৳)</label><input type="number" id="fBdt" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500 text-emerald-400" placeholder="0"></div>
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700"><p class="text-xs font-black text-slate-400 uppercase mb-2">Send Money To:</p><div onclick="copyNumber()" class="bg-slate-900 border border-slate-700 px-4 py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 group"><span id="fNumber" class="font-mono text-xl font-black text-white tracking-widest">01846849460</span><i class="fa-regular fa-copy text-slate-500 group-hover:text-blue-500"></i></div></div>
-                <div class="space-y-3"><input type="text" id="fSender" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500" placeholder="Sender Number"><input type="text" id="fTrx" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 font-black uppercase tracking-widest outline-none focus:border-blue-500" placeholder="TrxID"></div>
-                <button type="submit" id="fBtn" class="w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all">Submit Request</button>
+            <form id="depositForm" class="p-6 space-y-6 bg-slate-900">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">Select Method</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-4 text-center border-2 border-slate-700 rounded-2xl font-black text-slate-500 peer-checked:border-bkash text-sm uppercase tracking-widest transition-all">bKash</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-4 text-center border-2 border-slate-700 rounded-2xl font-black text-slate-500 peer-checked:border-nagad text-sm uppercase tracking-widest transition-all">Nagad</div></label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Amount to Add (৳)</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none"><span class="text-emerald-500 font-black text-xl">৳</span></div>
+                        <input type="number" id="fBdt" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl pl-10 pr-4 py-4 font-black text-2xl outline-none focus:border-blue-500 text-white shadow-inner" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                    <p class="text-xs font-black text-slate-400 uppercase mb-3 tracking-widest">Send Money To:</p>
+                    <div onclick="copyNumber()" class="bg-slate-900 border border-slate-700 px-5 py-4 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 group transition-colors shadow-inner">
+                        <span id="fNumber" class="font-mono text-2xl font-black text-white tracking-widest">01846849460</span>
+                        <i class="fa-regular fa-copy text-slate-500 group-hover:text-blue-500 text-xl transition-colors"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <input type="text" id="fSender" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-4 font-bold outline-none focus:border-blue-500 text-white placeholder-slate-500" placeholder="Your Sender Number">
+                    <input type="text" id="fTrx" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-4 font-black uppercase tracking-widest outline-none focus:border-blue-500 text-blue-400 placeholder-slate-500" placeholder="Transaction ID (TrxID)">
+                </div>
+
+                <button type="submit" id="fBtn" class="w-full text-white font-black py-5 rounded-2xl uppercase tracking-[0.2em] transition-all shadow-lg text-lg">Submit Request</button>
             </form>
         </div>
     </div>
@@ -277,16 +308,6 @@
             } else Swal.fire({title:'Booking Failed', text: data.error, icon:'error', ...swalDark});
         }
 
-        document.getElementById('fileAvatar').addEventListener('change', function(e) {
-            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
-            reader.onload = function(event) { const img = new Image(); img.onload = function() {
-                    const canvas = document.createElement('canvas'); const MAX_W = 256; const MAX_H = 256; let w = img.width; let h = img.height;
-                    if(w>h){if(w>MAX_W){h*=MAX_W/w; w=MAX_W;}}else{if(h>MAX_H){w*=MAX_H/h; h=MAX_H;}} canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
-                    base64Avatar = canvas.toDataURL('image/jpeg', 0.8); document.getElementById('settingAvatarPreview').innerHTML = `<img src="${base64Avatar}" class="w-full h-full object-cover">`;
-                }; img.src = event.target.result;
-            }; reader.readAsDataURL(file);
-        });
-
         async function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
             const uName = user.name || user.firstName || 'User'; base64Avatar = user.avatar || '';
@@ -298,6 +319,7 @@
             
             document.getElementById('profileModal').classList.replace('hidden', 'flex'); switchProfTab(defaultTab);
             
+            // 🔥 REAL-TIME STATUS BADGE UPDATE
             fetch('/api/library/' + user.id).then(r=>r.json()).then(data => { 
                 document.getElementById('pOrdersList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No orders yet.</p>' : data.map(p => {
                     let sClass = '';
@@ -320,6 +342,8 @@
 
         function openFund() { if(!user) return location.href='/login'; document.getElementById('fundModal').classList.replace('hidden', 'flex'); document.getElementById('fBdt').value = ''; updateFundUI(); }
         function closeFund() { document.getElementById('fundModal').classList.replace('flex', 'hidden'); }
+        
+        // 🔥 ADD FUND UI REFRESHED
         function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 transition-all duration-500 flex justify-between items-center text-white shadow-md'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.add('theme-bkash'); btn.classList.add('theme-bkash'); icon.className = 'fa-solid fa-paper-plane'; } else if(method === 'nagad') { num = '01846849460'; header.classList.add('theme-nagad'); btn.classList.add('theme-nagad'); icon.className = 'fa-solid fa-fire'; } document.getElementById('fNumber').innerText = num; }
         function copyNumber() { navigator.clipboard.writeText(document.getElementById('fNumber').innerText); toast('success', 'Copied!'); }
 
