@@ -31,7 +31,7 @@ model User {
   refCode            String?    @unique 
   referredBy         String?    
   referralRewardPaid Boolean    @default(false)
-  refCount           Int        @default(0)
+  refCount           Int        @default(0) // Used for User Badges
   ipAddress          String?    
   isVip              Boolean    @default(false)
   vipExpiry          DateTime?
@@ -48,7 +48,6 @@ model User {
   createdAt          DateTime   @default(now())
 }
 
-// 🔥 UPDATED RIDER MODEL WITH AVATAR & BADGE STATS
 model Rider {
   id            Int      @id @default(autoincrement())
   name          String
@@ -56,7 +55,10 @@ model Rider {
   phone         String
   password      String
   avatar        String?  
-  deliveryCount Int      @default(0) 
+  deliveryCount Int      @default(0) // Used for Rider Badges
+  lastLat       Float?   // 🔥 Rider GPS Latitude
+  lastLng       Float?   // 🔥 Rider GPS Longitude
+  lastLocUpdate DateTime? // 🔥 Last time location was synced
   isVerified    Boolean  @default(false)
   verifyToken   String?
   createdAt     DateTime @default(now())
