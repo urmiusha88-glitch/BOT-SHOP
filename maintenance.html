@@ -10,26 +10,25 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050b14; color: #e2e8f0; overflow: hidden; }
         
-        /* Floating Blobs */
         .blob { position: absolute; filter: blur(90px); opacity: 0.3; animation: float 15s infinite alternate ease-in-out; pointer-events: none; }
         .blob-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: #3b82f6; }
         .blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: #8b5cf6; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
 
-        /* Animations */
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide-up { animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
         .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
-<body class="h-screen w-full flex items-center justify-center p-4">
+<body class="h-screen w-full flex items-center justify-center p-4 relative">
 
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
 
-    <div class="glass-panel max-w-2xl w-full p-10 sm:p-16 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] text-center relative z-10 animate-slide-up border-t border-blue-500/30">
-        <div class="w-24 h-24 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.6)] text-white mb-8">
+    <div class="glass-panel max-w-2xl w-full p-10 sm:p-16 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] text-center relative z-10 animate-slide-up border-t border-blue-500/30 flex flex-col items-center">
+        
+        <div class="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.6)] text-white mb-8">
             <i class="fa-solid fa-gear text-5xl animate-spin" style="animation-duration: 3s;"></i>
         </div>
         
@@ -39,7 +38,7 @@
             AURA STORE is currently undergoing a scheduled core framework optimization to serve you better. We'll be back online shortly!
         </p>
 
-        <div class="inline-flex items-center bg-slate-900/80 px-6 py-3 rounded-full border border-slate-700">
+        <div class="inline-flex items-center bg-slate-900/80 px-6 py-3 rounded-full border border-slate-700 mb-8">
             <span class="flex h-3 w-3 relative mr-3">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
@@ -47,11 +46,22 @@
             <span class="text-sm font-black text-emerald-400 uppercase tracking-widest">Engineers at work</span>
         </div>
         
-        <div class="mt-10 pt-6 border-t border-slate-800/50">
-            <button onclick="location.reload()" class="text-slate-500 hover:text-white font-bold transition-colors text-sm">
+        <div class="w-full pt-8 border-t border-slate-800/50">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Contact Support</p>
+            <div class="flex justify-center gap-6">
+                <a href="https://t.me/minato_namikaze143" target="_blank" class="w-14 h-14 bg-[#25a3e1]/10 text-[#25a3e1] hover:bg-[#25a3e1] hover:text-white rounded-2xl flex items-center justify-center text-2xl transition-all shadow-[0_0_15px_rgba(37,163,225,0.2)] hover:shadow-[0_0_25px_rgba(37,163,225,0.6)] transform hover:-translate-y-1">
+                    <i class="fa-brands fa-telegram"></i>
+                </a>
+                <a href="https://www.facebook.com/yours.ononto" target="_blank" class="w-14 h-14 bg-[#1877f2]/10 text-[#1877f2] hover:bg-[#1877f2] hover:text-white rounded-2xl flex items-center justify-center text-2xl transition-all shadow-[0_0_15px_rgba(24,119,242,0.2)] hover:shadow-[0_0_25px_rgba(24,119,242,0.6)] transform hover:-translate-y-1">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+            </div>
+            
+            <button onclick="location.reload()" class="text-slate-500 hover:text-white font-bold transition-colors text-sm mt-8">
                 <i class="fa-solid fa-rotate-right mr-1"></i> Try Reloading
             </button>
         </div>
+
     </div>
 
 </body>
