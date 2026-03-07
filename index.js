@@ -8,9 +8,9 @@ const crypto = require('crypto');
 const prisma = new PrismaClient();
 
 // 🔥 MULTI-BOT ARCHITECTURE
-const mainBot = new Telegraf(process.env.BOT_TOKEN); // For /addproduct
-const logBot = process.env.LOG_BOT_TOKEN ? new Telegraf(process.env.LOG_BOT_TOKEN) : mainBot; // For Orders
-const feedbackBot = process.env.FEEDBACK_BOT_TOKEN ? new Telegraf(process.env.FEEDBACK_BOT_TOKEN) : logBot; // For Feedback
+const mainBot = new Telegraf(process.env.BOT_TOKEN);
+const logBot = process.env.LOG_BOT_TOKEN ? new Telegraf(process.env.LOG_BOT_TOKEN) : mainBot;
+const feedbackBot = process.env.FEEDBACK_BOT_TOKEN ? new Telegraf(process.env.FEEDBACK_BOT_TOKEN) : logBot;
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -29,7 +29,6 @@ app.use((req, res, next) => {
 
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
-// --- MAIN BOT LOGIC (/addproduct) ---
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('🛍️ 1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in BDT (৳)?'); return ctx.wizard.next(); },
@@ -48,10 +47,9 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   }
 );
 const stage = new Scenes.Stage([addProductWizard]); mainBot.use(session()); mainBot.use(stage.middleware());
-mainBot.start((ctx) => { ctx.reply(`🌟 *AURA MAIN BOT*\nUse /addproduct to add items.\nYour ID: \`${ctx.from.id}\``, { parse_mode: 'Markdown' }); });
+mainBot.start((ctx) => { ctx.reply(`🌟 *AURA MAIN BOT*\nUse /addproduct to add items.`, { parse_mode: 'Markdown' }); });
 mainBot.command('addproduct', (ctx) => { if (ctx.from.id.toString() !== ADMIN_ID) return; ctx.scene.enter('ADD_PRODUCT_SCENE'); });
 
-// --- LOG BOT LOGIC ---
 async function processDeposit(id, action) {
   const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } });
   if (dep && dep.status === 'PENDING') {
@@ -75,35 +73,36 @@ logBot.action(/deliver_(.+)/, (ctx) => updateOrderTelegram(ctx, 'DELIVERED', '�
 const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-color: #0b1121; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; font-family: Arial, sans-serif;"><div style="background-color: #2563eb; padding: 20px; text-align: center;"><h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">AURA STORE</h1></div><div style="padding: 30px; color: #e2e8f0;">`;
 const emailFooter = `</div><div style="background-color: #0f172a; padding: 15px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE.</p></div></div>`;
 
-// 🔥 FAST FEEDBACK API (No Await)
-app.post('/api/feedback', async (req, res) => {
+// 🔥 FIXED: INSTANT FEEDBACK API (No hanging/loading)
+app.post('/api/feedback', (req, res) => {
     const { userId, subject, message } = req.body;
-    try {
-        const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
-        if (!user) return res.status(403).json({ error: 'Unauthorized' });
+    
+    // 1. Send success response to user INSTANTLY
+    res.json({ success: true });
 
-        const targetEmail = process.env.MAIN_EMAIL || process.env.EMAIL_USER;
-
-        // Fire and Forget Email
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-            const mailOptions = {
-                from: `"AURA FEEDBACK" <${process.env.EMAIL_USER}>`,
-                to: targetEmail,
-                subject: `Feedback: ${subject}`,
-                html: `<div style="font-family: Arial; padding: 20px; background: #0f172a; color: #fff; border-radius: 10px; border: 1px solid #1e293b;"><h2 style="color: #3b82f6; margin-top: 0;">New User Feedback</h2><p><strong>User:</strong> ${user.firstName}</p><p><strong>Email:</strong> ${user.email}</p><p><strong>Subject:</strong> ${subject}</p><hr style="border-color: #334155; margin: 20px 0;"><p style="white-space: pre-wrap; font-size: 15px; color: #cbd5e1; line-height: 1.6;">${message}</p></div>`
-            };
-            transporter.sendMail(mailOptions).catch(e => console.error("Email error:", e));
-        }
-
-        // Fire and Forget Telegram
-        if (ADMIN_ID) {
-            const tgMsg = `📢 *NEW FEEDBACK*\n\n👤 *User:* ${user.firstName} (${user.email})\n📌 *Subject:* ${subject}\n\n📝 *Details:*\n${message}`;
-            feedbackBot.telegram.sendMessage(ADMIN_ID, tgMsg, { parse_mode: 'Markdown' }).catch(e => console.error("TG error:", e));
-        }
-
-        // Instantly return success to unblock the UI
-        res.json({ success: true });
-    } catch (e) { res.status(500).json({ success: false, error: 'Failed' }); }
+    // 2. Process Emails and Telegram in Background (Async)
+    (async () => {
+        try {
+            const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
+            if (!user) return;
+            const targetEmail = process.env.MAIN_EMAIL || process.env.EMAIL_USER;
+            
+            // Email
+            if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+                const mailOptions = {
+                    from: `"AURA FEEDBACK" <${process.env.EMAIL_USER}>`, to: targetEmail, subject: `Feedback: ${subject}`,
+                    html: `<div style="font-family: Arial; padding: 20px; background: #0f172a; color: #fff; border-radius: 10px; border: 1px solid #1e293b;"><h2 style="color: #3b82f6; margin-top: 0;">New User Feedback</h2><p><strong>User:</strong> ${user.firstName}</p><p><strong>Email:</strong> ${user.email}</p><p><strong>Subject:</strong> ${subject}</p><hr style="border-color: #334155; margin: 20px 0;"><p style="white-space: pre-wrap; font-size: 15px; color: #cbd5e1; line-height: 1.6;">${message}</p></div>`
+                };
+                transporter.sendMail(mailOptions).catch(()=>{});
+            }
+            
+            // Telegram Bot
+            if (ADMIN_ID) {
+                const tgMsg = `📢 *NEW FEEDBACK*\n\n👤 *User:* ${user.firstName} (${user.email})\n📌 *Subject:* ${subject}\n\n📝 *Details:*\n${message}`;
+                feedbackBot.telegram.sendMessage(ADMIN_ID, tgMsg, { parse_mode: 'Markdown' }).catch(()=>{});
+            }
+        } catch(e) {}
+    })();
 });
 
 // --- CUSTOMER APIs ---
@@ -188,6 +187,7 @@ app.post('/api/checkout', async (req, res) => {
     } catch(e) { res.status(500).json({ success: false, error: 'Server Error' }); }
 });
 
+// --- APIs ---
 app.get('/api/notices', async (req, res) => res.json(await prisma.notice.findMany({ where: { isActive: true } }))); 
 app.get('/api/products', async (req, res) => res.json(await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }))); 
 app.get('/api/photo/:fileId', async (req, res) => { try { const link = await mainBot.telegram.getFileLink(req.params.fileId); res.redirect(link.href); } catch(e) { res.status(404).send('Not found'); } });
@@ -197,6 +197,7 @@ app.get('/api/library/:userId', async (req, res) => { res.json(await prisma.purc
 app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
 app.post('/api/deposit', async (req, res) => { const { userId, method, amountBdt, senderNumber, trxId } = req.body; try { const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } }); const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(ADMIN_ID) logBot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ৳${amountBdt}\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] } }).catch(e=>{}); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); } });
 
+// --- ROUTING ---
 app.get('/manifest.json', (req, res) => res.sendFile(__dirname + '/manifest.json'));
 app.get('/sw.js', (req, res) => res.sendFile(__dirname + '/sw.js'));
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
@@ -204,7 +205,6 @@ app.get('/login', (req, res) => res.sendFile(__dirname + '/login.html'));
 app.get('/admin', (req, res) => res.sendFile(__dirname + '/admin.html')); 
 app.get('/rider', (req, res) => res.sendFile(__dirname + '/rider.html')); 
 
-// 🔥 START BOTS
 mainBot.launch();
 if(process.env.LOG_BOT_TOKEN) { logBot.launch(); console.log("Log Bot Active"); }
 if(process.env.FEEDBACK_BOT_TOKEN) { feedbackBot.launch(); console.log("Feedback Bot Active"); }
