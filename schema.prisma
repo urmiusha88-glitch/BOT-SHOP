@@ -9,6 +9,7 @@ datasource db {
 model Product {
   id        Int        @id @default(autoincrement())
   name      String
+  category  String     @default("Premium") // 🔥 NEW: Category System
   price     Float      
   abilities String     
   imageIds  String[]   
@@ -28,6 +29,8 @@ model User {
   firstName          String?
   country            String     @default("BD") 
   balanceBdt         Float      @default(0.0) 
+  loyaltyPoints      Int        @default(0)    // 🔥 NEW: Loyalty VIP System
+  savedAddress       String?                   // 🔥 NEW: Address Book
   refCode            String?    @unique 
   referredBy         String?    
   referralRewardPaid Boolean    @default(false)
@@ -56,6 +59,8 @@ model Rider {
   password      String
   avatar        String?  
   deliveryCount Int      @default(0) 
+  walletBalance Float    @default(0.0) // 🔥 NEW: Rider Earning Wallet
+  totalEarned   Float    @default(0.0) // 🔥 NEW: Total Income Track
   lastLat       Float?   
   lastLng       Float?   
   lastLocUpdate DateTime? 
@@ -67,7 +72,7 @@ model Rider {
 model Promo {
   id        Int      @id @default(autoincrement())
   code      String   @unique
-  discount  Int      
+  discount  Int      // % discount
   isActive  Boolean  @default(true)
 }
 
@@ -94,6 +99,7 @@ model Purchase {
   priceTotal    Float    
   advancePaid   Float    
   dueCod        Float    
+  promoApplied  String?  // 🔥 NEW: Promo Tracking
   phone         String?  
   street        String?  
   city          String?  
@@ -111,7 +117,6 @@ model Notice {
   createdAt DateTime @default(now())
 }
 
-// 🔥 NEW: FLASH SALE MODEL
 model FlashSale {
   id              Int      @id @default(1)
   isActive        Boolean  @default(false)
