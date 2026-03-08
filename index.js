@@ -75,16 +75,19 @@ const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-co
 const emailFooter = `</div><div style="background-color: #0f172a; padding: 15px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE.</p></div></div>`;
 
 // ================= EXPRESS APIs =================
+app.post('/api/chat', async (req, res) => {
+    const { message } = req.body;
+    if (!process.env.DEEPSEEK_API_KEY) return res.json({ reply: "Bhaiya, backend e DeepSeek API key setup kora nai. Please admin ke janan!" });
+    const systemPrompt = `You are a friendly Customer Support AI for "AURA STORE". Reply in naturally conversational Banglish or Bengali. Keep answers very concise, helpful, and polite. Store Knowledge: We sell premium physical collections. Delivery Time: Inside Dhaka 2-3 days, Outside Dhaka 3-5 days. Payment System: Customers MUST pay exactly ৳200 advance via bKash or Nagad. Contact Support: Telegram @minato_namikaze143 or Facebook fb.com/yours.ononto.`;
+    try {
+        const response = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}` }, body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: message }] }) });
+        const data = await response.json(); res.json({ reply: data.choices[0].message.content });
+    } catch (error) { res.json({ reply: "Dukkito! Amar server e ektu shomossha hocche. Apni ektu pore abar try korun." }); }
+});
+
 app.get('/api/flashsale', async (req, res) => { const fs = await prisma.flashSale.findFirst(); res.json(fs || { isActive: false }); });
 app.post('/api/admin/flashsale', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const { isActive, endTime, discountPercent } = req.body; let fs = await prisma.flashSale.findFirst(); if (fs) { await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive, endTime: new Date(endTime), discountPercent: parseInt(discountPercent) }}); } else { await prisma.flashSale.create({ data: { id: 1, isActive, endTime: new Date(endTime), discountPercent: parseInt(discountPercent) }}); } res.json({ success: true }); });
-
-// 🔥 API: Validate Promo
-app.post('/api/promo/validate', async (req, res) => {
-    const { code } = req.body;
-    const promo = await prisma.promo.findUnique({ where: { code } });
-    if(promo && promo.isActive) return res.json({ success: true, discount: promo.discount });
-    return res.json({ success: false, error: 'Invalid Promo Code' });
-});
+app.post('/api/promo/validate', async (req, res) => { const { code } = req.body; const promo = await prisma.promo.findUnique({ where: { code } }); if(promo && promo.isActive) return res.json({ success: true, discount: promo.discount }); return res.json({ success: false, error: 'Invalid Promo Code' }); });
 
 app.post('/api/checkout', async (req, res) => {
     const { userId, cartItems, address, promoCode } = req.body;
@@ -92,43 +95,21 @@ app.post('/api/checkout', async (req, res) => {
       const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(user.isBanned) return res.status(403).json({ success: false, error: 'Account Banned!' });
       const ADVANCE_FEE = 200; if(user.balanceBdt < ADVANCE_FEE) return res.json({ success: false, error: 'Insufficient Balance! You need at least ৳200 advance booking money.' });
       
-      let promoDiscount = 0;
-      if (promoCode) { const prm = await prisma.promo.findUnique({where: {code: promoCode}}); if (prm && prm.isActive) promoDiscount = prm.discount; }
-
+      let promoDiscount = 0; if (promoCode) { const prm = await prisma.promo.findUnique({where: {code: promoCode}}); if (prm && prm.isActive) promoDiscount = prm.discount; }
       let total = 0; let itemsToBuy = []; let receiptItemsHtml = '';
-      for (let item of cartItems) { 
-          const prod = await prisma.product.findUnique({ where: { id: parseInt(item.id) } }); 
-          if(!prod || prod.stock <= 0) continue; 
-          let itemFinalPrice = item.price - (item.price * promoDiscount / 100);
-          total += itemFinalPrice; 
-          itemsToBuy.push({ prod, size: item.size, color: item.color, finalPrice: itemFinalPrice }); 
-          let varTxt = []; if(item.size) varTxt.push(item.size); if(item.color) varTxt.push(item.color); 
-          receiptItemsHtml += `<p style="margin: 5px 0; color: #cbd5e1;">• ${prod.name} ${varTxt.length>0 ? `[${varTxt.join(', ')}]` : ''} - <b>৳${itemFinalPrice}</b></p>`; 
-      }
-      
+      for (let item of cartItems) { const prod = await prisma.product.findUnique({ where: { id: parseInt(item.id) } }); if(!prod || prod.stock <= 0) continue; let itemFinalPrice = item.price - (item.price * promoDiscount / 100); total += itemFinalPrice; itemsToBuy.push({ prod, size: item.size, color: item.color, finalPrice: itemFinalPrice }); let varTxt = []; if(item.size) varTxt.push(item.size); if(item.color) varTxt.push(item.color); receiptItemsHtml += `<p style="margin: 5px 0; color: #cbd5e1;">• ${prod.name} ${varTxt.length>0 ? `[${varTxt.join(', ')}]` : ''} - <b>৳${itemFinalPrice}</b></p>`; }
       if(itemsToBuy.length === 0) return res.json({ success: false, error: 'Items out of stock.' });
       let actualAdvance = Math.min(ADVANCE_FEE, total); let totalDue = total - actualAdvance;
-
-      // 🔥 LOYALTY POINTS UPDATE & SAVE ADDRESS
-      const pointsEarned = Math.floor(total / 100); // 1 point for every 100 Taka
-      await prisma.user.update({ 
-          where: { id: user.id }, 
-          data: { balanceBdt: { decrement: actualAdvance }, loyaltyPoints: { increment: pointsEarned }, savedAddress: JSON.stringify(address) } 
-      });
+      const pointsEarned = Math.floor(total / 100); 
+      await prisma.user.update({ where: { id: user.id }, data: { balanceBdt: { decrement: actualAdvance }, loyaltyPoints: { increment: pointsEarned }, savedAddress: JSON.stringify(address) } });
       
       let adminOrderMsg = `📦 *NEW ORDER RECEIVED*\n\n👤 *Customer:* ${user.firstName}\n📞 *Phone:* ${address.phone}\n🏠 *Address:* ${address.street}, ${address.city} - ${address.postcode}\n\n🛒 *Items Ordered:*\n`;
       let purchaseRecords = [];
       for (let itm of itemsToBuy) { 
           let itemAdvance = actualAdvance / itemsToBuy.length; let itemDue = totalDue / itemsToBuy.length;
           let p = await prisma.purchase.create({ data: { userId: user.id, productId: itm.prod.id, selectedSize: itm.size, selectedColor: itm.color, priceTotal: itm.finalPrice, advancePaid: itemAdvance, dueCod: itemDue, promoApplied: promoCode, phone: address.phone, street: address.street, city: address.city, postcode: address.postcode, status: 'PENDING' } }); 
-          purchaseRecords.push(p.id); 
-          const updatedProd = await prisma.product.update({ where: { id: itm.prod.id }, data: { stock: { decrement: 1 } } }); 
-          
-          // 🔥 LOW STOCK BOT ALERT
-          if (updatedProd.stock <= 5 && ADMIN_ID) {
-              logBot.telegram.sendMessage(ADMIN_ID, `⚠️ *LOW STOCK ALERT*\nProduct: ${updatedProd.name}\nRemaining: ${updatedProd.stock} pcs`, { parse_mode: 'Markdown' }).catch(()=>{});
-          }
-
+          purchaseRecords.push(p.id); const updatedProd = await prisma.product.update({ where: { id: itm.prod.id }, data: { stock: { decrement: 1 } } }); 
+          if (updatedProd.stock <= 5 && ADMIN_ID) { logBot.telegram.sendMessage(ADMIN_ID, `⚠️ *LOW STOCK ALERT*\nProduct: ${updatedProd.name}\nRemaining: ${updatedProd.stock} pcs`, { parse_mode: 'Markdown' }).catch(()=>{}); }
           adminOrderMsg += `- ${itm.prod.name} [Size: ${itm.size || 'N/A'}, Color: ${itm.color || 'N/A'}] (৳${itm.finalPrice})\n`;
       }
       adminOrderMsg += `\n💰 *Total:* ৳${total}\n✅ *Advance Paid:* ৳${actualAdvance}\n🚚 *Due (COD):* ৳${totalDue}`;
@@ -151,19 +132,27 @@ app.post('/api/deposit', async (req, res) => { const { userId, method, amountBdt
 // --- RIDER APIs ---
 app.post('/api/rider/register', async (req, res) => { try { const { name, email, phone, password } = req.body; const verifyToken = crypto.randomBytes(20).toString('hex'); await prisma.rider.create({ data: { name, email, phone, password, verifyToken, isVerified: true } }); res.json({ success: true, message: 'Rider Added' }); } catch(e) { res.status(400).json({ success: false, error: 'Email exists.' }); } });
 app.post('/api/rider/login', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { email: req.body.email } }); if (rider && rider.password === req.body.password) { res.json({ success: true, rider: { id: rider.id } }); } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); } } catch(e) { res.status(500).json({ success: false }); } });
-app.post('/api/rider/me', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(rider) res.json({ success: true, rider: { id: rider.id, name: rider.name, email: rider.email, phone: rider.phone, avatar: rider.avatar, deliveryCount: rider.deliveryCount, walletBalance: rider.walletBalance } }); else res.json({ success: false }); } catch(e) { res.json({ success: false }); } });
+app.post('/api/rider/me', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(rider) res.json({ success: true, rider: { id: rider.id, name: rider.name, email: rider.email, phone: rider.phone, avatar: rider.avatar, deliveryCount: rider.deliveryCount, walletBalance: rider.walletBalance, totalEarned: rider.totalEarned } }); else res.json({ success: false }); } catch(e) { res.json({ success: false }); } });
 app.post('/api/rider/update', async (req, res) => { const { riderId, email, password, avatar } = req.body; try { const data = {}; if (email) data.email = email; if (password) data.password = password; if (avatar !== undefined) data.avatar = avatar; await prisma.rider.update({ where: { id: parseInt(riderId) }, data }); res.json({ success: true }); } catch(e) { res.json({ success: false }); } });
 app.post('/api/rider/orders', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.status(403).json({ error: 'Unauthorized' }); const orders = await prisma.purchase.findMany({ where: { status: 'SHIPPED' }, include: { user: true, product: true }, orderBy: { createdAt: 'asc' } }); res.json({ success: true, orders }); } catch(e) { res.json({ success: false }); } });
 app.post('/api/rider/history', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.json({success: false}); const history = await prisma.purchase.findMany({ where: { status: 'DELIVERED', deliveredBy: rider.name }, include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); res.json({ success: true, history }); } catch(e) { res.json({ success: false }); } });
 app.post('/api/rider/location', async (req, res) => { try { const { riderId, lat, lng } = req.body; await prisma.rider.update({ where: { id: parseInt(riderId) }, data: { lastLat: parseFloat(lat), lastLng: parseFloat(lng), lastLocUpdate: new Date() } }); res.json({success: true}); } catch(e) { res.json({success: false}); } });
-app.post('/api/rider/send-otp', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.status(403).json({error: 'Unauthorized'}); const purchase = await prisma.purchase.findUnique({ where: { id: parseInt(req.body.orderId) }, include: { user: true, product: true } }); if (!purchase) return res.json({ success: false, error: 'Order not found' }); const otp = Math.floor(100000 + Math.random() * 900000).toString(); await prisma.purchase.update({ where: { id: purchase.id }, data: { deliveryOtp: otp } }); const varText = []; if(purchase.selectedSize) varText.push(purchase.selectedSize); if(purchase.selectedColor) varText.push(purchase.selectedColor); const varStr = varText.length > 0 ? `[${varText.join(', ')}]` : ''; const mailOptions = { from: `"AURA DELIVERY" <${process.env.EMAIL_USER}>`, to: purchase.user.email, subject: `Delivery Verification Code: ${otp}`, html: `${emailHeader}<h2 style="color: #10b981; margin-bottom: 5px;">Your Order is at your door! 📦</h2><p style="color: #94a3b8;">Our verified rider <b>${rider.name}</b> (Phone: ${rider.phone}) is waiting to deliver your order.</p><div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0;"><h3 style="color: #ffffff; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Receipt details</h3><p style="margin: 5px 0; color: #cbd5e1;">• ${purchase.product.name} ${varStr}</p><div style="margin-top: 15px; border-top: 1px dashed #334155; padding-top: 15px;"><p style="margin: 5px 0; color: #e2e8f0;">Total Price: ৳${purchase.priceTotal}</p><p style="margin: 5px 0; color: #34d399;">Advance Paid: ৳${purchase.advancePaid}</p><p style="margin: 5px 0; color: #ef4444; font-size: 18px;"><strong>Cash to Pay (COD): ৳${purchase.dueCod}</strong></p></div></div><p>Share this code with the rider to receive your product:</p><h1 style="color:#3b82f6;text-align:center;font-size:40px;letter-spacing:10px;">${otp}</h1><p style="color: #ef4444; font-size: 12px; text-align: center;">Do not share this code before receiving the product.</p>${emailFooter}` }; if(process.env.EMAIL_USER && process.env.EMAIL_PASS) await transporter.sendMail(mailOptions); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'Failed to send OTP' }); } });
-app.post('/api/rider/order/action', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.status(403).json({error: 'Unauthorized'}); const purchase = await prisma.purchase.findUnique({ where: { id: parseInt(req.body.orderId) }, include: { user: true, product: true } }); if (purchase.deliveryOtp && purchase.deliveryOtp !== req.body.otp) { return res.json({ success: false, error: 'Invalid OTP Code!' }); } 
-  // 🔥 RIDER EARNING LOGIC: Every delivery adds 50 Taka commission
-  await prisma.purchase.update({ where: { id: parseInt(req.body.orderId) }, data: { status: 'DELIVERED', deliveryOtp: null, deliveredBy: rider.name } }); 
-  await prisma.rider.update({ where: { id: rider.id }, data: { deliveryCount: { increment: 1 }, walletBalance: { increment: 50.0 }, totalEarned: { increment: 50.0 } } }); 
-  if(ADMIN_ID) { const msg = `✅ *ORDER DELIVERED*\n\n📦 *Order ID:* #${purchase.id}\n🛒 *Product:* ${purchase.product.name}\n👤 *Customer:* ${purchase.user.firstName}\n🚴 *Delivered By:* ${rider.name} (${rider.phone})\n💰 *Cash Collected:* ৳${purchase.dueCod}`; logBot.telegram.sendMessage(ADMIN_ID, msg, { parse_mode: 'Markdown' }).catch(e=>{}); } res.json({ success: true }); } catch(e) { res.json({ success: false }); } });
 
-// Admin APIs
+// 🔥 NEW: RIDER LEADERBOARD API
+app.get('/api/rider/leaderboard', async (req, res) => {
+    try {
+        const topRiders = await prisma.rider.findMany({ 
+            orderBy: { deliveryCount: 'desc' }, 
+            take: 10, 
+            select: { id: true, name: true, deliveryCount: true, avatar: true } 
+        });
+        res.json({ success: true, leaderboard: topRiders });
+    } catch(e) { res.json({ success: false }); }
+});
+
+app.post('/api/rider/send-otp', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.status(403).json({error: 'Unauthorized'}); const purchase = await prisma.purchase.findUnique({ where: { id: parseInt(req.body.orderId) }, include: { user: true, product: true } }); if (!purchase) return res.json({ success: false, error: 'Order not found' }); const otp = Math.floor(100000 + Math.random() * 900000).toString(); await prisma.purchase.update({ where: { id: purchase.id }, data: { deliveryOtp: otp } }); const varText = []; if(purchase.selectedSize) varText.push(purchase.selectedSize); if(purchase.selectedColor) varText.push(purchase.selectedColor); const varStr = varText.length > 0 ? `[${varText.join(', ')}]` : ''; const mailOptions = { from: `"AURA DELIVERY" <${process.env.EMAIL_USER}>`, to: purchase.user.email, subject: `Delivery Verification Code: ${otp}`, html: `${emailHeader}<h2 style="color: #10b981; margin-bottom: 5px;">Your Order is at your door! 📦</h2><p style="color: #94a3b8;">Our verified rider <b>${rider.name}</b> (Phone: ${rider.phone}) is waiting to deliver your order.</p><div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0;"><h3 style="color: #ffffff; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Receipt details</h3><p style="margin: 5px 0; color: #cbd5e1;">• ${purchase.product.name} ${varStr}</p><div style="margin-top: 15px; border-top: 1px dashed #334155; padding-top: 15px;"><p style="margin: 5px 0; color: #e2e8f0;">Total Price: ৳${purchase.priceTotal}</p><p style="margin: 5px 0; color: #34d399;">Advance Paid: ৳${purchase.advancePaid}</p><p style="margin: 5px 0; color: #ef4444; font-size: 18px;"><strong>Cash to Pay (COD): ৳${purchase.dueCod}</strong></p></div></div><p>Share this code with the rider to receive your product:</p><h1 style="color:#3b82f6;text-align:center;font-size:40px;letter-spacing:10px;">${otp}</h1><p style="color: #ef4444; font-size: 12px; text-align: center;">Do not share this code before receiving the product.</p>${emailFooter}` }; if(process.env.EMAIL_USER && process.env.EMAIL_PASS) await transporter.sendMail(mailOptions); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'Failed to send OTP' }); } });
+app.post('/api/rider/order/action', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.status(403).json({error: 'Unauthorized'}); const purchase = await prisma.purchase.findUnique({ where: { id: parseInt(req.body.orderId) }, include: { user: true, product: true } }); if (purchase.deliveryOtp && purchase.deliveryOtp !== req.body.otp) { return res.json({ success: false, error: 'Invalid OTP Code!' }); } await prisma.purchase.update({ where: { id: parseInt(req.body.orderId) }, data: { status: 'DELIVERED', deliveryOtp: null, deliveredBy: rider.name } }); await prisma.rider.update({ where: { id: rider.id }, data: { deliveryCount: { increment: 1 }, walletBalance: { increment: 50.0 }, totalEarned: { increment: 50.0 } } }); if(ADMIN_ID) { const msg = `✅ *ORDER DELIVERED*\n\n📦 *Order ID:* #${purchase.id}\n🛒 *Product:* ${purchase.product.name}\n👤 *Customer:* ${purchase.user.firstName}\n🚴 *Delivered By:* ${rider.name} (${rider.phone})\n💰 *Cash Collected:* ৳${purchase.dueCod}`; logBot.telegram.sendMessage(ADMIN_ID, msg, { parse_mode: 'Markdown' }).catch(e=>{}); } res.json({ success: true }); } catch(e) { res.json({ success: false }); } });
+
 app.get('/api/admin/settings', (req, res) => { res.json({ isMaintenance }); });
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { const recentPurchases = await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); let revenue = recentPurchases.reduce((acc, p) => acc + p.advancePaid, 0); res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany(), userList: await prisma.user.findMany({ take: 50, orderBy: { createdAt: 'desc' } }), riderList: await prisma.rider.findMany({ orderBy: { createdAt: 'desc' } }), orders: recentPurchases, revenue }); });
@@ -175,20 +164,7 @@ app.delete('/api/admin/product/:id', async (req, res) => { try { await prisma.pr
 app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({ data: { text: req.body.text } }); res.json({ success: true }); });
 app.post('/api/admin/settings', (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); isMaintenance = req.body.status; res.json({ success: true }); });
 
-// 🔥 API: EXPORT ORDERS TO CSV
-app.get('/api/admin/export-orders', async (req, res) => {
-    try {
-        const orders = await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } });
-        let csv = "Order ID,Customer Name,Phone,Address,Product Name,Size,Color,Total Price,Advance Paid,Due (COD),Status,Date\n";
-        orders.forEach(o => {
-            const date = new Date(o.createdAt).toLocaleDateString();
-            csv += `"${o.id}","${o.user.firstName}","${o.phone || ''}","${o.street || ''} ${o.city || ''}","${o.product.name}","${o.selectedSize || ''}","${o.selectedColor || ''}","${o.priceTotal}","${o.advancePaid}","${o.dueCod}","${o.status}","${date}"\n`;
-        });
-        res.header('Content-Type', 'text/csv');
-        res.attachment('AURA_ORDERS.csv');
-        return res.send(csv);
-    } catch(e) { res.status(500).send("Error generating CSV"); }
-});
+app.get('/api/admin/export-orders', async (req, res) => { try { const orders = await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); let csv = "Order ID,Customer Name,Phone,Address,Product Name,Size,Color,Total Price,Advance Paid,Due (COD),Status,Date\n"; orders.forEach(o => { const date = new Date(o.createdAt).toLocaleDateString(); csv += `"${o.id}","${o.user.firstName}","${o.phone || ''}","${o.street || ''} ${o.city || ''}","${o.product.name}","${o.selectedSize || ''}","${o.selectedColor || ''}","${o.priceTotal}","${o.advancePaid}","${o.dueCod}","${o.status}","${date}"\n`; }); res.header('Content-Type', 'text/csv'); res.attachment('AURA_ORDERS.csv'); return res.send(csv); } catch(e) { res.status(500).send("Error"); } });
 
 app.get('/manifest.json', (req, res) => res.sendFile(__dirname + '/manifest.json'));
 app.get('/sw.js', (req, res) => res.sendFile(__dirname + '/sw.js'));
