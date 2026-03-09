@@ -4,8 +4,8 @@
   "description": "Aura Store Next-Gen Platform",
   "main": "index.js",
   "scripts": {
-    "postinstall": "npx prisma generate && npx prisma db push",
-    "start": "node index.js"
+    "postinstall": "npx prisma generate",
+    "start": "npx prisma db push && node index.js"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
