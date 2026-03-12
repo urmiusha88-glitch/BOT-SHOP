@@ -9,7 +9,7 @@ datasource db {
 model Product {
   id        Int        @id @default(autoincrement())
   name      String
-  category  String     @default("Premium") // 🔥 NEW: Category System
+  category  String     @default("Premium")
   price     Float      
   abilities String     
   imageIds  String[]   
@@ -29,8 +29,8 @@ model User {
   firstName          String?
   country            String     @default("BD") 
   balanceBdt         Float      @default(0.0) 
-  loyaltyPoints      Int        @default(0)    // 🔥 NEW: Loyalty VIP System
-  savedAddress       String?                   // 🔥 NEW: Address Book
+  loyaltyPoints      Int        @default(0)
+  savedAddress       String?
   refCode            String?    @unique 
   referredBy         String?    
   referralRewardPaid Boolean    @default(false)
@@ -59,20 +59,21 @@ model Rider {
   password      String
   avatar        String?  
   deliveryCount Int      @default(0) 
-  walletBalance Float    @default(0.0) // 🔥 NEW: Rider Earning Wallet
-  totalEarned   Float    @default(0.0) // 🔥 NEW: Total Income Track
+  walletBalance Float    @default(0.0) 
+  totalEarned   Float    @default(0.0) 
   lastLat       Float?   
   lastLng       Float?   
   lastLocUpdate DateTime? 
   isVerified    Boolean  @default(false)
   verifyToken   String?
+  withdraws     RiderWithdraw[] // 🔥 NEW
   createdAt     DateTime @default(now())
 }
 
 model Promo {
   id        Int      @id @default(autoincrement())
   code      String   @unique
-  discount  Int      // % discount
+  discount  Int      
   isActive  Boolean  @default(true)
 }
 
@@ -99,7 +100,7 @@ model Purchase {
   priceTotal    Float    
   advancePaid   Float    
   dueCod        Float    
-  promoApplied  String?  // 🔥 NEW: Promo Tracking
+  promoApplied  String?  
   phone         String?  
   street        String?  
   city          String?  
@@ -122,4 +123,16 @@ model FlashSale {
   isActive        Boolean  @default(false)
   endTime         DateTime @default(now())
   discountPercent Int      @default(0)
+}
+
+// 🔥 NEW RIDER WITHDRAW SYSTEM
+model RiderWithdraw {
+  id        Int      @id @default(autoincrement())
+  riderId   Int
+  rider     Rider    @relation(fields: [riderId], references: [id])
+  amount    Float
+  method    String
+  number    String
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
 }
