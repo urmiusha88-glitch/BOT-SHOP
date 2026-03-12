@@ -18,8 +18,11 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.set('trust proxy', true);
 
 const ADMIN_ID = process.env.ADMIN_ID; 
-const OWNER_EMAIL = process.env.EMAIL_USER; // Your Personal Owner Email
+
+// 🔥 OWNER EMAIL FIX: Checks MAIN_EMAIL or ADMIN_EMAIL from Railway
+const OWNER_EMAIL = process.env.MAIN_EMAIL || process.env.ADMIN_EMAIL || process.env.EMAIL_USER; 
 const OWNER_PASS = process.env.ADMIN_PASSWORD || 'Ananto01@$';
+
 let isMaintenance = false;
 
 const transporter = nodemailer.createTransport({ 
@@ -199,7 +202,7 @@ app.get('/api/store-config', async (req, res) => {
     res.json({ owner: conf, admins: admins });
 });
 
-// 🔥 LIVE CHAT AI (DEEPSEEK RESTORED)
+// Live Chat API
 app.post('/api/chat', async (req, res) => { 
     try { 
         const response = await fetch('https://api.deepseek.com/chat/completions', { 
@@ -217,8 +220,9 @@ app.post('/api/chat', async (req, res) => {
 app.post('/api/admin/login', async (req, res) => { 
     const { email, password } = req.body;
     
-    // Check if Owner
+    // 🔥 OWNER LOGIN LOGIC: Checks exact Email & Password
     if (email === OWNER_EMAIL && password === OWNER_PASS) {
+        // Sync Owner in User table for Main Website login
         const owner = await prisma.user.upsert({
             where: { email },
             update: { role: 'OWNER', password },
@@ -439,11 +443,34 @@ app.get('/api/user/:id', async (req, res) => { const user = await prisma.user.fi
 app.get('/api/library/:userId', async (req, res) => { res.json(await prisma.purchase.findMany({ where: { userId: parseInt(req.params.userId) }, include: { product: true }, orderBy: { createdAt: 'desc' } })); });
 app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
 app.post('/api/deposit', async (req, res) => { const { userId, method, amountBdt, senderNumber, trxId } = req.body; try { const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } }); const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(ADMIN_ID) logBot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ৳${amountBdt}\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] } }).catch(e=>{}); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); } });
+
 app.post('/api/register', async (req, res) => { try { const { name, email, password } = req.body; await prisma.user.create({ data: { firstName: name, email, password, refCode: generateRefCode(), isVerified: true } }); res.json({ success: true, message: 'Account created!' }); } catch(e) { res.status(400).json({ success: false, error: 'Email exists.' }); } });
 app.post('/api/login', async (req, res) => { try { const user = await prisma.user.findUnique({ where: { email: req.body.email } }); if (user && user.password === req.body.password) { if(user.isBanned) return res.status(403).json({ success: false, error: 'Account Banned' }); res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceBdt: user.balanceBdt, role: user.role, avatar: user.avatar, loyaltyPoints: user.loyaltyPoints } }); } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); } } catch(e) { res.status(500).json({ success: false }); } });
-app.post('/api/feedback', async (req, res) => { try { const { userId, subject, message } = req.body; res.json({ success: true }); if (ADMIN_ID) { const u = await prisma.user.findUnique({where:{id:parseInt(userId)}}); feedbackBot.telegram.sendMessage(ADMIN_ID, `📢 *FEEDBACK*\n👤 ${u.firstName}\n📌 ${subject}\n📝 ${message}`, { parse_mode: 'Markdown' }).catch(()=>{}); } } catch(e){} });
 
-// Direct Password Reset Page Serve
+// Main Feedback 
+app.post('/api/feedback', async (req, res) => { 
+    try { 
+        const { userId, subject, message } = req.body; 
+        res.json({ success: true }); 
+        
+        // Find owner to send feedback
+        let ownerConfig = await prisma.storeConfig.findUnique({where:{id:1}});
+        if (ADMIN_ID) { 
+            const u = await prisma.user.findUnique({where:{id:parseInt(userId)}}); 
+            feedbackBot.telegram.sendMessage(ADMIN_ID, `📢 *NEW FEEDBACK*\n\n👤 User: ${u.firstName}\n📌 Subject: ${subject}\n📝 Message:\n${message}`, { parse_mode: 'Markdown' }).catch(()=>{}); 
+        } 
+    } catch(e){} 
+});
+
+// Rider APIs
+app.post('/api/rider/login', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { email: req.body.email } }); if (rider && rider.password === req.body.password) { res.json({ success: true, rider: { id: rider.id } }); } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); } } catch(e) { res.status(500).json({ success: false }); } });
+app.post('/api/rider/me', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(rider) res.json({ success: true, rider: { id: rider.id, name: rider.name, email: rider.email, phone: rider.phone, avatar: rider.avatar, deliveryCount: rider.deliveryCount, walletBalance: rider.walletBalance, totalEarned: rider.totalEarned } }); else res.json({ success: false }); } catch(e) { res.json({ success: false }); } });
+app.post('/api/rider/orders', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.status(403).json({ error: 'Unauthorized' }); const orders = await prisma.purchase.findMany({ where: { status: { in: ['PENDING', 'RECEIVED', 'SHIPPED'] } }, include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); res.json({ success: true, orders }); } catch(e) { res.json({ success: false }); } });
+app.post('/api/rider/history', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.json({success: false}); const history = await prisma.purchase.findMany({ where: { status: 'DELIVERED', deliveredBy: rider.name }, include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); res.json({ success: true, history }); } catch(e) { res.json({ success: false }); } });
+app.post('/api/rider/location', async (req, res) => { try { const { riderId, lat, lng } = req.body; await prisma.rider.update({ where: { id: parseInt(riderId) }, data: { lastLat: parseFloat(lat), lastLng: parseFloat(lng), lastLocUpdate: new Date() } }); res.json({success: true}); } catch(e) { res.json({success: false}); } });
+app.get('/api/rider/leaderboard', async (req, res) => { try { const topRiders = await prisma.rider.findMany({ orderBy: { deliveryCount: 'desc' }, take: 10, select: { id: true, name: true, deliveryCount: true, avatar: true } }); res.json({ success: true, leaderboard: topRiders }); } catch(e) { res.json({ success: false }); } });
+
+// Direct Password Reset Page
 app.get('/reset-password', (req, res) => {
     const token = req.query.token;
     if(!token) return res.send("Invalid Link");
