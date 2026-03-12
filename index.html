@@ -5,16 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AURA STORE | Premium Physical Store</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { animation: { 'fade-in': 'fadeIn 0.4s ease-in-out' } } } }
-    </script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { animation: { 'fade-in': 'fadeIn 0.4s ease-in-out' } } } }</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; --glass: rgba(255,255,255,0.9); }
         html.dark { --bg: #050b14; --text: #e2e8f0; --card: #0f172a; --border: #1e293b; --glass: rgba(15,23,42,0.85); }
@@ -46,6 +41,8 @@
         /* 🔥 FIXED GALLERY LOGIC */
         #imageModal { display: none; }
         #galleryMainImg { max-height: 60vh; max-width: 90vw; object-fit: contain; }
+        #galleryThumbnails img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all 0.3s; }
+        #galleryThumbnails img:hover { border-color: #3b82f6; transform: scale(1.1); }
         
         /* DeepSeek Chat Window */
         #chatWindow { position: fixed; bottom: 150px; left: 20px; width: calc(100% - 40px); max-width: 350px; height: 450px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; z-index: 100000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; transform: scale(0); transform-origin: bottom left; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -59,6 +56,12 @@
 
     <div id="flashBanner" class="hidden bg-gradient-to-r from-red-600 to-rose-500 text-white text-xs font-bold py-1.5 text-center shadow-lg relative z-50 animate-fade-in"><i class="fa-solid fa-bolt text-yellow-300 mr-2"></i> FLASH SALE ENDS IN: <span id="countdownTimer" class="font-mono text-yellow-300 ml-2">00:00:00</span></div>
     
+    <div id="noticeWrapper" class="hidden ticker-wrap w-full overflow-hidden bg-gradient-to-r from-[#0f172a] to-[#1e293b] border-b border-[#3b82f6] flex items-center h-10 relative z-40">
+        <div class="bg-[#3b82f6] color-white font-black px-5 h-full flex items-center z-10 relative shadow-[5px_0_15px_rgba(0,0,0,0.5)] uppercase text-xs tracking-widest text-white"><i class="fa-solid fa-bullhorn animate-pulse text-yellow-300 mr-2"></i> UPDATES</div>
+        <div class="inline-block whitespace-nowrap pl-full animate-[tickerAnim_15s_linear_infinite] hover:animate-play-state-paused" id="noticeText"></div>
+    </div>
+    <style>@keyframes tickerAnim { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } } .ticker-item { margin-right: 50px; font-weight: bold; color: #e2e8f0; font-size: 13px; letter-spacing: 1px; display: inline-block; } .ticker-item span { color: #facc15; margin-right: 10px; }</style>
+
     <nav class="sticky top-0 z-50 w-full h-16 sm:h-20 flex items-center px-4 shadow-lg transition-colors" style="background: var(--glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);">
         <div class="max-w-7xl mx-auto w-full flex justify-between items-center">
             <div class="flex items-center gap-2 cursor-pointer group" onclick="location.reload()">
@@ -158,7 +161,7 @@
                     <div id="pAvatarContainer" class="relative inline-block mx-auto mb-4">
                         </div>
                     <div><h3 class="text-3xl font-black flex justify-center items-center flex-wrap gap-2" id="pNameContainer"></h3></div>
-                    <button onclick="window.logout()" class="text-red-500 font-bold hover:bg-red-500/10 px-6 py-3 rounded-xl transition-colors font-black uppercase tracking-widest"><i class="fa-solid fa-right-from-bracket mr-2"></i> Secure Logout</button>
+                    <button onclick="window.logout()" class="text-red-500 font-bold hover:bg-red-500/10 px-6 py-3 rounded-xl transition-colors font-black uppercase tracking-widest mt-4"><i class="fa-solid fa-right-from-bracket mr-2"></i> Secure Logout</button>
                 </div>
                 
                 <div id="sec-orders" class="hidden space-y-4"><div id="pOrdersList"></div></div>
@@ -220,6 +223,7 @@
 
         async function init() { 
             renderAuth(); 
+            // 🔥 FIXED: Notice Bug (Bypasses browser cache)
             loadNotices(); 
             if(user && user.id) { 
                 try { const res = await fetch('/api/user/' + user.id); const data = await res.json(); if(data.success) { user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); } } catch(e) {} 
@@ -227,7 +231,7 @@
             loadProducts(); 
         }
 
-        // 🔥 FETCH OWNER & ADMIN INFO (STORE SUPPORT)
+        // 🔥 FETCH OWNER INFO 
         async function openAdminInfo() {
             try {
                 Swal.fire({title: 'Loading Support Data...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
@@ -258,7 +262,7 @@
             } catch(e) { Swal.fire('Error', 'Network Error connecting to server', 'error', swalDark); }
         }
 
-        // 🔥 FIXED NOTICE BUG (Cache Bypassing)
+        // 🔥 FIXED: Notice Cache
         async function loadNotices() { 
             try { 
                 const res = await fetch('/api/notices?t=' + new Date().getTime()); 
@@ -268,13 +272,6 @@
                     document.getElementById('noticeWrapper').classList.remove('hidden'); 
                 } 
             } catch(e) {} 
-        }
-
-        // 🔥 ROLE BADGE GENERATOR
-        function getBadge(role) { 
-            if(role === 'OWNER') return '<span class="bg-gradient-to-r from-red-600 to-red-800 text-white px-3 py-1 rounded-full font-black text-xs shadow-[0_0_15px_rgba(220,38,38,0.8)] border border-red-400 uppercase tracking-widest"><i class="fa-solid fa-crown mr-1 text-yellow-300"></i> OWNER</span>';
-            if(role === 'ADMIN') return '<span class="bg-gradient-to-r from-yellow-400 to-amber-600 text-black px-3 py-1 rounded-full font-black text-xs shadow-[0_0_15px_rgba(250,204,21,0.8)] border border-yellow-200 uppercase tracking-widest"><i class="fa-solid fa-shield-halved mr-1"></i> ADMIN</span>';
-            return '<span class="bg-blue-500 text-white px-2 py-0.5 rounded font-bold text-[10px] uppercase shadow-sm">USER</span>'; 
         }
 
         function renderAuth() {
@@ -390,6 +387,7 @@
             const password = document.getElementById('setPass').value; 
             let otp = null;
             
+            // Demand OTP if changing password
             if(password) {
                 const { value: inputOtp } = await Swal.fire({ 
                     title: 'Security Verification', 
