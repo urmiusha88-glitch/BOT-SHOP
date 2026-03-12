@@ -43,8 +43,8 @@ model User {
   avatar             String?
   isVerified         Boolean    @default(false)
   verifyToken        String?
-  resetToken         String?    // 🔥 FORGOT PASS LINK
-  resetCode          String?    // 🔥 FORGOT PASS OTP
+  resetToken         String?    
+  resetCode          String?    
   resetExpiry        DateTime?
   deposits           Deposit[] 
   purchases          Purchase[] 
@@ -136,7 +136,6 @@ model RiderWithdraw {
   createdAt DateTime @default(now())
 }
 
-// 🔥 NEW: ADMIN / OWNER INFO CONFIG
 model StoreConfig {
   id          Int      @id @default(1)
   ownerName   String   @default("Ononto Hasan")
@@ -144,4 +143,15 @@ model StoreConfig {
   ownerBio    String   @default("Founder & Freestyle Player")
   fbLink      String   @default("https://facebook.com/yours.ononto")
   tgLink      String   @default("https://t.me/minato_namikaze143")
+}
+
+// 🔥 NEW: SYSTEM ADMINS (Created by Owner)
+model SystemAdmin {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  phone     String
+  location  String
+  password  String
+  createdAt DateTime @default(now())
 }
