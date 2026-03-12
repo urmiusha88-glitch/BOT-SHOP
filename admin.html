@@ -8,13 +8,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        body { background-color: #050b14; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .tab-btn.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #60a5fa; padding-left: 1.5rem; }
-        .owner-tab.active { background: linear-gradient(90deg, rgba(250,204,21,0.15) 0%, transparent 100%); border-left: 4px solid #facc15; color: #fde047; padding-left: 1.5rem; }
+        body { 
+            background-color: #050b14; 
+            color: #e2e8f0; 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden; 
+        }
+        .glass-panel { 
+            background: rgba(15, 23, 42, 0.7); 
+            backdrop-filter: blur(24px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+        .tab-btn.active { 
+            background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); 
+            border-left: 4px solid #3b82f6; 
+            color: #60a5fa; 
+            padding-left: 1.5rem; 
+        }
+        .owner-tab.active { 
+            background: linear-gradient(90deg, rgba(250,204,21,0.15) 0%, transparent 100%); 
+            border-left: 4px solid #facc15; 
+            color: #fde047; 
+            padding-left: 1.5rem; 
+        }
         .table-row-hover:hover { background: rgba(59,130,246,0.05); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } 
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
     </style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col md:flex-row relative">
@@ -23,69 +44,140 @@
         <div class="glass-panel p-10 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-[90%] max-w-md text-center border border-slate-700/50">
             <h2 class="text-3xl font-black mb-8 text-white">System Access</h2>
             <input type="password" id="adminPass" class="w-full px-6 py-4 bg-slate-900/80 border border-slate-700 rounded-2xl mb-6 text-white font-black text-center tracking-[0.3em] text-xl outline-none focus:border-blue-500" placeholder="••••••••" onkeypress="if(event.key==='Enter') login()">
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase active:scale-95 shadow-lg">Authenticate</button>
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase active:scale-95 shadow-lg hover:bg-blue-500 transition-colors">Authenticate</button>
         </div>
     </div>
 
     <div id="dashSection" class="hidden flex-1 flex h-full relative z-10 overflow-hidden">
+        
         <div id="sidebar" class="w-72 glass-panel border-r border-slate-800/80 flex flex-col p-6 space-y-2">
             <div class="mb-10 pl-2">
                 <h2 class="text-2xl font-black text-white" id="panelTitle">AURA ADMIN</h2>
                 <p id="panelRole" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 inline-block mt-1 uppercase">ADMIN</p>
             </div>
-            <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
-            <button onclick="showTab('orders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-box mr-4 w-5"></i> Orders</button>
-            <button onclick="showTab('users', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-users mr-4 w-5"></i> Users</button>
             
-            <div id="ownerMenu" class="hidden flex-col mt-auto border-t border-slate-800 pt-2">
+            <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1 transition-colors"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
+            <button onclick="showTab('users', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1 transition-colors"><i class="fa-solid fa-users mr-4 w-5"></i> Users Control</button>
+            
+            <div id="ownerMenu" class="hidden flex-col mt-auto border-t border-slate-800 pt-4">
                 <p class="text-[9px] text-slate-600 font-black uppercase tracking-widest px-4 mb-2">Owner Controls</p>
-                <button onclick="showTab('admins', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-shield-halved mr-4 w-5"></i> Admins</button>
-                <button onclick="showTab('config', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-gear mr-4 w-5"></i> Store Info</button>
+                <button onclick="showTab('admins', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1 transition-colors"><i class="fa-solid fa-shield-halved mr-4 w-5"></i> Admins</button>
+                <button onclick="showTab('config', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1 transition-colors"><i class="fa-solid fa-gear mr-4 w-5"></i> Store Info</button>
             </div>
-            <button onclick="logout()" class="text-left p-4 rounded-xl font-bold text-red-500 hover:bg-red-500/10 uppercase text-xs mt-2"><i class="fa-solid fa-power-off mr-4 w-5"></i> Logout</button>
+            
+            <button onclick="logout()" class="text-left p-4 rounded-xl font-bold text-red-500 hover:bg-red-500/10 uppercase text-xs mt-2 transition-colors"><i class="fa-solid fa-power-off mr-4 w-5"></i> Logout</button>
         </div>
         
         <div class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
-            <div id="statsTab" class="tab-content"><h1 class="text-4xl font-black text-white mb-8">Dashboard</h1><p class="text-slate-400">Welcome to the core system.</p></div>
-            <div id="ordersTab" class="tab-content hidden"><h1 class="text-4xl font-black text-white mb-8">Orders</h1></div>
-            <div id="usersTab" class="tab-content hidden"><h1 class="text-4xl font-black text-white mb-8">Users</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name</th><th class="p-6">Role</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
+            
+            <div id="statsTab" class="tab-content">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-4xl font-black text-white">Dashboard</h1>
+                    <button onclick="loadAllData()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold transition-colors"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500">
+                        <p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Users</p>
+                        <h2 class="text-4xl font-black text-white" id="statUsers">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usersTab" class="tab-content hidden">
+                <div class="flex justify-between items-end mb-8">
+                    <h1 class="text-4xl font-black text-white">Manage Users</h1>
+                </div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto">
+                    <table class="w-full text-left min-w-[800px]">
+                        <thead class="bg-slate-900/80">
+                            <tr class="text-slate-400 text-xs uppercase font-black">
+                                <th class="p-6">Name & Email</th>
+                                <th class="p-6">Role</th>
+                                <th class="p-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userListBody" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
 
             <div id="adminsTab" class="tab-content hidden">
-                <div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black text-yellow-400"><i class="fa-solid fa-crown mr-3"></i>System Admins</h1><button onclick="addAdmin()" class="bg-yellow-500 text-black px-6 py-3 rounded-xl font-bold hover:bg-yellow-400"><i class="fa-solid fa-plus mr-2"></i>Add Admin</button></div>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Phone & Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminListBody" class="divide-y divide-slate-800"></tbody></table></div>
+                <div class="flex justify-between items-end mb-8">
+                    <h1 class="text-4xl font-black text-yellow-400"><i class="fa-solid fa-crown mr-3"></i>System Admins</h1>
+                    <button onclick="addAdmin()" class="bg-yellow-500 text-black px-6 py-3 rounded-xl font-bold hover:bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.4)] transition-transform active:scale-95"><i class="fa-solid fa-plus mr-2"></i>Add Admin</button>
+                </div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-900/80">
+                            <tr class="text-slate-400 text-xs uppercase font-black">
+                                <th class="p-6">Name & Email</th>
+                                <th class="p-6">Phone & Location</th>
+                                <th class="p-6 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminListBody" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="configTab" class="tab-content hidden max-w-2xl">
-                <h1 class="text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-gear mr-3"></i>Store Config</h1>
-                <div class="glass-panel p-8 rounded-[32px] space-y-4">
-                    <p class="text-sm text-slate-400 mb-6">This information will be visible to customers on the main website.</p>
-                    <input type="text" id="cfgName" placeholder="Owner Name" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold">
-                    <input type="text" id="cfgBio" placeholder="Short Bio / Title" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold">
-                    <input type="text" id="cfgPhone" placeholder="Contact Number" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold">
-                    <input type="text" id="cfgFb" placeholder="Facebook URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold">
-                    <input type="text" id="cfgTg" placeholder="Telegram URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold">
-                    <button onclick="saveStoreConfig()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-4 rounded-xl shadow-lg mt-4 uppercase tracking-widest hover:scale-[1.02] transition-transform">Update Live Website</button>
+                <h1 class="text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-gear mr-3"></i>Store Info Config</h1>
+                <div class="glass-panel p-8 rounded-[32px] space-y-5">
+                    <p class="text-sm text-slate-400 mb-6 border-b border-slate-700 pb-4">This information will be visible to customers on the main website when they click 'Admin Info'.</p>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Owner Name</label>
+                        <input type="text" id="cfgName" placeholder="Owner Name" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold transition-colors">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Short Bio / Title</label>
+                        <input type="text" id="cfgBio" placeholder="Short Bio / Title" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold transition-colors">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Contact Number</label>
+                        <input type="text" id="cfgPhone" placeholder="Contact Number" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold transition-colors">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Facebook Link</label>
+                        <input type="text" id="cfgFb" placeholder="Facebook URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold transition-colors">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Telegram Link</label>
+                        <input type="text" id="cfgTg" placeholder="Telegram URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white outline-none focus:border-yellow-500 font-bold transition-colors">
+                    </div>
+                    
+                    <button onclick="saveStoreConfig()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-4 rounded-xl shadow-lg mt-6 uppercase tracking-widest hover:scale-[1.02] transition-transform">Update Live Website</button>
                 </div>
             </div>
+
         </div>
     </div>
 
     <script>
-        const swalDark = { background: 'rgba(15,23,42,0.95)', color: '#fff', border:'1px solid #1e293b' };
-        let pass = sessionStorage.getItem('adminPass'); let currentRole = sessionStorage.getItem('adminRole');
+        const swalDark = { background: 'rgba(15,23,42,0.95)', color: '#fff', border:'1px solid #1e293b', confirmButtonColor: '#3b82f6', cancelButtonColor: '#ef4444' };
+        let pass = sessionStorage.getItem('adminPass'); 
+        let currentRole = sessionStorage.getItem('adminRole');
+        let globalUsers = [];
 
         if(pass) checkAuth();
         
         async function login() { 
             pass = document.getElementById('adminPass').value; 
-            const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); 
+            const res = await fetch('/api/admin/login', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ password: pass }) 
+            }); 
             const data = await res.json();
+            
             if(data.success) { 
                 sessionStorage.setItem('adminPass', pass); 
                 sessionStorage.setItem('adminRole', data.role); 
                 currentRole = data.role;
                 checkAuth(); 
-            } else { Swal.fire({toast:true, position:'top-end', icon:'error', title: 'Access Denied', background:'#1e293b', color:'#fff', showConfirmButton:false, timer:1500}); } 
+            } else { 
+                Swal.fire({toast:true, position:'top-end', icon:'error', title: 'Access Denied', ...swalDark, showConfirmButton:false, timer:1500}); 
+            } 
         }
 
         async function checkAuth() { 
@@ -96,57 +188,185 @@
             if(currentRole === 'OWNER') {
                 document.getElementById('panelTitle').innerText = 'AURA OWNER';
                 document.getElementById('panelTitle').classList.replace('text-white', 'text-yellow-400');
+                
                 document.getElementById('panelRole').innerText = 'OWNER';
-                document.getElementById('panelRole').className = 'text-[10px] font-black px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400 inline-block mt-1 uppercase tracking-widest';
+                document.getElementById('panelRole').className = 'text-[10px] font-black px-3 py-1 rounded bg-yellow-500/20 text-yellow-400 inline-block mt-1 uppercase tracking-widest border border-yellow-500/30';
+                
                 document.getElementById('ownerMenu').classList.remove('hidden');
                 document.getElementById('ownerMenu').classList.add('flex');
             } else {
                 document.getElementById('panelRole').innerText = 'ADMIN (RESTRICTED)';
                 document.getElementById('ownerMenu').classList.add('hidden');
             }
-            loadAllData(); loadConfig();
+            
+            loadAllData(); 
+            loadConfig();
         }
 
-        function showTab(tabId, btnElement) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); if(btnElement) btnElement.classList.add('active'); }
-        function logout() { sessionStorage.clear(); location.reload(); }
+        function showTab(tabId, btnElement) { 
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); 
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
+            
+            const activeTab = document.getElementById(tabId + 'Tab');
+            activeTab.classList.remove('hidden'); 
+            activeTab.classList.add('animate-slide-up'); // Re-trigger animation
+            
+            if(btnElement) btnElement.classList.add('active'); 
+        }
+        
+        function logout() { 
+            sessionStorage.clear(); 
+            location.reload(); 
+        }
 
         async function loadConfig() {
             if(currentRole !== 'OWNER') return;
-            try { const res = await fetch('/api/store-config'); const data = await res.json();
-            document.getElementById('cfgName').value = data.owner.ownerName; document.getElementById('cfgBio').value = data.owner.ownerBio; document.getElementById('cfgPhone').value = data.owner.ownerPhone; document.getElementById('cfgFb').value = data.owner.fbLink; document.getElementById('cfgTg').value = data.owner.tgLink; } catch(e) {}
+            try { 
+                const res = await fetch('/api/store-config'); 
+                const data = await res.json();
+                document.getElementById('cfgName').value = data.owner.ownerName; 
+                document.getElementById('cfgBio').value = data.owner.ownerBio; 
+                document.getElementById('cfgPhone').value = data.owner.ownerPhone; 
+                document.getElementById('cfgFb').value = data.owner.fbLink; 
+                document.getElementById('cfgTg').value = data.owner.tgLink; 
+            } catch(e) {}
         }
+
         async function saveStoreConfig() {
-            const data = { password: pass, ownerName: document.getElementById('cfgName').value, ownerBio: document.getElementById('cfgBio').value, ownerPhone: document.getElementById('cfgPhone').value, fbLink: document.getElementById('cfgFb').value, tgLink: document.getElementById('cfgTg').value };
-            await fetch('/api/admin/store-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            Swal.fire({toast:true, position:'top-end', icon:'success', title:'Config Updated', background:'#1e293b', color:'#fff', showConfirmButton:false, timer:1500});
+            const data = { 
+                password: pass, 
+                ownerName: document.getElementById('cfgName').value, 
+                ownerBio: document.getElementById('cfgBio').value, 
+                ownerPhone: document.getElementById('cfgPhone').value, 
+                fbLink: document.getElementById('cfgFb').value, 
+                tgLink: document.getElementById('cfgTg').value 
+            };
+            await fetch('/api/admin/store-config', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(data) 
+            });
+            Swal.fire({toast:true, position:'top-end', icon:'success', title:'Config Updated on Website', ...swalDark, showConfirmButton:false, timer:2000});
         }
 
         async function loadAllData() {
             try {
-                const res = await fetch('/api/admin/stats'); const data = await res.json();
+                const res = await fetch('/api/admin/stats'); 
+                const data = await res.json();
+                document.getElementById('statUsers').innerText = data.users;
+                
+                globalUsers = data.userList;
                 
                 // Users Rendering
                 document.getElementById('userListBody').innerHTML = data.userList.map(u => {
-                    let roleBadge = u.role === 'OWNER' ? `<span class="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-black"><i class="fa-solid fa-crown"></i> OWNER</span>` : `<span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-black">USER</span>`;
-                    let ownerBtn = currentRole === 'OWNER' && u.role !== 'OWNER' ? `<button onclick="setOwnerRole(${u.id})" class="text-yellow-400 bg-yellow-500/10 p-2 rounded hover:bg-yellow-500 hover:text-black mr-2 text-xs font-bold transition-colors">Make Owner</button>` : '';
-                    return `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${u.firstName}</td><td class="p-6"><p class="text-slate-400 text-sm">${u.email}</p><div class="mt-1">${roleBadge}</div></td><td class="p-6 text-right">${ownerBtn}</td></tr>`;
+                    let roleBadge = '';
+                    if(u.role === 'OWNER') {
+                        roleBadge = `<span class="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-black border border-yellow-500/30 tracking-widest"><i class="fa-solid fa-crown mr-1"></i> OWNER</span>`;
+                    } else if (u.role === 'ADMIN') {
+                        roleBadge = `<span class="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded font-black">ADMIN</span>`;
+                    } else {
+                        roleBadge = `<span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-black">USER</span>`;
+                    }
+                    
+                    // Only Owner can upgrade other users to Owner
+                    let ownerBtn = (currentRole === 'OWNER' && u.role !== 'OWNER') 
+                        ? `<button onclick="setOwnerRole(${u.id})" class="text-yellow-400 bg-yellow-500/10 p-2 rounded-lg hover:bg-yellow-500 hover:text-black mr-2 text-xs font-bold transition-colors shadow-sm"><i class="fa-solid fa-arrow-up mr-1"></i> Make Owner</button>` 
+                        : '';
+                        
+                    return `
+                    <tr class="table-row-hover">
+                        <td class="p-6">
+                            <p class="font-bold text-white text-lg">${u.firstName}</p>
+                            <p class="text-slate-400 text-sm mt-1">${u.email}</p>
+                        </td>
+                        <td class="p-6">${roleBadge}</td>
+                        <td class="p-6 text-right">${ownerBtn}</td>
+                    </tr>`;
                 }).join('');
 
                 // System Admins Rendering (Owner Only)
                 if(currentRole === 'OWNER') {
-                    document.getElementById('adminListBody').innerHTML = data.admins.map(a => `
-                    <tr class="table-row-hover"><td class="p-6"><p class="font-bold text-white">${a.name}</p><p class="text-xs text-slate-400">${a.email}</p></td><td class="p-6"><p class="text-sm font-bold text-blue-400">${a.phone}</p><p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot"></i> ${a.location}</p></td><td class="p-6 text-right"><button onclick="deleteAdmin(${a.id})" class="text-red-400 bg-red-500/10 p-2.5 rounded-xl hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+                    if (data.admins.length === 0) {
+                        document.getElementById('adminListBody').innerHTML = '<tr><td colspan="3" class="text-center text-slate-500 py-6">No admins assigned yet.</td></tr>';
+                    } else {
+                        document.getElementById('adminListBody').innerHTML = data.admins.map(a => `
+                        <tr class="table-row-hover">
+                            <td class="p-6"><p class="font-bold text-white text-lg">${a.name}</p><p class="text-xs text-slate-400 mt-1">${a.email}</p></td>
+                            <td class="p-6"><p class="text-sm font-bold text-blue-400">${a.phone}</p><p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot"></i> ${a.location}</p></td>
+                            <td class="p-6 text-right"><button onclick="deleteAdmin(${a.id})" class="text-red-400 bg-red-500/10 p-3 rounded-xl hover:bg-red-600 hover:text-white transition-colors shadow-sm" title="Revoke Admin Access"><i class="fa-solid fa-trash"></i></button></td>
+                        </tr>`).join('');
+                    }
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error("Failed to load admin data");
+            }
         }
 
-        async function setOwnerRole(id) { if(confirm('Upgrade user to OWNER status? This gives them full access.')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'role', role: 'OWNER', id})}); loadAllData(); } }
+        async function setOwnerRole(id) { 
+            if(confirm('Upgrade user to OWNER status? This will give them full access on the website.')) { 
+                await fetch('/api/admin/user/action', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({password: pass, action: 'role', role: 'OWNER', id})
+                }); 
+                loadAllData(); 
+                Swal.fire({toast:true, position:'top-end', icon:'success', title:'Upgraded to OWNER', ...swalDark, showConfirmButton:false, timer:2000});
+            } 
+        }
         
         async function addAdmin() { 
-            const { value: f } = await Swal.fire({ title: 'Add System Admin', html: `<input id="aN" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Name"><input id="aE" type="email" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Email"><input id="aP" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Phone"><input id="aL" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Location"><input id="aPw" type="text" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Set Password">`, focusConfirm: false, confirmButtonText: 'Add Admin', confirmButtonColor: '#facc15', preConfirm: () => [document.getElementById('aN').value, document.getElementById('aE').value, document.getElementById('aP').value, document.getElementById('aL').value, document.getElementById('aPw').value], ...swalDark }); 
-            if(f&&f[0]) { await fetch('/api/admin/system-admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'add', name:f[0], email:f[1], phone:f[2], location:f[3], adminPass:f[4]})}); loadAllData(); } 
+            const { value: f } = await Swal.fire({ 
+                title: 'Add System Admin', 
+                html: `
+                    <input id="aN" class="swal2-input bg-slate-800 text-white border-slate-600 w-[80%] mx-auto" placeholder="Full Name">
+                    <input id="aE" type="email" class="swal2-input bg-slate-800 text-white border-slate-600 w-[80%] mx-auto" placeholder="Email Address">
+                    <input id="aP" class="swal2-input bg-slate-800 text-white border-slate-600 w-[80%] mx-auto" placeholder="Phone Number">
+                    <input id="aL" class="swal2-input bg-slate-800 text-white border-slate-600 w-[80%] mx-auto" placeholder="Location/Area">
+                    <input id="aPw" type="text" class="swal2-input bg-slate-800 text-white border-slate-600 w-[80%] mx-auto font-black tracking-widest text-emerald-400" placeholder="Set Admin Password">
+                `, 
+                focusConfirm: false, 
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-plus mr-2"></i> Add Admin', 
+                confirmButtonColor: '#facc15', 
+                preConfirm: () => {
+                    const n = document.getElementById('aN').value;
+                    const e = document.getElementById('aE').value;
+                    const p = document.getElementById('aP').value;
+                    const l = document.getElementById('aL').value;
+                    const pw = document.getElementById('aPw').value;
+                    if(!n || !e || !pw) { Swal.showValidationMessage('Name, Email, and Password are required!'); return false; }
+                    return [n, e, p, l, pw];
+                }, 
+                ...swalDark 
+            }); 
+            
+            if(f && f[0]) { 
+                const res = await fetch('/api/admin/system-admin/action', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({password: pass, action: 'add', name: f[0], email: f[1], phone: f[2], location: f[3], adminPass: f[4]})
+                }); 
+                const data = await res.json();
+                if(data.success) {
+                    loadAllData(); 
+                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'Admin Assigned Successfully', ...swalDark, showConfirmButton:false, timer:2000});
+                } else {
+                    Swal.fire('Error', data.error, 'error', swalDark);
+                }
+            } 
         }
-        async function deleteAdmin(id) { if(confirm('Delete Admin completely?')) { await fetch('/api/admin/system-admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'delete', id})}); loadAllData(); } }
+
+        async function deleteAdmin(id) { 
+            if(confirm('Revoke access and delete this Admin completely?')) { 
+                await fetch('/api/admin/system-admin/action', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({password: pass, action: 'delete', id})
+                }); 
+                loadAllData(); 
+                Swal.fire({toast:true, position:'top-end', icon:'success', title:'Admin Removed', ...swalDark, showConfirmButton:false, timer:1500});
+            } 
+        }
 
     </script>
 </body>
