@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -29,8 +28,6 @@
         .table-row-hover:hover { background: rgba(59,130,246,0.05); transform: scale(1.01); box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 12px; }
         .sidebar-open { transform: translateX(0); } .sidebar-closed { transform: translateX(-100%); }
         @media (min-width: 768px) { .sidebar-closed { transform: translateX(0); } }
-        
-        /* Premium Map Fixes */
         .leaflet-popup-content-wrapper { background: #1e293b; color: #f8fafc; border-radius: 12px; border: 1px solid #334155; }
         .leaflet-popup-tip { background: #1e293b; }
         .leaflet-container { font-family: 'Inter', sans-serif; }
@@ -94,7 +91,27 @@
                     <h1 class="text-4xl font-black text-white">Fleet Command</h1>
                     <button onclick="addRiderManually()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg">Add Rider</button>
                 </div>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider Info</th><th class="p-6">Deliveries & Wallet</th><th class="p-6 text-right">Actions (Track / Delete)</th></tr></thead><tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody></table></div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto mb-10">
+                    <table class="w-full text-left min-w-[800px]">
+                        <thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider Info</th><th class="p-6">Deliveries & Wallet</th><th class="p-6 text-right">Actions (Track / Delete)</th></tr></thead>
+                        <tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+
+                <h2 class="text-2xl font-black text-white mb-6"><i class="fa-solid fa-money-bill-transfer text-emerald-500 mr-2"></i> Withdraw Requests</h2>
+                <div class="glass-panel rounded-[32px] overflow-x-auto">
+                    <table class="w-full text-left min-w-[800px]">
+                        <thead class="bg-slate-900/80">
+                            <tr class="text-slate-400 text-xs tracking-widest uppercase font-black">
+                                <th class="p-6">Rider</th>
+                                <th class="p-6">Method & Number</th>
+                                <th class="p-6">Amount</th>
+                                <th class="p-6 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminRiderWithdraws" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="usersTab" class="tab-content hidden"><div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black">Users</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search email..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl w-72 focus:outline-none focus:border-blue-500"></div><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name</th><th class="p-6">Email</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
@@ -106,10 +123,7 @@
     <div id="mapModal" class="fixed inset-0 bg-black/80 hidden justify-center items-center z-[999] backdrop-blur-md p-4 transition-opacity">
         <div class="bg-slate-900 border border-slate-700 w-full max-w-5xl h-[80vh] rounded-[32px] overflow-hidden flex flex-col relative shadow-[0_0_50px_rgba(0,0,0,0.6)] animate-slide-up">
             <div class="p-5 flex justify-between items-center bg-slate-800 border-b border-slate-700">
-                <div>
-                    <h3 class="font-black text-xl text-white flex items-center" id="mapTitle"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracking Rider</h3>
-                    <p class="text-xs text-slate-400 font-bold tracking-widest mt-1 uppercase" id="mapTime">Last update: Loading...</p>
-                </div>
+                <div><h3 class="font-black text-xl text-white flex items-center" id="mapTitle"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracking Rider</h3><p class="text-xs text-slate-400 font-bold tracking-widest mt-1 uppercase" id="mapTime">Last update: Loading...</p></div>
                 <button onclick="closeMap()" class="w-10 h-10 bg-slate-700 rounded-full text-white hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="mapArea" class="flex-1 w-full h-full bg-slate-950 z-0"></div>
@@ -120,7 +134,7 @@
         const swalDark = { background: 'rgba(15, 23, 42, 0.95)', color: '#fff', backdrop: 'rgba(0,0,0,0.8)' };
         const toast = (icon, title) => Swal.fire({ toast: true, position: 'top-end', icon, title, showConfirmButton: false, timer: 1500, background: '#1e293b', color: '#fff' });
         let pass = sessionStorage.getItem('adminPass'); let globalUsers = []; let chartInstance = null;
-        let map = null; let marker = null; // Map variables
+        let map = null; let marker = null; 
 
         if(pass) checkAuth();
         
@@ -136,19 +150,24 @@
                 document.getElementById('statUsers').innerText = data.users; document.getElementById('statRev').innerText = "৳" + data.revenue.toFixed(0); document.getElementById('statOrders').innerText = data.orders.length;
                 globalUsers = data.userList; renderUsers(globalUsers);
                 
-                // Render Chart
                 const ctx = document.getElementById('salesChart').getContext('2d');
                 if(chartInstance) chartInstance.destroy();
                 chartInstance = new Chart(ctx, { type: 'bar', data: { labels: ['Orders', 'Users', 'Products', 'Riders'], datasets: [{ label: 'Store Metrics', data: [data.orders.length, data.users, data.products.length, data.riderList.length], backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'], borderRadius: 8 }] }, options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
 
-                // 🔥 RIDER LIST WITH LOCATION BUTTON
                 document.getElementById('adminRiderList').innerHTML = data.riderList.map(r => {
-                    // Check if rider has sent coordinates
                     let trackBtn = (r.lastLat && r.lastLng) 
                         ? `<button onclick="trackRider(${r.lastLat}, ${r.lastLng}, '${r.name}', '${r.lastLocUpdate}')" class="text-emerald-400 p-2.5 bg-emerald-500/10 rounded-xl hover:bg-emerald-500 hover:text-white mr-2 transition-all shadow-sm" title="Track Live Location"><i class="fa-solid fa-map-location-dot"></i> Track</button>`
                         : `<button disabled class="text-slate-600 p-2.5 bg-slate-800 rounded-xl mr-2 cursor-not-allowed" title="No GPS Data Available"><i class="fa-solid fa-location-dot"></i> No GPS</button>`;
-
                     return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${r.name}</p><p class="text-xs text-slate-400">${r.phone}</p></td><td class="p-6"><p class="text-xl font-black text-emerald-400">${r.deliveryCount} <span class="text-[10px] text-slate-400 uppercase">Delivered</span></p><p class="text-xs text-blue-400 font-bold">Wallet: ৳${r.walletBalance}</p></td><td class="p-6 text-right">${trackBtn}<button onclick="deleteRider(${r.id})" class="text-red-400 p-2.5 bg-red-500/10 rounded-xl hover:bg-red-600 hover:text-white transition-all"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                }).join('');
+
+                // 🔥 NEW: RIDER WITHDRAW RENDERING
+                document.getElementById('adminRiderWithdraws').innerHTML = data.riderWithdraws.map(w => {
+                    let btns = w.status === 'PENDING' 
+                        ? `<button onclick="actionRiderWithdraw(${w.id}, 'APPROVE')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Pay & Approve</button>
+                           <button onclick="actionRiderWithdraw(${w.id}, 'REJECT')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>` 
+                        : `<span class="text-xs font-black uppercase tracking-widest ${w.status==='APPROVED'?'text-emerald-500':'text-red-500'}">${w.status}</span>`;
+                    return `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${w.rider.name}</td><td class="p-6"><span class="uppercase font-black text-[10px] text-blue-400 bg-blue-500/10 px-2 py-1 rounded">${w.method}</span><p class="mt-2 text-sm text-slate-300 font-mono tracking-widest">${w.number}</p></td><td class="p-6 font-black text-emerald-400 text-xl">৳${w.amount}</td><td class="p-6 text-right">${btns}</td></tr>`;
                 }).join('');
 
                 document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="table-row-hover"><td class="p-6 font-bold">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400">${d.trxId}</td><td class="p-6 font-black text-emerald-400">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>` : `<span class="text-xs font-bold text-slate-500">${d.status}</span>`}</td></tr>`).join('');
@@ -165,56 +184,33 @@
         
         async function updateOrderStatus(id, status) { await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); loadAllData(); toast('success', `Order marked as ${status}`); }
         async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); toast('success', 'Deposit Updated');}
+        
+        // 🔥 ACTION FOR RIDER WITHDRAW
+        async function actionRiderWithdraw(id, action) {
+            await fetch('/api/admin/rider-withdraw/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pass, id, action }) });
+            loadAllData(); toast('success', `Withdraw ${action}`);
+        }
+
         async function deleteProduct(id) { if(confirm('Are you sure you want to delete this product?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); toast('success', 'Deleted'); } }
         async function addRiderManually() { const { value: f } = await Swal.fire({ title: 'Add New Rider', html: `<input id="n" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Full Name"><input id="e" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Email Address"><input id="p" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Phone Number"><input id="pw" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Set Password">`, focusConfirm: false, confirmButtonText: 'Add Rider', confirmButtonColor: '#10b981', preConfirm: () => [document.getElementById('n').value, document.getElementById('e').value, document.getElementById('p').value, document.getElementById('pw').value], ...swalDark }); if(f&&f[0]) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'add', name:f[0], email:f[1], phone:f[2], riderPass:f[3]})}); loadAllData(); toast('success', 'Rider Added'); } }
         async function deleteRider(id) { if(confirm('Remove this rider permanently?')) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'delete', id})}); loadAllData(); toast('success', 'Rider Removed'); } }
         async function editBalance(id, cur) { const { value: amt } = await Swal.fire({ title: 'Update Wallet Balance', input: 'number', inputValue: cur, confirmButtonText: 'Update', confirmButtonColor: '#3b82f6', ...swalDark }); if(amt !== undefined) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount:amt})}); loadAllData(); toast('success', 'Balance Updated'); } }
         async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban this user?' : 'Ban this user?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); toast('success', 'Status Changed'); } }
 
-        // 🔥 CUSTOM LEAFLET MAP LOGIC FOR RIDER TRACKING (No Google Maps API needed)
         function trackRider(lat, lng, name, time) {
-            document.getElementById('mapModal').classList.remove('hidden');
-            document.getElementById('mapModal').classList.add('flex');
-            
+            document.getElementById('mapModal').classList.remove('hidden'); document.getElementById('mapModal').classList.add('flex');
             document.getElementById('mapTitle').innerHTML = `<i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracing: ${name}`;
-            let dateStr = new Date(time).toLocaleString();
-            document.getElementById('mapTime').innerText = `GPS Ping: ${dateStr}`;
-
-            // Initialize Map only once, then just move it
+            let dateStr = new Date(time).toLocaleString(); document.getElementById('mapTime').innerText = `GPS Ping: ${dateStr}`;
             if(!map) {
                 map = L.map('mapArea').setView([lat, lng], 16);
-                // Premium Dark Theme Map Tiles (CartoDB Dark Matter)
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    subdomains: 'abcd',
-                    maxZoom: 20
-                }).addTo(map);
-                
-                // Custom Marker Icon
-                const customIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div style="background-color:#10b981;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 0 15px rgba(16,185,129,0.8);animation:pulse 2s infinite;"></div>`,
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-                
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap', subdomains: 'abcd', maxZoom: 20 }).addTo(map);
+                const customIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background-color:#10b981;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 0 15px rgba(16,185,129,0.8);animation:pulse 2s infinite;"></div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
                 marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
-            } else {
-                map.setView([lat, lng], 16);
-                marker.setLatLng([lat, lng]);
-            }
-            
+            } else { map.setView([lat, lng], 16); marker.setLatLng([lat, lng]); }
             marker.bindPopup(`<div class="text-center"><p class="font-black text-sm mb-1 text-slate-800">${name}</p><p class="text-[10px] font-bold text-slate-500">${dateStr}</p></div>`).openPopup();
-            
-            // Fix Leaflet rendering bug inside hidden modals
             setTimeout(() => { map.invalidateSize(); }, 300);
         }
-
-        function closeMap() {
-            document.getElementById('mapModal').classList.add('hidden');
-            document.getElementById('mapModal').classList.remove('flex');
-        }
-
+        function closeMap() { document.getElementById('mapModal').classList.add('hidden'); document.getElementById('mapModal').classList.remove('flex'); }
     </script>
 </body>
 </html>
