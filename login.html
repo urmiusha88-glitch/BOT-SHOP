@@ -4,121 +4,314 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Authentication | AURA STORE</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050b14; color: #e2e8f0; overflow: hidden; }
-        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: white; transition: all 0.3s; }
-        .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); background: rgba(15,23,42,0.9); outline: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050b14; 
+            color: #e2e8f0; 
+            overflow: hidden; 
+            margin: 0;
+            padding: 0;
+        }
         
-        .blob { position: absolute; filter: blur(100px); opacity: 0.2; animation: float 20s infinite alternate; pointer-events: none; z-index: -1; }
-        .blob-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: #3b82f6; }
-        .blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: #8b5cf6; animation-delay: -5s; }
-        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(50px, 50px); } }
+        /* Animated Background Blobs */
+        .blob-container { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(120px); opacity: 0.4; animation: float 20s infinite alternate; }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3b82f6; }
+        .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #6366f1; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10vw, 5vw) scale(1.1); } }
 
-        .tab-btn { color: #64748b; border-bottom: 2px solid transparent; transition: 0.3s; }
-        .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+        /* Glassmorphism Panel */
+        .glass-panel { 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Custom Inputs */
+        .input-group { position: relative; margin-bottom: 1.25rem; }
+        .input-group i { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1.1rem; transition: 0.3s; }
+        .input-field { 
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: white; 
+            padding: 1rem 1rem 1rem 3rem; 
+            border-radius: 1rem; 
+            font-weight: 600; 
+            outline: none; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .input-field:focus { 
+            border-color: #3b82f6; 
+            background: rgba(15, 23, 42, 0.8); 
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); 
+        }
+        .input-field:focus + i, .input-field:focus ~ i { color: #3b82f6; }
+
+        /* Tabs */
+        .tab-btn { 
+            color: #64748b; 
+            border-bottom: 2px solid transparent; 
+            transition: all 0.3s ease; 
+        }
+        .tab-btn.active { 
+            color: #3b82f6; 
+            border-bottom-color: #3b82f6; 
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Animations */
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
+        .fade-in-right { animation: fadeInRight 0.4s ease-out forwards; }
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
-<body class="h-screen w-screen flex items-center justify-center relative">
-    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+<body class="h-screen w-screen flex items-center justify-center p-4">
 
-    <div class="w-full h-full md:h-auto md:w-[900px] flex flex-col md:flex-row glass-panel md:rounded-[40px] shadow-2xl overflow-hidden relative z-10 animate-slide-up">
+    <div class="blob-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="w-full max-w-5xl h-full max-h-[850px] md:h-[600px] flex flex-col md:flex-row glass-panel rounded-[2rem] md:rounded-[3rem] overflow-hidden relative z-10 animate-enter">
         
-        <div class="hidden md:flex md:w-1/2 bg-blue-600 p-12 flex-col justify-center items-center text-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-700 opacity-90 z-0"></div>
-            <i class="fa-solid fa-shirt text-8xl text-white mb-6 relative z-10 drop-shadow-lg"></i>
-            <h1 class="text-5xl font-black text-white mb-4 relative z-10 tracking-tight">AURA<br>STORE</h1>
-            <p class="text-blue-100 font-bold relative z-10">Premium Collections & Freestyle Gear.</p>
-            <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/20 to-transparent z-0"></div>
+        <div class="hidden md:flex md:w-5/12 relative flex-col justify-between p-12 overflow-hidden bg-slate-900/50">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-indigo-900/90 z-0 mix-blend-multiply"></div>
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-20 z-0"></div>
+            
+            <div class="relative z-10">
+                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] mb-8 transform -rotate-6">
+                    <i class="fa-solid fa-shirt text-3xl text-blue-600"></i>
+                </div>
+                <h1 class="text-5xl lg:text-6xl font-black text-white leading-tight tracking-tighter mb-4">
+                    AURA<br><span class="text-blue-400">STORE</span>
+                </h1>
+                <p class="text-blue-100/80 font-medium text-lg leading-relaxed max-w-xs">
+                    Access premium physical collections, freestyle gear, and your digital wallet.
+                </p>
+            </div>
+
+            <div class="relative z-10 flex items-center gap-4 mt-8">
+                <div class="flex -space-x-3">
+                    <img class="w-10 h-10 rounded-full border-2 border-blue-600" src="https://i.pravatar.cc/100?img=1" alt="User">
+                    <img class="w-10 h-10 rounded-full border-2 border-blue-600" src="https://i.pravatar.cc/100?img=2" alt="User">
+                    <img class="w-10 h-10 rounded-full border-2 border-blue-600" src="https://i.pravatar.cc/100?img=3" alt="User">
+                    <div class="w-10 h-10 rounded-full border-2 border-blue-600 bg-slate-800 flex items-center justify-center text-[10px] font-bold">+1k</div>
+                </div>
+                <p class="text-sm font-bold text-blue-200">Join our community</p>
+            </div>
         </div>
 
-        <div class="w-full md:w-1/2 p-8 sm:p-12 h-full flex flex-col justify-center bg-[#0b1120] md:bg-transparent overflow-y-auto">
+        <div class="w-full md:w-7/12 p-6 sm:p-10 h-full flex flex-col bg-[#0b1120]/80 relative overflow-y-auto custom-scrollbar">
             
-            <div class="md:hidden text-center mb-8">
-                <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-2xl text-white mb-4 shadow-[0_0_20px_rgba(59,130,246,0.5)]"><i class="fa-solid fa-shirt"></i></div>
-                <h1 class="text-3xl font-black text-white tracking-tight">AURA STORE</h1>
+            <div class="md:hidden text-center mb-8 mt-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mx-auto flex items-center justify-center shadow-lg mb-4">
+                    <i class="fa-solid fa-shirt text-xl text-white"></i>
+                </div>
+                <h2 class="text-3xl font-black text-white tracking-tight">AURA STORE</h2>
+                <p class="text-slate-400 text-sm mt-1">Welcome back, Please login to your account.</p>
             </div>
 
-            <div class="flex mb-8 border-b border-slate-800">
-                <button id="tabLogin" onclick="switchTab('login')" class="tab-btn active w-1/2 pb-4 font-black uppercase tracking-widest text-sm">Login</button>
-                <button id="tabReg" onclick="switchTab('register')" class="tab-btn w-1/2 pb-4 font-black uppercase tracking-widest text-sm">Register</button>
+            <div class="flex mb-8 border-b border-slate-800/80">
+                <button id="tabLogin" onclick="switchTab('login')" class="tab-btn active w-1/2 pb-4 font-black uppercase tracking-widest text-sm text-center">Sign In</button>
+                <button id="tabReg" onclick="switchTab('register')" class="tab-btn w-1/2 pb-4 font-black uppercase tracking-widest text-sm text-center">Sign Up</button>
             </div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5 animate-slide-up">
-                <input type="email" id="lEmail" required placeholder="Email Address" class="w-full input-field px-5 py-4 rounded-xl font-bold">
-                <input type="password" id="lPass" required placeholder="Password" class="w-full input-field px-5 py-4 rounded-xl font-bold">
-                <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all active:scale-95 mt-4">Sign In</button>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="fade-in-right flex-1 flex flex-col">
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="lEmail" required placeholder="Email Address" class="input-field">
+                </div>
+                <div class="input-group mb-2">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="lPass" required placeholder="Password" class="input-field">
+                </div>
+                
+                <div class="flex justify-end mb-8">
+                    <a href="#" onclick="Swal.fire('Notice', 'Contact Admin via Telegram to reset password.', 'info')" class="text-xs font-bold text-blue-500 hover:text-blue-400 transition-colors">Forgot Password?</a>
+                </div>
+
+                <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_10px_20px_-10px_rgba(59,130,246,0.6)] transform active:scale-95 transition-all mb-6">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Access Account
+                </button>
             </form>
 
-            <form id="regForm" onsubmit="handleRegister(event)" class="hidden space-y-4">
-                <input type="text" id="rName" required placeholder="Full Name" class="w-full input-field px-5 py-3.5 rounded-xl font-bold">
-                <input type="email" id="rEmail" required placeholder="Email Address" class="w-full input-field px-5 py-3.5 rounded-xl font-bold">
-                <input type="password" id="rPass" required placeholder="Password" class="w-full input-field px-5 py-3.5 rounded-xl font-bold">
-                <input type="text" id="rRef" placeholder="Referral Code (Optional)" class="w-full input-field px-5 py-3.5 rounded-xl font-bold text-emerald-400">
-                <button type="submit" id="btnReg" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all active:scale-95 mt-2">Create Account</button>
+            <form id="regForm" onsubmit="handleRegister(event)" class="hidden fade-in-right flex-1 flex flex-col">
+                <div class="input-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="rName" required placeholder="Full Name" class="input-field py-3.5">
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="rEmail" required placeholder="Email Address" class="input-field py-3.5">
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="rPass" required placeholder="Create Password" class="input-field py-3.5">
+                </div>
+                <div class="input-group mb-6">
+                    <i class="fa-solid fa-gift text-emerald-500"></i>
+                    <input type="text" id="rRef" placeholder="Referral Code (Optional)" class="input-field py-3.5 !border-emerald-500/30 focus:!border-emerald-500 text-emerald-400 placeholder-emerald-500/50">
+                </div>
+
+                <button type="submit" id="btnReg" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_10px_20px_-10px_rgba(79,70,229,0.6)] transform active:scale-95 transition-all mb-6">
+                    <i class="fa-solid fa-user-plus mr-2"></i> Create Account
+                </button>
             </form>
 
-            <button onclick="location.href='/'" class="mt-8 text-slate-500 font-bold hover:text-white text-sm text-center transition-colors"><i class="fa-solid fa-arrow-left mr-2"></i> Back to Store</button>
+            <div class="mt-auto pt-6 border-t border-slate-800/80 space-y-4">
+                <button type="button" onclick="location.href='/rider'" class="w-full bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-emerald-500/30 font-black py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all group">
+                    <i class="fa-solid fa-motorcycle mr-2 group-hover:animate-bounce"></i> Login as Rider
+                </button>
+                
+                <button type="button" onclick="location.href='/'" class="w-full text-slate-400 font-bold hover:text-white text-sm py-2 transition-colors flex justify-center items-center">
+                    <i class="fa-solid fa-arrow-left-long mr-2"></i> Return to Storehead
+                </button>
+            </div>
+
         </div>
     </div>
 
     <script>
-        const swalDark = { background: '#0f172a', color: '#fff', border: '1px solid #1e293b' };
+        // Custom SweetAlert Theme matching the UI
+        const swalTheme = { 
+            background: '#0f172a', 
+            color: '#f8fafc', 
+            border: '1px solid #1e293b',
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#ef4444'
+        };
         
         function switchTab(tab) {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('regForm').classList.add('hidden');
-            document.getElementById('tabLogin').classList.remove('active');
-            document.getElementById('tabReg').classList.remove('active');
-            
+            const loginForm = document.getElementById('loginForm');
+            const regForm = document.getElementById('regForm');
+            const tabLogin = document.getElementById('tabLogin');
+            const tabReg = document.getElementById('tabReg');
+
+            // Reset animations
+            loginForm.classList.remove('fade-in-right');
+            regForm.classList.remove('fade-in-right');
+
             if(tab === 'login') {
-                document.getElementById('loginForm').classList.remove('hidden');
-                document.getElementById('tabLogin').classList.add('active');
+                regForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                void loginForm.offsetWidth; // Trigger reflow for animation
+                loginForm.classList.add('fade-in-right');
+                
+                tabReg.classList.remove('active');
+                tabLogin.classList.add('active');
             } else {
-                document.getElementById('regForm').classList.remove('hidden');
-                document.getElementById('tabReg').classList.add('active');
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                void regForm.offsetWidth; // Trigger reflow for animation
+                regForm.classList.add('fade-in-right');
+                
+                tabLogin.classList.remove('active');
+                tabReg.classList.add('active');
             }
         }
 
         async function handleLogin(e) {
             e.preventDefault();
-            const btn = document.getElementById('btnLogin'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            const btn = document.getElementById('btnLogin'); 
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
+            
             try {
                 const res = await fetch('/api/login', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: document.getElementById('lEmail').value, password: document.getElementById('lPass').value })
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: document.getElementById('lEmail').value, 
+                        password: document.getElementById('lPass').value 
+                    })
                 });
+                
                 const data = await res.json();
-                if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); window.location.href = '/'; } 
-                else { Swal.fire({title: 'Failed', text: data.error, icon: 'error', ...swalDark}); }
+                
+                if(data.success) { 
+                    localStorage.setItem('user', JSON.stringify(data.user)); 
+                    window.location.href = '/'; 
+                } else { 
+                    Swal.fire({
+                        title: 'Access Denied', 
+                        text: data.error, 
+                        icon: 'error', 
+                        ...swalTheme
+                    }); 
+                }
             } catch(err) {
-                Swal.fire({title: 'System Error', text: 'Database sync error. Admin needs to run npx prisma db push.', icon: 'error', ...swalDark});
+                Swal.fire({
+                    title: 'System Offline', 
+                    text: 'Unable to connect to the database. Please wait for server sync.', 
+                    icon: 'error', 
+                    ...swalTheme
+                });
             }
-            btn.innerHTML = 'Sign In';
+            btn.innerHTML = originalText;
         }
 
         async function handleRegister(e) {
             e.preventDefault();
-            const btn = document.getElementById('btnReg'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            const btn = document.getElementById('btnReg'); 
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating Profile...';
+            
             try {
                 const res = await fetch('/api/register', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: document.getElementById('rName').value, email: document.getElementById('rEmail').value, password: document.getElementById('rPass').value, refCode: document.getElementById('rRef').value, country: 'BD' })
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        name: document.getElementById('rName').value, 
+                        email: document.getElementById('rEmail').value, 
+                        password: document.getElementById('rPass').value, 
+                        refCode: document.getElementById('rRef').value, 
+                        country: 'BD' 
+                    })
                 });
+                
                 const data = await res.json();
-                if(data.success) { Swal.fire({title: 'Success!', text: data.message, icon: 'success', ...swalDark}).then(()=>switchTab('login')); } 
-                else { Swal.fire({title: 'Failed', text: data.error, icon: 'error', ...swalDark}); }
+                
+                if(data.success) { 
+                    Swal.fire({
+                        title: 'Profile Created!', 
+                        text: data.message, 
+                        icon: 'success', 
+                        ...swalTheme
+                    }).then(() => {
+                        // Switch to login tab and auto-fill email
+                        document.getElementById('lEmail').value = document.getElementById('rEmail').value;
+                        document.getElementById('lPass').value = '';
+                        switchTab('login');
+                    }); 
+                } else { 
+                    Swal.fire({
+                        title: 'Registration Failed', 
+                        text: data.error, 
+                        icon: 'error', 
+                        ...swalTheme
+                    }); 
+                }
             } catch(err) {
-                Swal.fire({title: 'System Error', text: 'Database sync error. Admin needs to run npx prisma db push.', icon: 'error', ...swalDark});
+                Swal.fire({
+                    title: 'System Offline', 
+                    text: 'Unable to connect to the database. Please wait for server sync.', 
+                    icon: 'error', 
+                    ...swalTheme
+                });
             }
-            btn.innerHTML = 'Create Account';
+            btn.innerHTML = originalText;
         }
     </script>
 </body>
