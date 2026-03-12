@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         body { background-color: #050b14; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .blob { position: absolute; filter: blur(100px); opacity: 0.3; animation: float 20s infinite alternate; pointer-events: none; }
@@ -19,28 +23,36 @@
         .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .glow-btn { transition: all 0.3s; } .glow-btn:hover { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); transform: translateY(-2px); }
-        .glow-input:focus { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); border-color: #3b82f6; background: rgba(15,23,42,0.9); }
+        .glow-input:focus { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); border-color: #3b82f6; background: rgba(15,23,42,0.9); outline: none;}
         .tab-btn.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #60a5fa; padding-left: 1.5rem; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
         .table-row-hover:hover { background: rgba(59,130,246,0.05); transform: scale(1.01); box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 12px; }
         .sidebar-open { transform: translateX(0); } .sidebar-closed { transform: translateX(-100%); }
         @media (min-width: 768px) { .sidebar-closed { transform: translateX(0); } }
+        
+        /* Premium Map Fixes */
+        .leaflet-popup-content-wrapper { background: #1e293b; color: #f8fafc; border-radius: 12px; border: 1px solid #334155; }
+        .leaflet-popup-tip { background: #1e293b; }
+        .leaflet-container { font-family: 'Inter', sans-serif; }
     </style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col md:flex-row relative">
     <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    
     <div id="loginSection" class="fixed inset-0 h-screen flex justify-center items-center z-[100] backdrop-blur-md bg-black/60">
         <div class="glass-panel p-10 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-[90%] max-w-md text-center border border-slate-700/50 animate-slide-up">
             <div class="w-20 h-20 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-3xl text-white mb-6 shadow-[0_0_30px_rgba(59,130,246,0.6)]"><i class="fa-solid fa-fingerprint"></i></div>
             <h2 class="text-3xl font-black mb-8 text-white tracking-tight">Admin Core</h2>
-            <input type="password" id="adminPass" class="w-full px-6 py-4 bg-slate-900/80 border border-slate-700 rounded-2xl mb-6 text-white glow-input font-black text-center tracking-[0.3em] text-xl" placeholder="••••••••">
+            <input type="password" id="adminPass" class="w-full px-6 py-4 bg-slate-900/80 border border-slate-700 rounded-2xl mb-6 text-white glow-input font-black text-center tracking-[0.3em] text-xl" placeholder="••••••••" onkeypress="if(event.key==='Enter') login()">
             <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black glow-btn tracking-widest uppercase active:scale-95">Authenticate</button>
         </div>
     </div>
+
     <div class="md:hidden glass-panel w-full p-4 flex justify-between items-center z-50 border-b border-slate-800 hidden" id="mobileHeader">
         <h2 class="text-xl font-black text-white">AURA <span class="text-blue-500">ADMIN</span></h2>
         <button onclick="toggleSidebar()" class="text-white text-2xl"><i class="fa-solid fa-bars"></i></button>
     </div>
+
     <div id="dashSection" class="hidden flex-1 flex h-full relative z-10 overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
         <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
         <div id="sidebar" class="w-72 glass-panel border-r border-slate-800/80 flex flex-col p-6 space-y-2 shadow-2xl absolute md:relative z-50 h-full sidebar-closed transition-transform duration-400 bg-[#050b14] md:bg-transparent">
@@ -52,18 +64,19 @@
             <button onclick="showTab('users', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-users mr-4 w-5 text-lg"></i> Users</button>
             <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-wallet mr-4 w-5 text-lg"></i> Deposits</button>
         </div>
+        
         <div class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
             <div id="statsTab" class="tab-content">
-                <h1 class="text-4xl font-black mb-8 text-white tracking-tight">Command Center</h1>
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-4xl font-black text-white tracking-tight">Command Center</h1>
+                    <button onclick="loadAllData()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold transition-colors"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Users</p><h2 class="text-4xl font-black text-white" id="statUsers">0</h2></div>
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Advance</p><h2 class="text-4xl font-black text-emerald-400" id="statRev">৳0</h2></div>
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-purple-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Orders</p><h2 class="text-4xl font-black text-purple-400" id="statOrders">0</h2></div>
                 </div>
-                <div class="glass-panel p-6 rounded-[32px] w-full max-w-4xl">
-                    <h3 class="text-lg font-bold text-white mb-4">Sales Analytics</h3>
-                    <canvas id="salesChart" height="100"></canvas>
-                </div>
+                <div class="glass-panel p-6 rounded-[32px] w-full max-w-4xl"><h3 class="text-lg font-bold text-white mb-4">Sales Analytics</h3><canvas id="salesChart" height="100"></canvas></div>
             </div>
 
             <div id="ordersTab" class="tab-content hidden">
@@ -75,16 +88,42 @@
             </div>
             
             <div id="productsTab" class="tab-content hidden"><h1 class="text-4xl font-black mb-8">Inventory</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Item</th><th class="p-6">Price</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-800"></tbody></table></div></div>
-            <div id="ridersTab" class="tab-content hidden"><div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black">Fleet</h1><button onclick="addRiderManually()" class="bg-emerald-600 px-6 py-3 rounded-xl font-bold">Add Rider</button></div><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider Info</th><th class="p-6">Deliveries & Wallet</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody></table></div></div>
-            <div id="usersTab" class="tab-content hidden"><div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black">Users</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search email..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl w-72"></div><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name</th><th class="p-6">Email</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
+            
+            <div id="ridersTab" class="tab-content hidden">
+                <div class="flex justify-between items-end mb-8">
+                    <h1 class="text-4xl font-black text-white">Fleet Command</h1>
+                    <button onclick="addRiderManually()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg">Add Rider</button>
+                </div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider Info</th><th class="p-6">Deliveries & Wallet</th><th class="p-6 text-right">Actions (Track / Delete)</th></tr></thead><tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody></table></div>
+            </div>
+
+            <div id="usersTab" class="tab-content hidden"><div class="flex justify-between items-end mb-8"><h1 class="text-4xl font-black">Users</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search email..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl w-72 focus:outline-none focus:border-blue-500"></div><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name</th><th class="p-6">Email</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
+            
             <div id="depositsTab" class="tab-content hidden"><h1 class="text-4xl font-black mb-8">Deposits</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
         </div>
     </div>
+
+    <div id="mapModal" class="fixed inset-0 bg-black/80 hidden justify-center items-center z-[999] backdrop-blur-md p-4 transition-opacity">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-5xl h-[80vh] rounded-[32px] overflow-hidden flex flex-col relative shadow-[0_0_50px_rgba(0,0,0,0.6)] animate-slide-up">
+            <div class="p-5 flex justify-between items-center bg-slate-800 border-b border-slate-700">
+                <div>
+                    <h3 class="font-black text-xl text-white flex items-center" id="mapTitle"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracking Rider</h3>
+                    <p class="text-xs text-slate-400 font-bold tracking-widest mt-1 uppercase" id="mapTime">Last update: Loading...</p>
+                </div>
+                <button onclick="closeMap()" class="w-10 h-10 bg-slate-700 rounded-full text-white hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="mapArea" class="flex-1 w-full h-full bg-slate-950 z-0"></div>
+        </div>
+    </div>
+
     <script>
         const swalDark = { background: 'rgba(15, 23, 42, 0.95)', color: '#fff', backdrop: 'rgba(0,0,0,0.8)' };
         const toast = (icon, title) => Swal.fire({ toast: true, position: 'top-end', icon, title, showConfirmButton: false, timer: 1500, background: '#1e293b', color: '#fff' });
         let pass = sessionStorage.getItem('adminPass'); let globalUsers = []; let chartInstance = null;
+        let map = null; let marker = null; // Map variables
+
         if(pass) checkAuth();
+        
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('sidebar-closed'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
         async function login() { pass = document.getElementById('adminPass').value; const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else { toast('error', 'Access Denied'); } }
         async function checkAuth() { document.getElementById('loginSection').style.opacity = 0; setTimeout(()=>document.getElementById('loginSection').classList.add('hidden'), 300); document.getElementById('dashSection').classList.remove('hidden'); document.getElementById('mobileHeader').classList.remove('hidden'); loadAllData(); }
@@ -92,32 +131,90 @@
         function downloadExcel() { window.open('/api/admin/export-orders', '_blank'); }
 
         async function loadAllData() {
-            const res = await fetch('/api/admin/stats'); const data = await res.json();
-            document.getElementById('statUsers').innerText = data.users; document.getElementById('statRev').innerText = "৳" + data.revenue.toFixed(0); document.getElementById('statOrders').innerText = data.orders.length;
-            globalUsers = data.userList; renderUsers(globalUsers);
-            
-            // Render Chart
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, { type: 'bar', data: { labels: ['Orders', 'Users', 'Products', 'Riders'], datasets: [{ label: 'Store Metrics', data: [data.orders.length, data.users, data.products.length, data.riderList.length], backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'], borderRadius: 8 }] }, options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+            try {
+                const res = await fetch('/api/admin/stats'); const data = await res.json();
+                document.getElementById('statUsers').innerText = data.users; document.getElementById('statRev').innerText = "৳" + data.revenue.toFixed(0); document.getElementById('statOrders').innerText = data.orders.length;
+                globalUsers = data.userList; renderUsers(globalUsers);
+                
+                // Render Chart
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                if(chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx, { type: 'bar', data: { labels: ['Orders', 'Users', 'Products', 'Riders'], datasets: [{ label: 'Store Metrics', data: [data.orders.length, data.users, data.products.length, data.riderList.length], backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'], borderRadius: 8 }] }, options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
 
-            document.getElementById('adminRiderList').innerHTML = data.riderList.map(r => `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${r.name}</p><p class="text-xs text-slate-400">${r.phone}</p></td><td class="p-6"><p class="text-xl font-black text-emerald-400">${r.deliveryCount} <span class="text-[10px] text-slate-400">Delivered</span></p><p class="text-xs text-blue-400 font-bold">Wallet: ৳${r.walletBalance}</p></td><td class="p-6 text-right"><button onclick="deleteRider(${r.id})" class="text-red-400 p-2 bg-red-500/10 rounded hover:bg-red-600 hover:text-white"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
-            document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="table-row-hover"><td class="p-6 font-bold">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400">${d.trxId}</td><td class="p-6 font-black text-emerald-400">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="text-emerald-400 mr-2">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="text-red-400">Reject</button>` : d.status}</td></tr>`).join('');
-            document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="table-row-hover"><td class="p-6 font-bold">${p.name} <span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 rounded ml-2">${p.category||'General'}</span></td><td class="p-6 text-emerald-400 font-black">৳${p.price}</td><td class="p-6 text-slate-400">${p.stock}</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
-            document.getElementById('adminOrderList').innerHTML = data.orders.map(o => {
-                let actionBtns = o.status === 'PENDING' ? `<button onclick="updateOrderStatus(${o.id}, 'RECEIVED')" class="text-[10px] bg-yellow-600 text-white px-4 py-2 rounded w-full mb-1">Receive</button>` : (o.status === 'RECEIVED' ? `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 text-white px-4 py-2 rounded w-full mb-1">Ship</button>` : '');
-                return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${o.user.firstName}</p><p class="text-xs text-blue-400">${o.phone||''}</p></td><td class="p-6"><p class="font-bold">${o.product?o.product.name:'Deleted'}</p><p class="text-[10px] text-slate-500">ID: #${o.id} ${o.promoApplied?`| Promo: ${o.promoApplied}`:''}</p></td><td class="p-6"><p class="text-xs">Total: ৳${o.priceTotal}</p><p class="text-xs text-red-400">COD: ৳${o.dueCod}</p></td><td class="p-6 text-right"><span class="text-[10px] font-bold block mb-2">${o.status}</span>${actionBtns}</td></tr>`
-            }).join('');
+                // 🔥 RIDER LIST WITH LOCATION BUTTON
+                document.getElementById('adminRiderList').innerHTML = data.riderList.map(r => {
+                    // Check if rider has sent coordinates
+                    let trackBtn = (r.lastLat && r.lastLng) 
+                        ? `<button onclick="trackRider(${r.lastLat}, ${r.lastLng}, '${r.name}', '${r.lastLocUpdate}')" class="text-emerald-400 p-2.5 bg-emerald-500/10 rounded-xl hover:bg-emerald-500 hover:text-white mr-2 transition-all shadow-sm" title="Track Live Location"><i class="fa-solid fa-map-location-dot"></i> Track</button>`
+                        : `<button disabled class="text-slate-600 p-2.5 bg-slate-800 rounded-xl mr-2 cursor-not-allowed" title="No GPS Data Available"><i class="fa-solid fa-location-dot"></i> No GPS</button>`;
+
+                    return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${r.name}</p><p class="text-xs text-slate-400">${r.phone}</p></td><td class="p-6"><p class="text-xl font-black text-emerald-400">${r.deliveryCount} <span class="text-[10px] text-slate-400 uppercase">Delivered</span></p><p class="text-xs text-blue-400 font-bold">Wallet: ৳${r.walletBalance}</p></td><td class="p-6 text-right">${trackBtn}<button onclick="deleteRider(${r.id})" class="text-red-400 p-2.5 bg-red-500/10 rounded-xl hover:bg-red-600 hover:text-white transition-all"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                }).join('');
+
+                document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="table-row-hover"><td class="p-6 font-bold">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400">${d.trxId}</td><td class="p-6 font-black text-emerald-400">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>` : `<span class="text-xs font-bold text-slate-500">${d.status}</span>`}</td></tr>`).join('');
+                document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="table-row-hover"><td class="p-6 font-bold">${p.name} <span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded ml-2 uppercase">${p.category||'General'}</span></td><td class="p-6 text-emerald-400 font-black">৳${p.price}</td><td class="p-6 text-slate-400 font-bold">${p.stock} pcs</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+                document.getElementById('adminOrderList').innerHTML = data.orders.map(o => {
+                    let actionBtns = o.status === 'PENDING' ? `<button onclick="updateOrderStatus(${o.id}, 'RECEIVED')" class="text-[10px] bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded w-full mb-1 uppercase tracking-widest font-bold transition-colors">Accept & Pack</button>` : (o.status === 'RECEIVED' ? `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded w-full mb-1 uppercase tracking-widest font-bold transition-colors">Handover to Rider</button>` : '');
+                    return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${o.user.firstName}</p><p class="text-xs text-blue-400">${o.phone||''}</p></td><td class="p-6"><p class="font-bold">${o.product?o.product.name:'Deleted Product'}</p><p class="text-[10px] text-slate-500 mt-1">ID: #${o.id} ${o.promoApplied?`| Promo: <span class="text-indigo-400">${o.promoApplied}</span>`:''}</p></td><td class="p-6"><p class="text-xs font-bold">Total: ৳${o.priceTotal}</p><p class="text-xs font-black text-red-400">COD: ৳${o.dueCod}</p></td><td class="p-6 text-right"><span class="text-[10px] font-black uppercase tracking-widest block mb-2 text-slate-300">${o.status}</span>${actionBtns}</td></tr>`
+                }).join('');
+            } catch(e) { console.error(e); toast('error', 'Error loading data'); }
         }
-        function renderUsers(users) { document.getElementById('userListBody').innerHTML = users.map(u => `<tr class="table-row-hover"><td class="p-6 font-bold">${u.firstName}</td><td class="p-6 text-sm text-slate-400">${u.email}</td><td class="p-6 text-emerald-400 font-black">৳${u.balanceBdt} <span class="text-yellow-400 text-xs ml-2"><i class="fa-solid fa-star"></i> ${u.loyaltyPoints} Pts</span></td><td class="p-6 text-right"><button onclick="editBalance(${u.id}, ${u.balanceBdt})" class="text-blue-400 mr-2"><i class="fa-solid fa-wallet"></i></button><button onclick="toggleBan(${u.id}, ${u.isBanned})" class="text-red-400"><i class="fa-solid fa-ban"></i></button></td></tr>`).join(''); }
+
+        function renderUsers(users) { document.getElementById('userListBody').innerHTML = users.map(u => `<tr class="table-row-hover"><td class="p-6 font-bold">${u.firstName}</td><td class="p-6 text-sm text-slate-400">${u.email}</td><td class="p-6 text-emerald-400 font-black">৳${u.balanceBdt} <span class="text-yellow-400 text-xs ml-2 bg-yellow-500/10 px-2 py-0.5 rounded"><i class="fa-solid fa-star"></i> ${u.loyaltyPoints}</span></td><td class="p-6 text-right"><button onclick="editBalance(${u.id}, ${u.balanceBdt})" class="text-blue-400 bg-blue-500/10 p-2 rounded-lg hover:bg-blue-500 hover:text-white mr-2 transition-colors" title="Edit Wallet"><i class="fa-solid fa-wallet"></i></button><button onclick="toggleBan(${u.id}, ${u.isBanned})" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="${u.isBanned?'Unban':'Ban'} User"><i class="fa-solid fa-ban"></i></button></td></tr>`).join(''); }
         function filterUsers() { const q = document.getElementById('userSearch').value.toLowerCase(); renderUsers(globalUsers.filter(u => u.firstName.toLowerCase().includes(q) || (u.email && u.email.toLowerCase().includes(q)))); }
-        async function updateOrderStatus(id, status) { await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); loadAllData(); toast('success', status); }
-        async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
-        async function deleteProduct(id) { if(confirm('Delete?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
-        async function addRiderManually() { const { value: f } = await Swal.fire({ title: 'Add Rider', html: `<input id="n" class="swal2-input" placeholder="Name"><input id="e" class="swal2-input" placeholder="Email"><input id="p" class="swal2-input" placeholder="Phone"><input id="pw" class="swal2-input" placeholder="Password">`, preConfirm: () => [document.getElementById('n').value, document.getElementById('e').value, document.getElementById('p').value, document.getElementById('pw').value], ...swalDark }); if(f&&f[0]) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'add', name:f[0], email:f[1], phone:f[2], riderPass:f[3]})}); loadAllData(); } }
-        async function deleteRider(id) { if(confirm('Delete?')) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'delete', id})}); loadAllData(); } }
-        async function editBalance(id, cur) { const { value: amt } = await Swal.fire({ title: 'Set Balance', input: 'number', inputValue: cur, ...swalDark }); if(amt) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount:amt})}); loadAllData(); } }
-        async function toggleBan(id, isBanned) { if(confirm('Change Ban Status?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
+        
+        async function updateOrderStatus(id, status) { await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); loadAllData(); toast('success', `Order marked as ${status}`); }
+        async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); toast('success', 'Deposit Updated');}
+        async function deleteProduct(id) { if(confirm('Are you sure you want to delete this product?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); toast('success', 'Deleted'); } }
+        async function addRiderManually() { const { value: f } = await Swal.fire({ title: 'Add New Rider', html: `<input id="n" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Full Name"><input id="e" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Email Address"><input id="p" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Phone Number"><input id="pw" class="swal2-input bg-slate-800 text-white border-slate-600" placeholder="Set Password">`, focusConfirm: false, confirmButtonText: 'Add Rider', confirmButtonColor: '#10b981', preConfirm: () => [document.getElementById('n').value, document.getElementById('e').value, document.getElementById('p').value, document.getElementById('pw').value], ...swalDark }); if(f&&f[0]) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'add', name:f[0], email:f[1], phone:f[2], riderPass:f[3]})}); loadAllData(); toast('success', 'Rider Added'); } }
+        async function deleteRider(id) { if(confirm('Remove this rider permanently?')) { await fetch('/api/admin/rider/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'delete', id})}); loadAllData(); toast('success', 'Rider Removed'); } }
+        async function editBalance(id, cur) { const { value: amt } = await Swal.fire({ title: 'Update Wallet Balance', input: 'number', inputValue: cur, confirmButtonText: 'Update', confirmButtonColor: '#3b82f6', ...swalDark }); if(amt !== undefined) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount:amt})}); loadAllData(); toast('success', 'Balance Updated'); } }
+        async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban this user?' : 'Ban this user?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); toast('success', 'Status Changed'); } }
+
+        // 🔥 CUSTOM LEAFLET MAP LOGIC FOR RIDER TRACKING (No Google Maps API needed)
+        function trackRider(lat, lng, name, time) {
+            document.getElementById('mapModal').classList.remove('hidden');
+            document.getElementById('mapModal').classList.add('flex');
+            
+            document.getElementById('mapTitle').innerHTML = `<i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracing: ${name}`;
+            let dateStr = new Date(time).toLocaleString();
+            document.getElementById('mapTime').innerText = `GPS Ping: ${dateStr}`;
+
+            // Initialize Map only once, then just move it
+            if(!map) {
+                map = L.map('mapArea').setView([lat, lng], 16);
+                // Premium Dark Theme Map Tiles (CartoDB Dark Matter)
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                }).addTo(map);
+                
+                // Custom Marker Icon
+                const customIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div style="background-color:#10b981;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 0 15px rgba(16,185,129,0.8);animation:pulse 2s infinite;"></div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                
+                marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
+            } else {
+                map.setView([lat, lng], 16);
+                marker.setLatLng([lat, lng]);
+            }
+            
+            marker.bindPopup(`<div class="text-center"><p class="font-black text-sm mb-1 text-slate-800">${name}</p><p class="text-[10px] font-bold text-slate-500">${dateStr}</p></div>`).openPopup();
+            
+            // Fix Leaflet rendering bug inside hidden modals
+            setTimeout(() => { map.invalidateSize(); }, 300);
+        }
+
+        function closeMap() {
+            document.getElementById('mapModal').classList.add('hidden');
+            document.getElementById('mapModal').classList.remove('flex');
+        }
+
     </script>
 </body>
 </html>
