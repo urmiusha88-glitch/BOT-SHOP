@@ -10,28 +10,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050b14; color: white; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; overflow-x: hidden;}
-        
         .blob { position: absolute; filter: blur(90px); opacity: 0.3; animation: float 15s infinite alternate ease-in-out; pointer-events: none; }
         .blob-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: #10b981; }
         .blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: #3b82f6; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
-
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide-up { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
         .animate-slide-right { animation: slideInRight 0.3s ease-out forwards; }
-
         .glass-panel { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
         .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; color: white; outline: none; font-size: 16px; }
         .input-box:focus { border-color: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.3); background: rgba(15,23,42,0.9); }
         .tab-active { border-bottom: 2px solid #10b981; color: #10b981; }
         .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
-        
         .desktop-tab { transition: all 0.3s; }
         .desktop-tab.active { background: linear-gradient(90deg, rgba(16,185,129,0.15) 0%, transparent 100%); border-left: 4px solid #10b981; color: #34d399; padding-left: 1.5rem; }
-        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
-        
         .r-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
         .badge-rookie { background: linear-gradient(135deg, #94a3b8, #475569); color: white; }
         .badge-bronze { background: linear-gradient(135deg, #d97706, #78350f); color: white; box-shadow: 0 0 10px rgba(217, 119, 6, 0.5); }
@@ -39,10 +33,8 @@
         .badge-gold { background: linear-gradient(135deg, #fbbf24, #b45309); color: #451a03; text-shadow: none; box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
         .badge-platinum { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #0f172a; text-shadow: none; box-shadow: 0 0 15px rgba(226, 232, 240, 0.6); }
         .badge-diamond { background: linear-gradient(135deg, #67e8f9, #0284c7); color: #082f49; text-shadow: none; box-shadow: 0 0 20px rgba(6, 182, 212, 0.8); }
-        
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
         .card-hover { transition: transform 0.2s, box-shadow 0.2s; } .card-hover:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(16,185,129,0.2); }
-        
         .rank-1 { border: 2px solid #fbbf24; background: rgba(251, 191, 36, 0.1); box-shadow: 0 0 20px rgba(251,191,36,0.3); }
         .rank-2 { border: 1px solid #cbd5e1; background: rgba(203, 213, 225, 0.1); }
         .rank-3 { border: 1px solid #d97706; background: rgba(217, 119, 6, 0.1); }
@@ -54,17 +46,12 @@
 
     <div id="authSection" class="absolute inset-0 flex flex-col items-center justify-center p-4 z-[100] bg-black/60 backdrop-blur-md animate-slide-up">
         <div class="w-full max-w-md">
-            <div class="text-center mb-8">
-                <div class="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-4xl text-slate-900 mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-6 transform rotate-12"><i class="fa-solid fa-motorcycle -rotate-12"></i></div>
-                <h1 class="text-4xl font-black tracking-tight text-white">RIDER <span class="text-emerald-400">PORTAL</span></h1>
-            </div>
-
+            <div class="text-center mb-8"><div class="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-4xl text-slate-900 mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-6 transform rotate-12"><i class="fa-solid fa-motorcycle -rotate-12"></i></div><h1 class="text-4xl font-black tracking-tight text-white">RIDER <span class="text-emerald-400">PORTAL</span></h1></div>
             <div class="glass-panel p-8 rounded-3xl shadow-2xl relative overflow-hidden">
                 <div id="loginForm" class="space-y-5 animate-slide-right">
                     <input type="email" id="lEmail" placeholder="Rider Email" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
                     <button onclick="login()" id="btnLogin" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] mt-4 active:scale-95">Enter App <i class="fa-solid fa-arrow-right ml-2"></i></button>
-                    
                     <button onclick="location.href='/login'" class="w-full mt-4 text-slate-500 font-bold hover:text-white text-sm text-center transition-colors"><i class="fa-solid fa-arrow-left mr-2"></i> Back to Store</button>
                 </div>
             </div>
@@ -72,33 +59,17 @@
     </div>
 
     <aside id="desktopSidebar" class="hidden md:flex w-72 flex-col glass-panel border-r border-slate-800/80 z-50 h-full p-6">
-        <div class="flex items-center gap-4 mb-12 pl-2">
-            <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-xl text-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.4)]"><i class="fa-solid fa-motorcycle"></i></div>
-            <h2 class="text-xl font-black text-white tracking-tighter">AURA <span class="text-emerald-400">RIDER</span></h2>
-        </div>
+        <div class="flex items-center gap-4 mb-12 pl-2"><div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-xl text-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.4)]"><i class="fa-solid fa-motorcycle"></i></div><h2 class="text-xl font-black text-white tracking-tighter">AURA <span class="text-emerald-400">RIDER</span></h2></div>
         <button onclick="switchDashTab('active')" id="dtab-desk-active" class="desktop-tab active text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-box mr-4 text-lg"></i> Active Orders</button>
         <button onclick="switchDashTab('history')" id="dtab-desk-history" class="desktop-tab text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-clock-rotate-left mr-4 text-lg"></i> History Logs</button>
         <button onclick="switchDashTab('leaderboard')" id="dtab-desk-leaderboard" class="desktop-tab text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-trophy mr-4 text-lg text-yellow-400"></i> Leaderboard</button>
         <button onclick="switchDashTab('profile')" id="dtab-desk-profile" class="desktop-tab text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-user mr-4 text-lg"></i> Profile & Wallet</button>
-        
-        <div class="mt-auto bg-slate-900/50 p-4 rounded-2xl border border-slate-800 text-center">
-            <div id="gpsStatusDesk" class="w-3 h-3 bg-red-500 rounded-full animate-pulse mx-auto mb-2 shadow-[0_0_10px_currentColor]"></div>
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">GPS Tracking Active</p>
-        </div>
+        <div class="mt-auto bg-slate-900/50 p-4 rounded-2xl border border-slate-800 text-center"><div id="gpsStatusDesk" class="w-3 h-3 bg-red-500 rounded-full animate-pulse mx-auto mb-2 shadow-[0_0_10px_currentColor]"></div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">GPS Tracking Active</p></div>
     </aside>
 
     <main id="dashSection" class="hidden flex-1 flex-col h-screen relative z-10 w-full">
         <header class="md:hidden shrink-0 bg-slate-900 border-b border-slate-800 shadow-lg z-50">
-            <div class="px-5 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-slate-900 overflow-hidden border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" id="topAvatarMob"><i class="fa-solid fa-user-astronaut"></i></div>
-                    <div><h2 class="text-xl font-black leading-tight text-white" id="riderNameDisplayMob">Rider</h2><p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5" id="riderBadgeDisplayMob">Rookie</p></div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div id="gpsStatusMob" class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_currentColor]"></div>
-                    <button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-xl font-bold transition-colors active:scale-95"><i class="fa-solid fa-power-off text-xl"></i></button>
-                </div>
-            </div>
+            <div class="px-5 py-4 flex justify-between items-center"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-slate-900 overflow-hidden border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" id="topAvatarMob"><i class="fa-solid fa-user-astronaut"></i></div><div><h2 class="text-xl font-black leading-tight text-white" id="riderNameDisplayMob">Rider</h2><p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5" id="riderBadgeDisplayMob">Rookie</p></div></div><div class="flex items-center gap-3"><div id="gpsStatusMob" class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_currentColor]"></div><button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-xl font-bold transition-colors active:scale-95"><i class="fa-solid fa-power-off text-xl"></i></button></div></div>
         </header>
 
         <header class="hidden md:flex shrink-0 bg-transparent border-b border-slate-800/50 px-10 py-6 justify-between items-center z-40 backdrop-blur-md">
@@ -168,9 +139,41 @@
         }
 
         async function login() { const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value; if(!email || !password) return; const btn = document.getElementById('btnLogin'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...'; const res = await fetch('/api/rider/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password}) }); const data = await res.json(); btn.innerHTML = 'Enter App <i class="fa-solid fa-arrow-right ml-2"></i>'; if(data.success) { rider = { id: data.rider.id }; loadRiderData(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title: data.error || 'Login Failed', background:'#1e293b', color:'#fff'}); } }
-        function requestWithdraw() { if(rider.walletBalance < 500) { Swal.fire({title: 'Insufficient Balance', text: 'You need at least ৳500 in your wallet to withdraw.', icon: 'warning', ...swalDark}); } else { Swal.fire({title: 'Withdraw Request', text: 'Feature coming soon! Contact admin for manual payout.', icon: 'info', ...swalDark}); } }
 
-        // 🔥 FETCH ORDERS UPDATED (Handles Pending & Shipped UI logically)
+        // 🔥 REAL WITHDRAW LOGIC
+        async function requestWithdraw() { 
+            if(rider.walletBalance < 50) return Swal.fire({title: 'Insufficient Balance', text: 'You need at least ৳50 to withdraw.', icon: 'warning', ...swalDark}); 
+            
+            const { value: formValues } = await Swal.fire({
+                title: 'Withdraw Funds',
+                html: `
+                    <p class="text-slate-400 text-sm mb-4">Available Balance: <b class="text-emerald-400">৳${rider.walletBalance}</b></p>
+                    <select id="wMethod" class="swal2-input bg-slate-800 text-white border-slate-600 mb-3 w-[80%] mx-auto block h-12 rounded-xl px-4 outline-none font-bold">
+                        <option value="bkash">bKash Personal</option>
+                        <option value="nagad">Nagad Personal</option>
+                    </select>
+                    <input id="wNumber" type="number" class="swal2-input bg-slate-800 text-white border-slate-600 mb-3 font-bold tracking-widest" placeholder="Account Number">
+                    <input id="wAmount" type="number" class="swal2-input bg-slate-800 text-emerald-400 border-slate-600 font-black text-xl" placeholder="Amount (৳)">
+                `,
+                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Send Request', confirmButtonColor: '#10b981', ...swalDark,
+                preConfirm: () => {
+                    const method = document.getElementById('wMethod').value;
+                    const number = document.getElementById('wNumber').value;
+                    const amount = parseFloat(document.getElementById('wAmount').value);
+                    if (!number || !amount || amount < 50 || amount > rider.walletBalance) { Swal.showValidationMessage('Invalid amount or number.'); return false; }
+                    return { method, number, amount };
+                }
+            });
+
+            if (formValues) {
+                Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, ...swalDark });
+                const res = await fetch('/api/rider/withdraw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ riderId: rider.id, amount: formValues.amount, method: formValues.method, number: formValues.number }) });
+                const data = await res.json();
+                if (data.success) { Swal.fire({ title: 'Requested!', text: 'Your withdrawal request has been sent to admin.', icon: 'success', ...swalDark }); loadRiderData(); } 
+                else { Swal.fire('Error', data.error, 'error', swalDark); }
+            }
+        }
+
         async function fetchOrders() {
             const container = document.getElementById('view-active'); container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold mt-32"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-emerald-500"></i><br>Locating Orders...</div>';
             try {
