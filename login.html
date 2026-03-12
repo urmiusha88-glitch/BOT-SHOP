@@ -11,71 +11,29 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #050b14; 
-            color: #e2e8f0; 
-            overflow: hidden; 
-            margin: 0;
-            padding: 0;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #050b14; color: #e2e8f0; overflow: hidden; margin: 0; padding: 0;}
         .blob-container { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
         .blob { position: absolute; filter: blur(120px); opacity: 0.4; animation: float 20s infinite alternate; }
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3b82f6; }
         .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #6366f1; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10vw, 5vw) scale(1.1); } }
-
-        .glass-panel { 
-            background: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(24px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         .input-group { position: relative; margin-bottom: 1.25rem; }
         .input-group i { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1.1rem; transition: 0.3s; }
-        .input-field { 
-            width: 100%; 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            color: white; 
-            padding: 1rem 1rem 1rem 3rem; 
-            border-radius: 1rem; 
-            font-weight: 600; 
-            outline: none; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        .input-field:focus { 
-            border-color: #3b82f6; 
-            background: rgba(15, 23, 42, 0.8); 
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); 
-        }
+        .input-field { width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; font-weight: 600; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .input-field:focus { border-color: #3b82f6; background: rgba(15, 23, 42, 0.8); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
         .input-field:focus + i, .input-field:focus ~ i { color: #3b82f6; }
-
-        .tab-btn { 
-            color: #64748b; 
-            border-bottom: 2px solid transparent; 
-            transition: all 0.3s ease; 
-        }
-        .tab-btn.active { 
-            color: #3b82f6; 
-            border-bottom-color: #3b82f6; 
-            text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-        }
-
+        .tab-btn { color: #64748b; border-bottom: 2px solid transparent; transition: all 0.3s ease; }
+        .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);}
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
         .fade-in-right { animation: fadeInRight 0.4s ease-out forwards; }
         @keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body class="h-screen w-screen flex items-center justify-center p-4">
 
-    <div class="blob-container">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-    </div>
+    <div class="blob-container"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
     <div class="w-full max-w-5xl h-full max-h-[850px] md:h-[600px] flex flex-col md:flex-row glass-panel rounded-[2rem] md:rounded-[3rem] overflow-hidden relative z-10 animate-enter">
         
@@ -89,8 +47,12 @@
                     AURA<br><span class="text-blue-400">STORE</span>
                 </h1>
                 <p class="text-blue-100/80 font-medium text-lg leading-relaxed max-w-xs">
-                    Premium Authentication Portal.
+                    Premium Authentication Portal. 
                 </p>
+            </div>
+            
+            <div class="relative z-10 mt-auto pt-8">
+                <a href="/admin" class="text-xs font-bold text-white/50 hover:text-white transition-colors border border-white/20 rounded-full px-4 py-2 backdrop-blur-sm"><i class="fa-solid fa-shield-halved mr-1"></i> Admin Gateway</a>
             </div>
         </div>
 
@@ -189,108 +151,36 @@
     </div>
 
     <script>
-        const swalTheme = { 
-            background: '#0f172a', 
-            color: '#f8fafc', 
-            border: '1px solid #1e293b',
-            confirmButtonColor: '#3b82f6',
-            cancelButtonColor: '#ef4444'
-        };
+        const swalTheme = { background: '#0f172a', color: '#f8fafc', border: '1px solid #1e293b', confirmButtonColor: '#3b82f6', cancelButtonColor: '#ef4444' };
         
-        function switchTab(tab) {
-            const loginForm = document.getElementById('loginForm');
-            const regForm = document.getElementById('regForm');
-            const forgotForm = document.getElementById('forgotForm');
-            const tabLogin = document.getElementById('tabLogin');
-            const tabReg = document.getElementById('tabReg');
-
-            loginForm.classList.remove('fade-in-right');
-            regForm.classList.remove('fade-in-right');
+        function switchTab(tab) { 
+            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('regForm').classList.add('hidden'); document.getElementById('forgotForm').classList.add('hidden');
+            document.getElementById('tabLogin').classList.remove('active'); document.getElementById('tabReg').classList.remove('active'); 
+            document.getElementById('tabsArea').classList.remove('hidden'); document.getElementById('bottomLinks').classList.remove('hidden');
             
-            forgotForm.classList.add('hidden');
-            document.getElementById('tabsArea').classList.remove('hidden');
-            document.getElementById('bottomLinks').classList.remove('hidden');
-
-            if(tab === 'login') {
-                regForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                void loginForm.offsetWidth; 
-                loginForm.classList.add('fade-in-right');
-                
-                tabReg.classList.remove('active');
-                tabLogin.classList.add('active');
-            } else {
-                loginForm.classList.add('hidden');
-                regForm.classList.remove('hidden');
-                void regForm.offsetWidth; 
-                regForm.classList.add('fade-in-right');
-                
-                tabLogin.classList.remove('active');
-                tabReg.classList.add('active');
-            }
+            if(tab === 'login') { document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('tabLogin').classList.add('active'); } 
+            else if(tab === 'register') { document.getElementById('regForm').classList.remove('hidden'); document.getElementById('tabReg').classList.add('active'); } 
         }
 
         async function handleLogin(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnLogin'); 
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
-            
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: document.getElementById('lEmail').value, 
-                        password: document.getElementById('lPass').value 
-                    })
-                });
-                
-                const data = await res.json();
-                
-                if(data.success) { 
-                    localStorage.setItem('user', JSON.stringify(data.user)); 
-                    window.location.href = '/'; 
-                } else { 
-                    Swal.fire({ title: 'Access Denied', text: data.error, icon: 'error', ...swalTheme }); 
-                }
-            } catch(err) {
-                Swal.fire({ title: 'System Offline', text: 'Wait for server sync.', icon: 'error', ...swalTheme });
-            }
+            e.preventDefault(); const btn = document.getElementById('btnLogin'); const originalText = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
+            try { 
+                const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('lEmail').value, password: document.getElementById('lPass').value }) }); 
+                const data = await res.json(); 
+                if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); window.location.href = '/'; } 
+                else { Swal.fire({ title: 'Access Denied', text: data.error, icon: 'error', ...swalTheme }); } 
+            } catch(err) { Swal.fire({ title: 'System Offline', text: 'Wait for server sync.', icon: 'error', ...swalTheme }); } 
             btn.innerHTML = originalText;
         }
 
         async function handleRegister(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnReg'); 
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating Profile...';
-            
-            try {
-                const res = await fetch('/api/register', {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        name: document.getElementById('rName').value, 
-                        email: document.getElementById('rEmail').value, 
-                        password: document.getElementById('rPass').value 
-                    })
-                });
-                
-                const data = await res.json();
-                
-                if(data.success) { 
-                    Swal.fire({ title: 'Profile Created!', text: data.message, icon: 'success', ...swalTheme }).then(() => {
-                        document.getElementById('lEmail').value = document.getElementById('rEmail').value;
-                        document.getElementById('lPass').value = '';
-                        switchTab('login');
-                    }); 
-                } else { 
-                    Swal.fire({ title: 'Registration Failed', text: data.error, icon: 'error', ...swalTheme }); 
-                }
-            } catch(err) {
-                Swal.fire({ title: 'System Offline', text: 'Wait for server sync.', icon: 'error', ...swalTheme });
-            }
+            e.preventDefault(); const btn = document.getElementById('btnReg'); const originalText = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating Profile...';
+            try { 
+                const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('rName').value, email: document.getElementById('rEmail').value, password: document.getElementById('rPass').value }) }); 
+                const data = await res.json(); 
+                if(data.success) { Swal.fire({ title: 'Profile Created!', text: data.message, icon: 'success', ...swalTheme }).then(() => { document.getElementById('lEmail').value = document.getElementById('rEmail').value; switchTab('login'); }); } 
+                else { Swal.fire({ title: 'Registration Failed', text: data.error, icon: 'error', ...swalTheme }); } 
+            } catch(err) { Swal.fire({ title: 'System Offline', text: 'Wait for server sync.', icon: 'error', ...swalTheme }); } 
             btn.innerHTML = originalText;
         }
 
@@ -299,7 +189,6 @@
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('tabsArea').classList.add('hidden');
             document.getElementById('bottomLinks').classList.add('hidden');
-            
             const forgotForm = document.getElementById('forgotForm');
             forgotForm.classList.remove('hidden');
             void forgotForm.offsetWidth;
@@ -307,43 +196,24 @@
         }
 
         function cancelForgot() { 
-            document.getElementById('fEmail').value=''; 
-            document.getElementById('fOtp').value=''; 
-            document.getElementById('fNewPass').value=''; 
-            document.getElementById('otpArea').classList.add('hidden'); 
-            document.getElementById('btnSendForgot').classList.remove('hidden'); 
-            document.getElementById('btnVerifyForgot').classList.add('hidden'); 
-            document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; 
+            document.getElementById('fEmail').value=''; document.getElementById('fOtp').value=''; document.getElementById('fNewPass').value=''; 
+            document.getElementById('otpArea').classList.add('hidden'); document.getElementById('btnSendForgot').classList.remove('hidden'); 
+            document.getElementById('btnVerifyForgot').classList.add('hidden'); document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; 
             switchTab('login'); 
         }
 
         async function sendForgotOTP() {
             const email = document.getElementById('fEmail').value; 
             if(!email) return Swal.fire('Warning','Enter your account email first.','warning', swalTheme);
-            
             document.getElementById('btnSendForgot').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
-            
             try {
-                const res = await fetch('/api/auth/send-otp', { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({email}) 
-                });
+                const res = await fetch('/api/auth/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email}) });
                 const data = await res.json();
-                
                 if(data.success) {
                     Swal.fire({toast:true, position:'top-end', icon:'success', title:'OTP Sent to Email', showConfirmButton:false, timer:2000, ...swalTheme});
-                    document.getElementById('btnSendForgot').classList.add('hidden');
-                    document.getElementById('otpArea').classList.remove('hidden');
-                    document.getElementById('btnVerifyForgot').classList.remove('hidden');
-                } else { 
-                    document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; 
-                    Swal.fire('Error', data.error, 'error', swalTheme); 
-                }
-            } catch(e) {
-                document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; 
-                Swal.fire('Error', 'Network connection failed.', 'error', swalTheme);
-            }
+                    document.getElementById('btnSendForgot').classList.add('hidden'); document.getElementById('otpArea').classList.remove('hidden'); document.getElementById('btnVerifyForgot').classList.remove('hidden');
+                } else { document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; Swal.fire('Error', data.error, 'error', swalTheme); }
+            } catch(e) { document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; Swal.fire('Error', 'Network connection failed.', 'error', swalTheme); }
         }
 
         async function resendForgotOTP() {
@@ -354,32 +224,15 @@
         }
 
         async function verifyAndReset() {
-            const email = document.getElementById('fEmail').value; 
-            const code = document.getElementById('fOtp').value; 
-            const newPassword = document.getElementById('fNewPass').value;
-            
+            const email = document.getElementById('fEmail').value; const code = document.getElementById('fOtp').value; const newPassword = document.getElementById('fNewPass').value;
             if(!code || !newPassword) return Swal.fire('Error','Please fill in both the OTP code and new password.','error', swalTheme);
-            
             document.getElementById('btnVerifyForgot').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
-            
             try {
-                const res = await fetch('/api/auth/reset', { 
-                    method:'POST', 
-                    headers:{'Content-Type':'application/json'}, 
-                    body:JSON.stringify({email, code, newPassword}) 
-                });
+                const res = await fetch('/api/auth/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, code, newPassword}) });
                 const data = await res.json();
-                
-                if(data.success) { 
-                    Swal.fire('Success!', 'Password updated securely. You can now login.', 'success', swalTheme).then(()=>cancelForgot()); 
-                } else { 
-                    document.getElementById('btnVerifyForgot').innerText = 'Verify & Update Password'; 
-                    Swal.fire('Verification Failed', data.error, 'error', swalTheme); 
-                }
-            } catch(e) {
-                document.getElementById('btnVerifyForgot').innerText = 'Verify & Update Password';
-                Swal.fire('Error', 'Network connection failed.', 'error', swalTheme);
-            }
+                if(data.success) { Swal.fire('Success!', 'Password updated securely. You can now login.', 'success', swalTheme).then(()=>cancelForgot()); } 
+                else { document.getElementById('btnVerifyForgot').innerText = 'Verify & Update Password'; Swal.fire('Verification Failed', data.error, 'error', swalTheme); }
+            } catch(e) { document.getElementById('btnVerifyForgot').innerText = 'Verify & Update Password'; Swal.fire('Error', 'Network connection failed.', 'error', swalTheme); }
         }
     </script>
 </body>
