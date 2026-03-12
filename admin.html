@@ -20,9 +20,11 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
         @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fade 0.4s ease-out forwards; }
+        .leaflet-popup-content-wrapper { background: #1e293b; color: #f8fafc; border-radius: 12px; border: 1px solid #334155; }
+        .leaflet-popup-tip { background: #1e293b; }
     </style>
 </head>
-<body class="h-screen overflow-hidden flex flex-col md:flex-row relative">
+<body class="h-screen overflow-hidden flex flex-col relative">
     
     <div id="loginSection" class="fixed inset-0 h-screen flex justify-center items-center z-[100] backdrop-blur-md bg-black/80">
         <div class="glass-panel p-10 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-[90%] max-w-md text-center border border-slate-700/50 relative overflow-hidden">
@@ -48,130 +50,137 @@
 
                 <button id="btnRegSend" onclick="requestAdminOTP()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-black uppercase shadow-lg hover:bg-emerald-500 mb-4 text-sm">Send Request OTP</button>
                 <button id="btnRegVerify" onclick="verifyAdminReg()" class="hidden w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase shadow-lg hover:bg-blue-500 mb-4 text-sm">Verify & Apply</button>
-                
                 <p class="text-sm text-slate-400"><button onclick="toggleAuthForm()" class="text-slate-300 font-bold hover:text-white"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Login</button></p>
             </div>
         </div>
     </div>
 
-    <div id="dashSection" class="hidden flex-1 flex h-full relative z-10 overflow-hidden">
+    <div id="dashSection" class="hidden flex-col h-screen relative z-10 w-full overflow-hidden">
         
-        <div id="sidebar" class="w-72 glass-panel border-r border-slate-800/80 flex flex-col p-6 space-y-2 overflow-y-auto custom-scrollbar">
-            <div class="mb-10 pl-2">
-                <h2 class="text-2xl font-black text-white" id="panelTitle">AURA ADMIN</h2>
-                <p id="panelRole" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 inline-block mt-1 uppercase">ADMIN</p>
-            </div>
-            
-            <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
-            <button onclick="showTab('orders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-box mr-4 w-5"></i> Orders</button>
-            <button onclick="showTab('products', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-shirt mr-4 w-5"></i> Products</button>
-            <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-wallet mr-4 w-5"></i> Deposits</button>
-            <button onclick="showTab('riders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-motorcycle mr-4 w-5"></i> Riders Fleet</button>
-            <button onclick="showTab('users', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-users mr-4 w-5"></i> Users</button>
-            
-            <div id="ownerMenu" class="hidden flex-col mt-4 border-t border-slate-800 pt-4">
-                <p class="text-[9px] text-slate-600 font-black uppercase tracking-widest px-4 mb-2">Owner Controls</p>
-                <button onclick="showTab('admins', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-shield-halved mr-4 w-5"></i> Admins</button>
-                <button onclick="showTab('storectrl', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-store mr-4 w-5"></i> Web Control</button>
-                <button onclick="showTab('config', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-gear mr-4 w-5"></i> Owner Info</button>
-            </div>
-            
-            <button onclick="logout()" class="text-left p-4 rounded-xl font-bold text-red-500 hover:bg-red-500/10 uppercase text-xs mt-auto"><i class="fa-solid fa-power-off mr-4 w-5"></i> Logout</button>
+        <div id="mobileHeader" class="md:hidden flex justify-between items-center p-5 glass-panel border-b border-slate-800 shrink-0 z-[60]">
+            <div><h2 class="text-xl font-black text-white leading-tight">AURA ADMIN</h2><p id="mobPanelRole" class="text-[10px] text-blue-400 font-bold uppercase">ADMIN</p></div>
+            <button onclick="toggleSidebar()" class="text-white text-2xl p-2"><i class="fa-solid fa-bars"></i></button>
         </div>
-        
-        <div class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
+
+        <div class="flex flex-1 overflow-hidden relative">
             
-            <div id="statsTab" class="tab-content animate-fade">
-                <div class="flex justify-between items-center mb-8"><h1 class="text-4xl font-black text-white">Dashboard</h1><button onclick="loadAllData()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button></div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Users</p><h2 class="text-4xl font-black text-white" id="statUsers">0</h2></div>
-                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-purple-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Orders</p><h2 class="text-4xl font-black text-purple-400" id="statOrders">0</h2></div>
+            <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-[70] hidden md:hidden" onclick="toggleSidebar()"></div>
+            
+            <aside id="sidebar" class="fixed inset-y-0 left-0 z-[80] md:relative w-72 glass-panel border-r border-slate-800/80 flex flex-col p-6 space-y-2 overflow-y-auto custom-scrollbar transform transition-transform duration-300 -translate-x-full md:translate-x-0">
+                <button onclick="toggleSidebar()" class="md:hidden absolute top-5 right-5 text-slate-400 text-2xl hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="hidden md:block mb-10 pl-2">
+                    <h2 class="text-2xl font-black text-white" id="panelTitle">AURA ADMIN</h2>
+                    <p id="panelRole" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 inline-block mt-1 uppercase">ADMIN</p>
                 </div>
-            </div>
-
-            <div id="ordersTab" class="tab-content hidden animate-fade">
-                <h1 class="text-4xl font-black text-white mb-8">Manage Orders</h1>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Customer</th><th class="p-6">Product</th><th class="p-6">Payment</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminOrderList" class="divide-y divide-slate-800"></tbody></table></div>
-            </div>
-
-            <div id="productsTab" class="tab-content hidden animate-fade">
-                <h1 class="text-4xl font-black text-white mb-8">Inventory</h1>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Item</th><th class="p-6">Price & Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-800"></tbody></table></div>
-            </div>
-
-            <div id="depositsTab" class="tab-content hidden animate-fade">
-                <h1 class="text-4xl font-black text-white mb-8">Fund Deposits</h1>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-800"></tbody></table></div>
-            </div>
-
-            <div id="ridersTab" class="tab-content hidden animate-fade">
-                <h1 class="text-4xl font-black text-white mb-8">Riders Fleet</h1>
-                <div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider Info</th><th class="p-6">Deliveries & Wallet</th><th class="p-6 text-right">Live Tracking</th></tr></thead><tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody></table></div>
                 
-                <h2 class="text-2xl font-black text-white mb-6"><i class="fa-solid fa-money-bill-transfer text-emerald-500 mr-2"></i> Withdraw Requests</h2>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider</th><th class="p-6">Method & Number</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminRiderWithdraws" class="divide-y divide-slate-800"></tbody></table></div>
-            </div>
-
-            <div id="usersTab" class="tab-content hidden animate-fade">
-                <h1 class="text-4xl font-black text-white mb-8">Manage Users</h1>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Role</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div>
-            </div>
-
-            <div id="adminsTab" class="tab-content hidden animate-fade">
-                <h1 class="text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-crown mr-3"></i>System Admins</h1>
+                <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
+                <button onclick="showTab('orders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-box mr-4 w-5"></i> Orders</button>
+                <button onclick="showTab('products', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-shirt mr-4 w-5"></i> Products</button>
+                <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-wallet mr-4 w-5"></i> Deposits</button>
+                <button onclick="showTab('riders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-motorcycle mr-4 w-5"></i> Riders Fleet</button>
+                <button onclick="showTab('users', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-users mr-4 w-5"></i> Users</button>
                 
-                <h2 class="text-xl font-bold text-white mb-4">Pending Requests</h2>
-                <div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Applicant</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="pendingAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
-
-                <h2 class="text-xl font-bold text-white mb-4">Active Admins</h2>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="activeAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
-            </div>
-
-            <div id="storectrlTab" class="tab-content hidden animate-fade">
-                <h1 class="text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-store mr-3"></i>Web Controls</h1>
+                <div id="ownerMenu" class="hidden flex-col mt-4 border-t border-slate-800 pt-4">
+                    <p class="text-[9px] text-slate-600 font-black uppercase tracking-widest px-4 mb-2">Owner Controls</p>
+                    <button onclick="showTab('admins', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-shield-halved mr-4 w-5"></i> Admins</button>
+                    <button onclick="showTab('storectrl', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-store mr-4 w-5"></i> Web Control</button>
+                    <button onclick="showTab('config', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-gear mr-4 w-5"></i> Owner Info</button>
+                </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="glass-panel p-6 rounded-[32px]">
-                        <h3 class="text-xl font-black text-white mb-4">Maintenance Mode</h3>
-                        <p class="text-sm text-slate-400 mb-4">Turn off the main website temporarily.</p>
-                        <button onclick="ownerAction('toggle_maintenance')" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm w-full"><i class="fa-solid fa-power-off mr-2"></i> Toggle Power</button>
+                <button onclick="logout()" class="text-left p-4 rounded-xl font-bold text-red-500 hover:bg-red-500/10 uppercase text-xs mt-auto"><i class="fa-solid fa-power-off mr-4 w-5"></i> Logout</button>
+            </aside>
+            
+            <main class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar relative z-10 w-full">
+                
+                <div id="statsTab" class="tab-content animate-fade">
+                    <div class="flex justify-between items-center mb-8"><h1 class="text-3xl md:text-4xl font-black text-white">Dashboard</h1><button onclick="loadAllData()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Users</p><h2 class="text-4xl font-black text-white" id="statUsers">0</h2></div>
+                        <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-purple-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Orders</p><h2 class="text-4xl font-black text-purple-400" id="statOrders">0</h2></div>
                     </div>
-                    <div class="glass-panel p-6 rounded-[32px]">
-                        <h3 class="text-xl font-black text-white mb-4">Notice Board</h3>
-                        <input type="text" id="noticeText" placeholder="Enter Notice Text" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500 mb-3 text-sm">
-                        <div class="flex gap-2">
-                            <button onclick="ownerAction('add_notice')" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm flex-1">Publish</button>
-                            <button onclick="ownerAction('clear_notices')" class="bg-slate-700 text-red-400 px-4 py-3 rounded-xl font-bold text-sm">Clear All</button>
+                </div>
+
+                <div id="ordersTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Orders</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Customer</th><th class="p-6">Product</th><th class="p-6">Payment</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminOrderList" class="divide-y divide-slate-800"></tbody></table></div>
+                </div>
+
+                <div id="productsTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Inventory</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Item</th><th class="p-6">Price & Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-800"></tbody></table></div>
+                </div>
+
+                <div id="depositsTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Fund Deposits</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-800"></tbody></table></div>
+                </div>
+
+                <div id="ridersTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Riders Fleet</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider Info</th><th class="p-6">Deliveries & Wallet</th><th class="p-6 text-right">Live Tracking</th></tr></thead><tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody></table></div>
+                    
+                    <h2 class="text-xl md:text-2xl font-black text-white mb-6"><i class="fa-solid fa-money-bill-transfer text-emerald-500 mr-2"></i> Withdraw Requests</h2>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider</th><th class="p-6">Method & Number</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminRiderWithdraws" class="divide-y divide-slate-800"></tbody></table></div>
+                </div>
+
+                <div id="usersTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Users</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Role</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div>
+                </div>
+
+                <div id="adminsTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-crown mr-3"></i>System Admins</h1>
+                    <h2 class="text-xl font-bold text-white mb-4">Pending Requests</h2>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Applicant</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="pendingAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
+                    <h2 class="text-xl font-bold text-white mb-4">Active Admins</h2>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="activeAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
+                </div>
+
+                <div id="storectrlTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-store mr-3"></i>Web Controls</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="glass-panel p-6 rounded-[32px]">
+                            <h3 class="text-xl font-black text-white mb-4">Maintenance Mode</h3>
+                            <p class="text-sm text-slate-400 mb-4">Turn off the main website temporarily.</p>
+                            <button onclick="ownerAction('toggle_maintenance')" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm w-full"><i class="fa-solid fa-power-off mr-2"></i> Toggle Power</button>
+                        </div>
+                        <div class="glass-panel p-6 rounded-[32px]">
+                            <h3 class="text-xl font-black text-white mb-4">Notice Board</h3>
+                            <input type="text" id="noticeText" placeholder="Enter Notice Text" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500 mb-3 text-sm">
+                            <div class="flex gap-2">
+                                <button onclick="ownerAction('add_notice')" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm flex-1">Publish</button>
+                                <button onclick="ownerAction('clear_notices')" class="bg-slate-700 text-red-400 px-4 py-3 rounded-xl font-bold text-sm">Clear All</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="glass-panel p-6 rounded-[32px]">
-                    <h3 class="text-xl font-black text-white mb-4">Add Product</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <input type="text" id="pName" placeholder="Product Name" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                        <input type="text" id="pCat" placeholder="Category" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                        <input type="number" id="pPrice" placeholder="Price (BDT)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                        <input type="number" id="pStock" placeholder="Stock" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                        <input type="text" id="pImage" placeholder="Image Base64 URL" class="col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
+                    <div class="glass-panel p-6 rounded-[32px]">
+                        <h3 class="text-xl font-black text-white mb-4">Add Product</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <input type="text" id="pName" placeholder="Product Name" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
+                            <input type="text" id="pCat" placeholder="Category" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
+                            <input type="number" id="pPrice" placeholder="Price (BDT)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
+                            <input type="number" id="pStock" placeholder="Stock" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
+                            <input type="text" id="pImage" placeholder="Image Base64 URL" class="col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
+                        </div>
+                        <button onclick="ownerAction('add_product')" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm w-full">Upload Product</button>
                     </div>
-                    <button onclick="ownerAction('add_product')" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm w-full">Upload Product</button>
                 </div>
-            </div>
 
-            <div id="configTab" class="tab-content hidden animate-fade max-w-2xl">
-                <h1 class="text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-user-tie mr-3"></i>Owner Profile</h1>
-                <div class="glass-panel p-8 rounded-[32px] space-y-4">
-                    <p class="text-sm text-slate-400 mb-6 border-b border-slate-700 pb-4">Visible on website's 'Admin Support' section.</p>
-                    <input type="text" id="cfgName" placeholder="Owner Name" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                    <input type="text" id="cfgBio" placeholder="Short Bio / Title" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                    <input type="text" id="cfgPhone" placeholder="Contact Number" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                    <input type="text" id="cfgFb" placeholder="Facebook URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                    <input type="text" id="cfgTg" placeholder="Telegram URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                    <button onclick="saveStoreConfig()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-4 rounded-xl mt-6 uppercase tracking-widest hover:scale-[1.02] transition-transform">Save Live Website Info</button>
+                <div id="configTab" class="tab-content hidden animate-fade max-w-2xl">
+                    <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-user-tie mr-3"></i>Owner Profile</h1>
+                    <div class="glass-panel p-8 rounded-[32px] space-y-4">
+                        <p class="text-sm text-slate-400 mb-6 border-b border-slate-700 pb-4">Visible on website's 'Admin Support' section.</p>
+                        <input type="text" id="cfgName" placeholder="Owner Name" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
+                        <input type="text" id="cfgBio" placeholder="Short Bio / Title" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
+                        <input type="text" id="cfgPhone" placeholder="Contact Number" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
+                        <input type="text" id="cfgFb" placeholder="Facebook URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
+                        <input type="text" id="cfgTg" placeholder="Telegram URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
+                        <button onclick="saveStoreConfig()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-4 rounded-xl mt-6 uppercase tracking-widest hover:scale-[1.02] transition-transform">Save Live Website Info</button>
+                    </div>
                 </div>
-            </div>
 
+            </main>
         </div>
     </div>
 
@@ -185,6 +194,11 @@
         let tempRegLocation = ''; let map = null; let marker = null; 
 
         if(adminEmail && adminPass) checkAuth();
+
+        function toggleSidebar() { 
+            document.getElementById('sidebar').classList.toggle('-translate-x-full'); 
+            document.getElementById('sidebarOverlay').classList.toggle('hidden'); 
+        }
 
         function toggleAuthForm() {
             const login = document.getElementById('formLogin');
@@ -206,18 +220,14 @@
             } else { Swal.fire({toast:true, position:'top-end', icon:'error', title: 'Access Denied', ...swalDark, showConfirmButton:false, timer:1500}); } 
         }
 
-        // 🔥 REGISTRATION FLOW WITH LOCATION & OTP
         async function requestAdminOTP() {
             const name = document.getElementById('regName').value; const email = document.getElementById('regEmail').value; const pass = document.getElementById('regPass').value;
             if(!name || !email || !pass) return Swal.fire('Error', 'Fill all fields', 'error', swalDark);
             
-            // Get Location
             Swal.fire({title: 'Detecting Location...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     tempRegLocation = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-                    
-                    // Send OTP Request
                     const res = await fetch('/api/admin/register/otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email}) });
                     const data = await res.json();
                     if(data.success) {
@@ -246,25 +256,39 @@
             if(currentRole === 'OWNER') {
                 document.getElementById('panelTitle').innerText = 'AURA OWNER'; document.getElementById('panelTitle').classList.replace('text-white', 'text-yellow-400');
                 document.getElementById('panelRole').innerText = 'OWNER'; document.getElementById('panelRole').className = 'text-[10px] font-black px-3 py-1 rounded bg-yellow-500/20 text-yellow-400 inline-block mt-1 uppercase';
+                document.getElementById('mobPanelRole').innerText = 'OWNER'; document.getElementById('mobPanelRole').classList.replace('text-blue-400', 'text-yellow-400');
                 document.getElementById('ownerMenu').classList.remove('hidden'); document.getElementById('ownerMenu').classList.add('flex');
             } else { document.getElementById('panelRole').innerText = 'ADMIN'; }
             loadAllData(); loadConfig();
         }
 
-        function showTab(tabId, btnElement) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); if(btnElement) btnElement.classList.add('active'); }
+        function showTab(tabId, btnElement) { 
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); 
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
+            document.getElementById(tabId + 'Tab').classList.remove('hidden'); 
+            if(btnElement) btnElement.classList.add('active'); 
+            
+            // Auto close sidebar on mobile
+            if(window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebarOverlay').classList.add('hidden');
+            }
+        }
+
         function logout() { sessionStorage.clear(); location.reload(); }
 
-        // Owner Controls
         async function loadConfig() {
             if(currentRole !== 'OWNER') return;
             try { const res = await fetch('/api/store-config'); const data = await res.json();
             document.getElementById('cfgName').value = data.owner.ownerName; document.getElementById('cfgBio').value = data.owner.ownerBio; document.getElementById('cfgPhone').value = data.owner.ownerPhone; document.getElementById('cfgFb').value = data.owner.fbLink; document.getElementById('cfgTg').value = data.owner.tgLink; } catch(e) {}
         }
+
         async function saveStoreConfig() {
             const data = { email: adminEmail, password: adminPass, ownerName: document.getElementById('cfgName').value, ownerBio: document.getElementById('cfgBio').value, ownerPhone: document.getElementById('cfgPhone').value, fbLink: document.getElementById('cfgFb').value, tgLink: document.getElementById('cfgTg').value };
             await fetch('/api/admin/store-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             Swal.fire({toast:true, position:'top-end', icon:'success', title:'Config Updated', ...swalDark, showConfirmButton:false, timer:2000});
         }
+        
         async function ownerAction(action) {
             let body = { email: adminEmail, password: adminPass, action };
             if(action === 'add_notice') body.text = document.getElementById('noticeText').value;
@@ -273,43 +297,35 @@
             Swal.fire('Done', 'Action completed', 'success', swalDark); loadAllData();
         }
 
-        // 🔥 MASTER DATA LOADER WITH ALL RESTORED FUNCTIONS
         async function loadAllData() {
             try {
                 const res = await fetch('/api/admin/stats'); const data = await res.json();
                 document.getElementById('statUsers').innerText = data.users; document.getElementById('statOrders').innerText = data.orders.length;
                 
-                // Users Rendering
                 document.getElementById('userListBody').innerHTML = data.userList.map(u => {
                     let roleBadge = u.role === 'OWNER' ? `<span class="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-black"><i class="fa-solid fa-crown"></i> OWNER</span>` : (u.role === 'ADMIN' ? `<span class="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded font-black">ADMIN</span>` : `<span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-black">USER</span>`);
                     return `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${u.firstName}<br><span class="text-xs text-slate-400 font-normal">${u.email}</span></td><td class="p-6">${roleBadge}</td><td class="p-6 text-emerald-400 font-black">৳${u.balanceBdt} <span class="text-yellow-400 text-xs ml-2 bg-yellow-500/10 px-2 py-0.5 rounded"><i class="fa-solid fa-star"></i> ${u.loyaltyPoints}</span></td><td class="p-6 text-right"><button onclick="actionAPI('update_balance', ${u.id}, 'Amount')" class="text-blue-400 bg-blue-500/10 p-2 rounded-lg hover:bg-blue-500 hover:text-white mr-2 transition-colors" title="Edit Wallet"><i class="fa-solid fa-wallet"></i></button><button onclick="actionAPI('toggle_ban', ${u.id})" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Ban Toggle"><i class="fa-solid fa-ban"></i></button>${currentRole === 'OWNER' && u.role !== 'OWNER' ? `<button onclick="actionAPI('make_owner', ${u.id})" class="text-yellow-400 bg-yellow-500/10 p-2 rounded hover:bg-yellow-500 hover:text-black ml-2 text-xs font-bold transition-colors">Make Owner</button>` : ''}</td></tr>`;
                 }).join('');
 
-                // Orders Rendering
                 document.getElementById('adminOrderList').innerHTML = data.orders.map(o => {
                     let actionBtns = o.status === 'PENDING' ? `<button onclick="actionAPI('order_status', ${o.id}, 'RECEIVED')" class="text-[10px] bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded w-full mb-1 uppercase tracking-widest font-bold transition-colors">Accept & Pack</button>` : (o.status === 'RECEIVED' ? `<button onclick="actionAPI('order_status', ${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded w-full mb-1 uppercase tracking-widest font-bold transition-colors">Handover to Rider</button>` : '');
                     return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${o.user.firstName}</p><p class="text-xs text-blue-400">${o.phone||''}</p></td><td class="p-6"><p class="font-bold">${o.product?o.product.name:'Deleted Product'}</p><p class="text-[10px] text-slate-500 mt-1">ID: #${o.id} ${o.promoApplied?`| Promo: <span class="text-indigo-400">${o.promoApplied}</span>`:''}</p></td><td class="p-6"><p class="text-xs font-bold">Total: ৳${o.priceTotal}</p><p class="text-xs font-black text-red-400">COD: ৳${o.dueCod}</p></td><td class="p-6 text-right"><span class="text-[10px] font-black uppercase tracking-widest block mb-2 text-slate-300">${o.status}</span>${actionBtns}</td></tr>`
                 }).join('');
 
-                // Products Rendering
                 document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="table-row-hover"><td class="p-6 font-bold">${p.name}</td><td class="p-6 text-emerald-400 font-black">৳${p.price} <span class="text-slate-400 text-xs ml-2 font-normal">Stock: ${p.stock}</span></td><td class="p-6 text-right"><button onclick="ownerAction('delete_product')" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Owner Only Action"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
 
-                // Deposits Rendering
                 document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="table-row-hover"><td class="p-6 font-bold">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400">${d.trxId}</td><td class="p-6 font-black text-emerald-400">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionAPI('deposit_status', ${d.id}, 'APPROVED')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="actionAPI('deposit_status', ${d.id}, 'REJECTED')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>` : `<span class="text-xs font-bold text-slate-500">${d.status}</span>`}</td></tr>`).join('');
 
-                // Riders & Map Rendering
                 document.getElementById('adminRiderList').innerHTML = data.riderList.map(r => {
                     let trackBtn = (r.lastLat && r.lastLng) ? `<button onclick="trackRider(${r.lastLat}, ${r.lastLng}, '${r.name}', '${r.lastLocUpdate}')" class="text-emerald-400 p-2.5 bg-emerald-500/10 rounded-xl hover:bg-emerald-500 hover:text-white mr-2 transition-all shadow-sm" title="Track Live Location"><i class="fa-solid fa-map-location-dot"></i> Track</button>` : `<button disabled class="text-slate-600 p-2.5 bg-slate-800 rounded-xl mr-2 cursor-not-allowed"><i class="fa-solid fa-location-dot"></i> No GPS</button>`;
                     return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${r.name}</p><p class="text-xs text-slate-400">${r.phone}</p></td><td class="p-6"><p class="text-xl font-black text-emerald-400">${r.deliveryCount} <span class="text-[10px] text-slate-400 uppercase">Delivered</span></p><p class="text-xs text-blue-400 font-bold">Wallet: ৳${r.walletBalance}</p></td><td class="p-6 text-right">${trackBtn}</td></tr>`;
                 }).join('');
 
-                // Rider Withdraws Rendering
                 document.getElementById('adminRiderWithdraws').innerHTML = data.riderWithdraws.map(w => {
                     let btns = w.status === 'PENDING' ? `<button onclick="actionAPI('withdraw_status', ${w.id}, 'APPROVED')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Pay & Approve</button><button onclick="actionAPI('withdraw_status', ${w.id}, 'REJECTED')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>` : `<span class="text-xs font-black uppercase tracking-widest ${w.status==='APPROVED'?'text-emerald-500':'text-red-500'}">${w.status}</span>`;
                     return `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${w.rider.name}</td><td class="p-6"><span class="uppercase font-black text-[10px] text-blue-400 bg-blue-500/10 px-2 py-1 rounded">${w.method}</span><p class="mt-2 text-sm text-slate-300 font-mono tracking-widest">${w.number}</p></td><td class="p-6 font-black text-emerald-400 text-xl">৳${w.amount}</td><td class="p-6 text-right">${btns}</td></tr>`;
                 }).join('');
 
-                // Admins Rendering (Owner Only)
                 if(currentRole === 'OWNER') {
                     document.getElementById('pendingAdminBody').innerHTML = data.pendingAdmins.map(a => `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-blue-400 font-normal">${a.email}</span></td><td class="p-6 text-xs text-slate-400"><i class="fa-solid fa-location-dot"></i> ${a.location || 'N/A'}</td><td class="p-6 text-right"><button onclick="adminAction('approve_admin', ${a.id})" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded mr-2 font-bold text-xs hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="adminAction('reject_admin', ${a.id})" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded font-bold text-xs hover:bg-red-500 hover:text-white transition-colors">Reject</button></td></tr>`).join('') || `<tr><td colspan="3" class="p-6 text-center text-slate-500">No pending requests.</td></tr>`;
                     document.getElementById('activeAdminBody').innerHTML = data.activeAdmins.map(a => `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-slate-400 font-normal">${a.email}</span></td><td class="p-6 text-xs text-slate-400">${a.location || 'Owner Panel Access'}</td><td class="p-6 text-right">${a.role !== 'OWNER' ? `<button onclick="adminAction('delete_admin', ${a.id})" class="bg-red-500/10 text-red-400 p-2 rounded hover:bg-red-500 hover:text-white transition-colors" title="Revoke Role"><i class="fa-solid fa-trash"></i></button>`: '<span class="text-xs font-bold text-yellow-500">OWNER</span>'}</td></tr>`).join('');
@@ -317,7 +333,6 @@
             } catch(e) { console.error("Failed to load admin data"); }
         }
 
-        // Universal Backend Action Trigger
         async function actionAPI(action, id, valParam = null) {
             let body = { email: adminEmail, password: adminPass, action, id };
             if (valParam) {
@@ -337,7 +352,6 @@
             loadAllData();
         }
 
-        // Live Map Rendering Logic
         function trackRider(lat, lng, name, time) {
             document.getElementById('mapModal').classList.remove('hidden'); document.getElementById('mapModal').classList.add('flex');
             document.getElementById('mapTitle').innerHTML = `<i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracing: ${name}`;
