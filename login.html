@@ -19,24 +19,19 @@
             margin: 0;
             padding: 0;
         }
-        
-        /* Animated Background Blobs */
         .blob-container { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
         .blob { position: absolute; filter: blur(120px); opacity: 0.4; animation: float 20s infinite alternate; }
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3b82f6; }
         .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #6366f1; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10vw, 5vw) scale(1.1); } }
 
-        /* Glassmorphism Panel */
         .glass-panel { 
             background: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(24px); 
-            -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(255, 255, 255, 0.08); 
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Custom Inputs */
         .input-group { position: relative; margin-bottom: 1.25rem; }
         .input-group i { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1.1rem; transition: 0.3s; }
         .input-field { 
@@ -57,7 +52,6 @@
         }
         .input-field:focus + i, .input-field:focus ~ i { color: #3b82f6; }
 
-        /* Tabs */
         .tab-btn { 
             color: #64748b; 
             border-bottom: 2px solid transparent; 
@@ -69,7 +63,6 @@
             text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
         }
 
-        /* Animations */
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
@@ -88,8 +81,6 @@
         
         <div class="hidden md:flex md:w-5/12 relative flex-col justify-between p-12 overflow-hidden bg-slate-900/50">
             <div class="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-indigo-900/90 z-0 mix-blend-multiply"></div>
-            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-20 z-0"></div>
-            
             <div class="relative z-10">
                 <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] mb-8 transform -rotate-6">
                     <i class="fa-solid fa-shirt text-3xl text-blue-600"></i>
@@ -98,18 +89,8 @@
                     AURA<br><span class="text-blue-400">STORE</span>
                 </h1>
                 <p class="text-blue-100/80 font-medium text-lg leading-relaxed max-w-xs">
-                    Access premium physical collections, freestyle gear, and your digital wallet.
+                    Premium Authentication Portal.
                 </p>
-            </div>
-
-            <div class="relative z-10 flex items-center gap-4 mt-8">
-                <div class="flex -space-x-3">
-                    <img class="w-10 h-10 rounded-full border-2 border-blue-600" src="https://i.pravatar.cc/100?img=1" alt="User">
-                    <img class="w-10 h-10 rounded-full border-2 border-blue-600" src="https://i.pravatar.cc/100?img=2" alt="User">
-                    <img class="w-10 h-10 rounded-full border-2 border-blue-600" src="https://i.pravatar.cc/100?img=3" alt="User">
-                    <div class="w-10 h-10 rounded-full border-2 border-blue-600 bg-slate-800 flex items-center justify-center text-[10px] font-bold">+1k</div>
-                </div>
-                <p class="text-sm font-bold text-blue-200">Join our community</p>
             </div>
         </div>
 
@@ -120,10 +101,9 @@
                     <i class="fa-solid fa-shirt text-xl text-white"></i>
                 </div>
                 <h2 class="text-3xl font-black text-white tracking-tight">AURA STORE</h2>
-                <p class="text-slate-400 text-sm mt-1">Welcome back, Please login to your account.</p>
             </div>
 
-            <div class="flex mb-8 border-b border-slate-800/80">
+            <div class="flex mb-8 border-b border-slate-800/80" id="tabsArea">
                 <button id="tabLogin" onclick="switchTab('login')" class="tab-btn active w-1/2 pb-4 font-black uppercase tracking-widest text-sm text-center">Sign In</button>
                 <button id="tabReg" onclick="switchTab('register')" class="tab-btn w-1/2 pb-4 font-black uppercase tracking-widest text-sm text-center">Sign Up</button>
             </div>
@@ -139,7 +119,7 @@
                 </div>
                 
                 <div class="flex justify-end mb-8">
-                    <a href="#" onclick="Swal.fire('Notice', 'Contact Admin via Telegram to reset password.', 'info')" class="text-xs font-bold text-blue-500 hover:text-blue-400 transition-colors">Forgot Password?</a>
+                    <button type="button" onclick="forgotPasswordFlow()" class="text-xs font-bold text-blue-500 hover:text-blue-400 transition-colors">Forgot Password?</button>
                 </div>
 
                 <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_10px_20px_-10px_rgba(59,130,246,0.6)] transform active:scale-95 transition-all mb-6">
@@ -160,23 +140,48 @@
                     <i class="fa-solid fa-lock"></i>
                     <input type="password" id="rPass" required placeholder="Create Password" class="input-field py-3.5">
                 </div>
-                <div class="input-group mb-6">
-                    <i class="fa-solid fa-gift text-emerald-500"></i>
-                    <input type="text" id="rRef" placeholder="Referral Code (Optional)" class="input-field py-3.5 !border-emerald-500/30 focus:!border-emerald-500 text-emerald-400 placeholder-emerald-500/50">
-                </div>
-
-                <button type="submit" id="btnReg" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_10px_20px_-10px_rgba(79,70,229,0.6)] transform active:scale-95 transition-all mb-6">
+                <button type="submit" id="btnReg" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_10px_20px_-10px_rgba(79,70,229,0.6)] transform active:scale-95 transition-all mb-6 mt-4">
                     <i class="fa-solid fa-user-plus mr-2"></i> Create Account
                 </button>
             </form>
 
-            <div class="mt-auto pt-6 border-t border-slate-800/80 space-y-4">
+            <div id="forgotForm" class="hidden fade-in-right flex-1 flex flex-col">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-blue-600/20 text-blue-500 rounded-full flex items-center justify-center"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3 class="text-2xl font-black text-white">Reset Password</h3>
+                </div>
+                <p class="text-sm text-slate-400 mb-6 border-b border-slate-800 pb-4">Enter your email. A 6-digit verification code will be sent to secure your account.</p>
+                
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="fEmail" placeholder="Your Account Email" class="input-field py-3.5">
+                </div>
+                
+                <div id="otpArea" class="hidden space-y-4 mb-4">
+                    <div class="input-group">
+                        <i class="fa-solid fa-key text-emerald-500"></i>
+                        <input type="text" id="fOtp" placeholder="Enter 6-Digit OTP Code" class="input-field py-3.5 text-emerald-400 !border-emerald-500/30 focus:!border-emerald-500 tracking-[0.3em] font-black text-center" maxlength="6">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock text-emerald-500"></i>
+                        <input type="password" id="fNewPass" placeholder="Enter New Password" class="input-field py-3.5">
+                    </div>
+                    <p class="text-right"><button type="button" onclick="resendForgotOTP()" class="text-xs text-blue-500 font-bold hover:underline">Didn't receive code? Resend</button></p>
+                </div>
+
+                <div class="flex flex-col gap-3 mt-4">
+                    <button type="button" id="btnSendForgot" onclick="sendForgotOTP()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-lg transition-transform active:scale-95">Send OTP Code</button>
+                    <button type="button" id="btnVerifyForgot" onclick="verifyAndReset()" class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-lg transition-transform active:scale-95">Verify & Update Password</button>
+                    <button type="button" onclick="cancelForgot()" class="text-slate-500 font-bold hover:text-white text-sm py-2"><i class="fa-solid fa-arrow-left mr-2"></i> Back to Login</button>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-6 border-t border-slate-800/80 space-y-4" id="bottomLinks">
                 <button type="button" onclick="location.href='/rider'" class="w-full bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-emerald-500/30 font-black py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all group">
                     <i class="fa-solid fa-motorcycle mr-2 group-hover:animate-bounce"></i> Login as Rider
                 </button>
-                
                 <button type="button" onclick="location.href='/'" class="w-full text-slate-400 font-bold hover:text-white text-sm py-2 transition-colors flex justify-center items-center">
-                    <i class="fa-solid fa-arrow-left-long mr-2"></i> Return to Storehead
+                    <i class="fa-solid fa-arrow-left-long mr-2"></i> Return to Storefront
                 </button>
             </div>
 
@@ -184,7 +189,6 @@
     </div>
 
     <script>
-        // Custom SweetAlert Theme matching the UI
         const swalTheme = { 
             background: '#0f172a', 
             color: '#f8fafc', 
@@ -196,17 +200,21 @@
         function switchTab(tab) {
             const loginForm = document.getElementById('loginForm');
             const regForm = document.getElementById('regForm');
+            const forgotForm = document.getElementById('forgotForm');
             const tabLogin = document.getElementById('tabLogin');
             const tabReg = document.getElementById('tabReg');
 
-            // Reset animations
             loginForm.classList.remove('fade-in-right');
             regForm.classList.remove('fade-in-right');
+            
+            forgotForm.classList.add('hidden');
+            document.getElementById('tabsArea').classList.remove('hidden');
+            document.getElementById('bottomLinks').classList.remove('hidden');
 
             if(tab === 'login') {
                 regForm.classList.add('hidden');
                 loginForm.classList.remove('hidden');
-                void loginForm.offsetWidth; // Trigger reflow for animation
+                void loginForm.offsetWidth; 
                 loginForm.classList.add('fade-in-right');
                 
                 tabReg.classList.remove('active');
@@ -214,7 +222,7 @@
             } else {
                 loginForm.classList.add('hidden');
                 regForm.classList.remove('hidden');
-                void regForm.offsetWidth; // Trigger reflow for animation
+                void regForm.offsetWidth; 
                 regForm.classList.add('fade-in-right');
                 
                 tabLogin.classList.remove('active');
@@ -244,20 +252,10 @@
                     localStorage.setItem('user', JSON.stringify(data.user)); 
                     window.location.href = '/'; 
                 } else { 
-                    Swal.fire({
-                        title: 'Access Denied', 
-                        text: data.error, 
-                        icon: 'error', 
-                        ...swalTheme
-                    }); 
+                    Swal.fire({ title: 'Access Denied', text: data.error, icon: 'error', ...swalTheme }); 
                 }
             } catch(err) {
-                Swal.fire({
-                    title: 'System Offline', 
-                    text: 'Unable to connect to the database. Please wait for server sync.', 
-                    icon: 'error', 
-                    ...swalTheme
-                });
+                Swal.fire({ title: 'System Offline', text: 'Wait for server sync.', icon: 'error', ...swalTheme });
             }
             btn.innerHTML = originalText;
         }
@@ -275,43 +273,113 @@
                     body: JSON.stringify({ 
                         name: document.getElementById('rName').value, 
                         email: document.getElementById('rEmail').value, 
-                        password: document.getElementById('rPass').value, 
-                        refCode: document.getElementById('rRef').value, 
-                        country: 'BD' 
+                        password: document.getElementById('rPass').value 
                     })
                 });
                 
                 const data = await res.json();
                 
                 if(data.success) { 
-                    Swal.fire({
-                        title: 'Profile Created!', 
-                        text: data.message, 
-                        icon: 'success', 
-                        ...swalTheme
-                    }).then(() => {
-                        // Switch to login tab and auto-fill email
+                    Swal.fire({ title: 'Profile Created!', text: data.message, icon: 'success', ...swalTheme }).then(() => {
                         document.getElementById('lEmail').value = document.getElementById('rEmail').value;
                         document.getElementById('lPass').value = '';
                         switchTab('login');
                     }); 
                 } else { 
-                    Swal.fire({
-                        title: 'Registration Failed', 
-                        text: data.error, 
-                        icon: 'error', 
-                        ...swalTheme
-                    }); 
+                    Swal.fire({ title: 'Registration Failed', text: data.error, icon: 'error', ...swalTheme }); 
                 }
             } catch(err) {
-                Swal.fire({
-                    title: 'System Offline', 
-                    text: 'Unable to connect to the database. Please wait for server sync.', 
-                    icon: 'error', 
-                    ...swalTheme
-                });
+                Swal.fire({ title: 'System Offline', text: 'Wait for server sync.', icon: 'error', ...swalTheme });
             }
             btn.innerHTML = originalText;
+        }
+
+        // 🔥 PRO FORGOT PASSWORD LOGIC
+        function forgotPasswordFlow() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('tabsArea').classList.add('hidden');
+            document.getElementById('bottomLinks').classList.add('hidden');
+            
+            const forgotForm = document.getElementById('forgotForm');
+            forgotForm.classList.remove('hidden');
+            void forgotForm.offsetWidth;
+            forgotForm.classList.add('fade-in-right');
+        }
+
+        function cancelForgot() { 
+            document.getElementById('fEmail').value=''; 
+            document.getElementById('fOtp').value=''; 
+            document.getElementById('fNewPass').value=''; 
+            document.getElementById('otpArea').classList.add('hidden'); 
+            document.getElementById('btnSendForgot').classList.remove('hidden'); 
+            document.getElementById('btnVerifyForgot').classList.add('hidden'); 
+            document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; 
+            switchTab('login'); 
+        }
+
+        async function sendForgotOTP() {
+            const email = document.getElementById('fEmail').value; 
+            if(!email) return Swal.fire('Warning','Enter your account email first.','warning', swalTheme);
+            
+            document.getElementById('btnSendForgot').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
+            
+            try {
+                const res = await fetch('/api/auth/send-otp', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({email}) 
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'OTP Sent to Email', showConfirmButton:false, timer:2000, ...swalTheme});
+                    document.getElementById('btnSendForgot').classList.add('hidden');
+                    document.getElementById('otpArea').classList.remove('hidden');
+                    document.getElementById('btnVerifyForgot').classList.remove('hidden');
+                } else { 
+                    document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; 
+                    Swal.fire('Error', data.error, 'error', swalTheme); 
+                }
+            } catch(e) {
+                document.getElementById('btnSendForgot').innerText = 'Send OTP Code'; 
+                Swal.fire('Error', 'Network connection failed.', 'error', swalTheme);
+            }
+        }
+
+        async function resendForgotOTP() {
+            const email = document.getElementById('fEmail').value;
+            Swal.fire({toast:true, position:'top-end', title:'Resending...', showConfirmButton:false, ...swalTheme});
+            await fetch('/api/auth/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email}) });
+            Swal.fire({toast:true, position:'top-end', icon:'success', title:'New OTP Sent', showConfirmButton:false, timer:2000, ...swalTheme});
+        }
+
+        async function verifyAndReset() {
+            const email = document.getElementById('fEmail').value; 
+            const code = document.getElementById('fOtp').value; 
+            const newPassword = document.getElementById('fNewPass').value;
+            
+            if(!code || !newPassword) return Swal.fire('Error','Please fill in both the OTP code and new password.','error', swalTheme);
+            
+            document.getElementById('btnVerifyForgot').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
+            
+            try {
+                const res = await fetch('/api/auth/reset', { 
+                    method:'POST', 
+                    headers:{'Content-Type':'application/json'}, 
+                    body:JSON.stringify({email, code, newPassword}) 
+                });
+                const data = await res.json();
+                
+                if(data.success) { 
+                    Swal.fire('Success!', 'Password updated securely. You can now login.', 'success', swalTheme).then(()=>cancelForgot()); 
+                } else { 
+                    document.getElementById('btnVerifyForgot').innerText = 'Verify & Update Password'; 
+                    Swal.fire('Verification Failed', data.error, 'error', swalTheme); 
+                }
+            } catch(e) {
+                document.getElementById('btnVerifyForgot').innerText = 'Verify & Update Password';
+                Swal.fire('Error', 'Network connection failed.', 'error', swalTheme);
+            }
         }
     </script>
 </body>
