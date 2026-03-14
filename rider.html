@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -499,7 +499,7 @@
             if(type === 'riders') {
                 container.innerHTML = list.map((r, i) => {
                     let medal = `<span class="font-black text-slate-500 w-6 text-center">#${i+1}</span>`;
-                    let bgClass = "bg-slate-800/50 border-slate-700";
+                    let bgClass = "bg-[var(--card)] border-[var(--border)]";
                     if(i === 0) { medal = `<i class="fa-solid fa-medal text-yellow-400 text-2xl drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]"></i>`; bgClass = "border-yellow-400/50 bg-yellow-500/10"; }
                     else if(i === 1) { medal = `<i class="fa-solid fa-medal text-slate-300 text-xl"></i>`; }
                     else if(i === 2) { medal = `<i class="fa-solid fa-medal text-amber-600 text-xl"></i>`; }
@@ -566,11 +566,11 @@
                                     Swal.fire({title: 'Success! 🎉', html: `<p>Order Delivered!</p><p class="text-emerald-400 font-black mt-2">+৳50 Added to Wallet</p>`, icon: 'success', ...swalDark}); 
                                     loadRiderData(); 
                                 } else { 
-                                    Swal.fire('Error', verifyData.error || 'Verification Failed', 'error', swalDark); 
+                                    Swal.fire('Error', verifyData.error || 'Verification Failed', 'error', ...swalDark); 
                                 } 
                             } 
                         } else { 
-                            Swal.fire('Error', data.error, 'error', swalDark); 
+                            Swal.fire('Error', data.error, 'error', ...swalDark); 
                         } 
                     } catch(e) {
                         Swal.fire('Error', 'Network connection issue', 'error', swalDark);
@@ -618,9 +618,7 @@
                 if(data.success) { 
                     Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', showConfirmButton:false, timer:1500, ...swalDark}); 
                     loadRiderData(); 
-                } else {
-                    Swal.fire('Error', 'Update failed', 'error'); 
-                }
+                } else Swal.fire('Error', 'Update failed', 'error'); 
             } catch(e) {
                 Swal.fire('Error', 'Network Error', 'error');
             }
