@@ -48,6 +48,7 @@ model User {
   resetToken         String?    
   resetCode          String?    
   resetExpiry        DateTime?
+  lastRedeemDate     DateTime?  
   deposits           Deposit[] 
   purchases          Purchase[] 
   createdAt          DateTime   @default(now())
@@ -79,13 +80,12 @@ model Promo {
   isActive  Boolean  @default(true)
 }
 
-// 🔥 NEW: REDEEM CODE SYSTEM
 model RedeemCode {
   id        Int      @id @default(autoincrement())
   code      String   @unique
   amount    Float
   maxUses   Int      @default(1)
-  usedBy    Int[]    // Array of User IDs who used this code
+  usedBy    Int[]    
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
@@ -149,6 +149,7 @@ model RiderWithdraw {
   createdAt DateTime @default(now())
 }
 
+// 🔥 UPDATED DEFAULT CONFIG WITH BKASH/NAGAD & FB LINK
 model StoreConfig {
   id          Int      @id @default(1)
   ownerName   String   @default("Ononto Hasan")
@@ -156,6 +157,8 @@ model StoreConfig {
   ownerBio    String   @default("Store Founder & Freestyle Player")
   fbLink      String   @default("https://www.facebook.com/yours.ononto")
   tgLink      String   @default("https://t.me/minato_namikaze143")
+  bkashNumber String   @default("01846849460")
+  nagadNumber String   @default("01846849460")
 }
 
 model SystemAdmin {
