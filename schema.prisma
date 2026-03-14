@@ -41,7 +41,7 @@ model User {
   vipExpiry          DateTime?
   isBanned           Boolean    @default(false)
   role               String     @default("USER") // USER, ADMIN, OWNER, PENDING_ADMIN
-  location           String?    // For Admin Registration
+  location           String?    
   avatar             String?
   isVerified         Boolean    @default(false)
   verifyToken        String?
@@ -138,11 +138,22 @@ model RiderWithdraw {
   createdAt DateTime @default(now())
 }
 
+// 🔥 DEFAULT OWNER INFO HARDCODED
 model StoreConfig {
   id          Int      @id @default(1)
   ownerName   String   @default("Ononto Hasan")
-  ownerPhone  String   @default("+880 1846849460")
-  ownerBio    String   @default("Founder & Developer")
-  fbLink      String   @default("https://facebook.com/yours.ononto")
+  ownerPhone  String   @default("+8801846849460")
+  ownerBio    String   @default("Store Founder & Freestyle Player")
+  fbLink      String   @default("https://www.facebook.com")
   tgLink      String   @default("https://t.me/minato_namikaze143")
+}
+
+model SystemAdmin {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  phone     String
+  location  String
+  password  String
+  createdAt DateTime @default(now())
 }
