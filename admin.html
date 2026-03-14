@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Master Panel - AURA STORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -12,34 +12,77 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body { background-color: #050b14; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .tab-btn.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #60a5fa; padding-left: 1.5rem; }
-        .owner-tab.active { background: linear-gradient(90deg, rgba(250,204,21,0.15) 0%, transparent 100%); border-left: 4px solid #facc15; color: #fde047; padding-left: 1.5rem; }
-        .table-row-hover:hover { background: rgba(59,130,246,0.05); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
-        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body { 
+            background-color: #050b14; 
+            color: #e2e8f0; 
+            font-family: 'Inter', sans-serif; 
+        }
+        .glass-panel { 
+            background: rgba(15, 23, 42, 0.7); 
+            backdrop-filter: blur(24px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active { 
+            background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); 
+            border-left: 4px solid #3b82f6; 
+            color: #60a5fa; 
+            padding-left: 1.5rem; 
+        }
+        .owner-tab.active { 
+            background: linear-gradient(90deg, rgba(250,204,21,0.15) 0%, transparent 100%); 
+            border-left: 4px solid #facc15; 
+            color: #fde047; 
+            padding-left: 1.5rem; 
+        }
+        .table-row-hover {
+            transition: background-color 0.2s ease;
+        }
+        .table-row-hover:hover { 
+            background: rgba(59,130,246,0.05); 
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } 
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
+        
+        @keyframes fade { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
         .animate-fade { animation: fade 0.4s ease-out forwards; }
+        
+        /* Map UI Fixes */
         .leaflet-popup-content-wrapper { background: #1e293b; color: #f8fafc; border-radius: 12px; border: 1px solid #334155; }
         .leaflet-popup-tip { background: #1e293b; }
     </style>
 </head>
-<body class="h-screen overflow-hidden flex flex-col relative">
+<body class="h-screen w-screen overflow-hidden flex flex-col relative text-slate-200">
     
     <div id="loginSection" class="fixed inset-0 h-screen flex justify-center items-center z-[100] backdrop-blur-md bg-black/80">
         <div class="glass-panel p-10 rounded-[40px] shadow-[0_0_60px_rgba(0,0,0,0.5)] w-[90%] max-w-md text-center border border-slate-700/50 relative overflow-hidden">
+            
             <div id="formLogin" class="animate-fade">
-                <div class="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-3xl text-white mb-6 shadow-[0_0_30px_rgba(59,130,246,0.6)]"><i class="fa-solid fa-fingerprint"></i></div>
+                <div class="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-3xl text-white mb-6 shadow-[0_0_30px_rgba(59,130,246,0.6)]">
+                    <i class="fa-solid fa-fingerprint"></i>
+                </div>
                 <h2 class="text-3xl font-black mb-8 text-white">System Access</h2>
+                
                 <input type="email" id="adminEmail" class="w-full px-5 py-4 bg-slate-900/80 border border-slate-700 rounded-xl mb-4 text-white font-bold text-center outline-none focus:border-blue-500" placeholder="Admin Email">
                 <input type="password" id="adminPass" class="w-full px-5 py-4 bg-slate-900/80 border border-slate-700 rounded-xl mb-6 text-white font-black text-center tracking-[0.3em] outline-none focus:border-blue-500" placeholder="••••••••" onkeypress="if(event.key==='Enter') login()">
-                <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase active:scale-95 shadow-lg hover:bg-blue-500 transition-colors mb-4">Authenticate</button>
-                <p class="text-sm text-slate-400"><button onclick="toggleAuthForm()" class="text-blue-400 font-bold hover:underline">Apply for Admin Access</button></p>
+                
+                <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase active:scale-95 shadow-lg hover:bg-blue-500 transition-colors mb-4">
+                    Authenticate
+                </button>
+                <p class="text-sm text-slate-400">
+                    <button onclick="toggleAuthForm()" class="text-blue-400 font-bold hover:underline">Apply for Admin Access</button>
+                </p>
             </div>
 
             <div id="formRegister" class="hidden animate-fade">
                 <h2 class="text-2xl font-black mb-2 text-white">Admin Application</h2>
                 <p class="text-xs text-slate-400 mb-6">Location access is required to verify your application.</p>
+                
                 <input type="text" id="regName" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl mb-3 text-white text-sm outline-none" placeholder="Full Name">
                 <input type="email" id="regEmail" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl mb-3 text-white text-sm outline-none" placeholder="Email Address">
                 <input type="password" id="regPass" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl mb-3 text-white text-sm outline-none" placeholder="Set Password">
@@ -48,103 +91,299 @@
                     <input type="text" id="regOtp" class="w-full px-4 py-3 bg-slate-900 border border-emerald-500/50 rounded-xl text-emerald-400 font-black text-center tracking-widest outline-none" placeholder="6-Digit OTP">
                 </div>
 
-                <button id="btnRegSend" onclick="requestAdminOTP()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-black uppercase shadow-lg hover:bg-emerald-500 mb-4 text-sm">Send Request OTP</button>
-                <button id="btnRegVerify" onclick="verifyAdminReg()" class="hidden w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase shadow-lg hover:bg-blue-500 mb-4 text-sm">Verify & Apply</button>
-                <p class="text-sm text-slate-400"><button onclick="toggleAuthForm()" class="text-slate-300 font-bold hover:text-white"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Login</button></p>
+                <button id="btnRegSend" onclick="requestAdminOTP()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-black uppercase shadow-lg hover:bg-emerald-500 mb-4 text-sm transition-colors">
+                    Send Request OTP
+                </button>
+                <button id="btnRegVerify" onclick="verifyAdminReg()" class="hidden w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase shadow-lg hover:bg-blue-500 mb-4 text-sm transition-colors">
+                    Verify & Apply
+                </button>
+                
+                <p class="text-sm text-slate-400">
+                    <button onclick="toggleAuthForm()" class="text-slate-300 font-bold hover:text-white transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Back to Login
+                    </button>
+                </p>
             </div>
         </div>
     </div>
 
-    <div id="dashSection" class="hidden flex-col h-screen relative z-10 w-full overflow-hidden">
+    <div id="dashSection" class="hidden flex-col w-full h-full absolute inset-0 z-10 bg-[#050b14]">
         
-        <div id="mobileHeader" class="md:hidden flex justify-between items-center p-5 glass-panel border-b border-slate-800 shrink-0 z-[60]">
-            <div><h2 class="text-xl font-black text-white leading-tight">AURA ADMIN</h2><p id="mobPanelRole" class="text-[10px] text-blue-400 font-bold uppercase">ADMIN</p></div>
-            <button onclick="toggleSidebar()" class="text-white text-2xl p-2"><i class="fa-solid fa-bars"></i></button>
+        <div id="mobileHeader" class="md:hidden flex justify-between items-center p-4 glass-panel border-b border-slate-800 z-[60] h-16 shrink-0">
+            <div>
+                <h2 class="text-xl font-black text-white leading-tight">AURA ADMIN</h2>
+                <p id="mobPanelRole" class="text-[10px] text-blue-400 font-bold uppercase">ADMIN</p>
+            </div>
+            <button onclick="toggleSidebar()" class="text-white text-2xl p-2 hover:text-blue-500 transition-colors">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
 
-        <div class="flex flex-1 overflow-hidden relative">
-            <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-[70] hidden md:hidden" onclick="toggleSidebar()"></div>
+        <div class="flex flex-1 overflow-hidden relative w-full h-[calc(100vh-4rem)] md:h-full">
             
-            <aside id="sidebar" class="fixed inset-y-0 left-0 z-[80] md:relative w-72 glass-panel border-r border-slate-800/80 flex flex-col p-6 space-y-2 overflow-y-auto custom-scrollbar transform transition-transform duration-300 -translate-x-full md:translate-x-0">
-                <button onclick="toggleSidebar()" class="md:hidden absolute top-5 right-5 text-slate-400 text-2xl hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                <div class="hidden md:block mb-10 pl-2">
+            <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-[70] hidden md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
+            
+            <aside id="sidebar" class="absolute inset-y-0 left-0 z-[80] md:relative w-72 glass-panel border-r border-slate-800/80 flex flex-col p-6 space-y-2 h-full overflow-y-auto custom-scrollbar transform transition-transform duration-300 -translate-x-full md:translate-x-0">
+                <button onclick="toggleSidebar()" class="md:hidden absolute top-5 right-5 text-slate-400 text-2xl hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                
+                <div class="hidden md:block mb-8 pl-2">
                     <h2 class="text-2xl font-black text-white" id="panelTitle">AURA ADMIN</h2>
-                    <p id="panelRole" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 inline-block mt-1 uppercase">ADMIN</p>
+                    <p id="panelRole" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 inline-block mt-1 uppercase tracking-widest">ADMIN</p>
                 </div>
                 
-                <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
-                <button onclick="showTab('orders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-box mr-4 w-5"></i> Orders</button>
-                <button onclick="showTab('products', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-shirt mr-4 w-5"></i> Products</button>
-                <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-wallet mr-4 w-5"></i> Deposits</button>
-                <button onclick="showTab('riders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-motorcycle mr-4 w-5"></i> Riders Fleet</button>
-                <button onclick="showTab('users', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white uppercase text-xs mb-1"><i class="fa-solid fa-users mr-4 w-5"></i> Users</button>
+                <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 uppercase text-xs mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5 text-center"></i> Overview</button>
+                <button onclick="showTab('orders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 uppercase text-xs mb-1"><i class="fa-solid fa-box mr-4 w-5 text-center"></i> Orders</button>
+                <button onclick="showTab('products', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 uppercase text-xs mb-1"><i class="fa-solid fa-shirt mr-4 w-5 text-center"></i> Products</button>
+                <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 uppercase text-xs mb-1"><i class="fa-solid fa-wallet mr-4 w-5 text-center"></i> Deposits</button>
+                <button onclick="showTab('riders', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 uppercase text-xs mb-1"><i class="fa-solid fa-motorcycle mr-4 w-5 text-center"></i> Riders Fleet</button>
+                <button onclick="showTab('users', this)" class="tab-btn text-left p-4 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 uppercase text-xs mb-1"><i class="fa-solid fa-users mr-4 w-5 text-center"></i> Users</button>
                 
                 <div id="ownerMenu" class="hidden flex-col mt-4 border-t border-slate-800 pt-4">
                     <p class="text-[9px] text-slate-600 font-black uppercase tracking-widest px-4 mb-2">Owner Controls</p>
-                    <button onclick="showTab('promos', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-ticket mr-4 w-5"></i> Promo & Redeem</button>
-                    <button onclick="showTab('admins', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-shield-halved mr-4 w-5"></i> Admins</button>
-                    <button onclick="showTab('storectrl', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-store mr-4 w-5"></i> Web Control</button>
-                    <button onclick="showTab('config', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-gear mr-4 w-5"></i> Owner Info</button>
+                    <button onclick="showTab('promos', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10 uppercase text-xs mb-1"><i class="fa-solid fa-ticket mr-4 w-5 text-center"></i> Promo & Redeem</button>
+                    <button onclick="showTab('admins', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10 uppercase text-xs mb-1"><i class="fa-solid fa-shield-halved mr-4 w-5 text-center"></i> Admins</button>
+                    <button onclick="showTab('storectrl', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10 uppercase text-xs mb-1"><i class="fa-solid fa-store mr-4 w-5 text-center"></i> Web Control</button>
+                    <button onclick="showTab('config', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10 uppercase text-xs mb-1"><i class="fa-solid fa-gear mr-4 w-5 text-center"></i> Owner Info</button>
                 </div>
-                <button onclick="logout()" class="text-left p-4 rounded-xl font-bold text-red-500 hover:bg-red-500/10 uppercase text-xs mt-auto"><i class="fa-solid fa-power-off mr-4 w-5"></i> Logout</button>
+                
+                <button onclick="logout()" class="text-left p-4 rounded-xl font-bold text-red-500 hover:bg-red-500/10 hover:text-red-400 uppercase text-xs mt-auto transition-colors"><i class="fa-solid fa-power-off mr-4 w-5 text-center"></i> Logout</button>
             </aside>
             
-            <main class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar relative z-10 w-full">
+            <main class="flex-1 h-full overflow-y-auto p-4 md:p-10 relative z-10 w-full custom-scrollbar pb-24 md:pb-10">
                 
                 <div id="statsTab" class="tab-content animate-fade">
-                    <div class="flex justify-between items-center mb-8"><h1 class="text-3xl md:text-4xl font-black text-white">Dashboard</h1><button onclick="loadAllData()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"><div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Users</p><h2 class="text-4xl font-black text-white" id="statUsers">0</h2></div><div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-purple-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Orders</p><h2 class="text-4xl font-black text-purple-400" id="statOrders">0</h2></div></div>
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl md:text-4xl font-black text-white">Dashboard</h1>
+                        <button onclick="loadAllData()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold transition-colors">
+                            <i class="fa-solid fa-rotate-right mr-2"></i>Refresh
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500">
+                            <p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Users</p>
+                            <h2 class="text-4xl font-black text-white" id="statUsers">0</h2>
+                        </div>
+                        <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-purple-500">
+                            <p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Orders</p>
+                            <h2 class="text-4xl font-black text-purple-400" id="statOrders">0</h2>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="ordersTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Orders</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Customer</th><th class="p-6">Product</th><th class="p-6">Payment</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminOrderList" class="divide-y divide-slate-800"></tbody></table></div></div>
-                <div id="productsTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Inventory</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Item</th><th class="p-6">Price & Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-800"></tbody></table></div></div>
-                <div id="depositsTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Fund Deposits</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
+                <div id="ordersTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Orders</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto">
+                        <table class="w-full text-left min-w-[800px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs uppercase font-black tracking-widest">
+                                    <th class="p-6">Customer</th>
+                                    <th class="p-6">Product</th>
+                                    <th class="p-6">Payment</th>
+                                    <th class="p-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOrderList" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="productsTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Inventory</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto">
+                        <table class="w-full text-left min-w-[800px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs uppercase font-black tracking-widest">
+                                    <th class="p-6">Item</th>
+                                    <th class="p-6">Price & Stock</th>
+                                    <th class="p-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminProductList" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="depositsTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Fund Deposits</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto">
+                        <table class="w-full text-left min-w-[800px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs uppercase font-black tracking-widest">
+                                    <th class="p-6">User</th>
+                                    <th class="p-6">TrxID</th>
+                                    <th class="p-6">Amount</th>
+                                    <th class="p-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="depositListBody" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <div id="ridersTab" class="tab-content hidden animate-fade">
                     <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Riders Fleet</h1>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider Info</th><th class="p-6">Deliveries & Wallet</th><th class="p-6 text-right">Live Tracking</th></tr></thead><tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody></table></div>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto mb-10">
+                        <table class="w-full text-left min-w-[800px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs tracking-widest uppercase font-black">
+                                    <th class="p-6">Rider Info</th>
+                                    <th class="p-6">Deliveries & Wallet</th>
+                                    <th class="p-6 text-right">Live Tracking</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminRiderList" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
                     
                     <h2 class="text-xl md:text-2xl font-black text-white mb-6"><i class="fa-solid fa-money-bill-transfer text-emerald-500 mr-2"></i> Withdraw Requests</h2>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider</th><th class="p-6">Method & Number</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminRiderWithdraws" class="divide-y divide-slate-800"></tbody></table></div>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto">
+                        <table class="w-full text-left min-w-[800px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs tracking-widest uppercase font-black">
+                                    <th class="p-6">Rider</th>
+                                    <th class="p-6">Method & Number</th>
+                                    <th class="p-6">Amount</th>
+                                    <th class="p-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminRiderWithdraws" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div id="usersTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Users</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Role</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
+                <div id="usersTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Users</h1>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto">
+                        <table class="w-full text-left min-w-[800px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs uppercase font-black tracking-widest">
+                                    <th class="p-6">Name & Email</th>
+                                    <th class="p-6">Role</th>
+                                    <th class="p-6">Wallet / VIP</th>
+                                    <th class="p-6 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userListBody" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <div id="promosTab" class="tab-content hidden animate-fade">
                     <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-ticket mr-3"></i>Promo & Redeem Codes</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div class="glass-panel p-6 rounded-[32px]">
                             <h3 class="text-xl font-black text-white mb-4">Add Discount Promo</h3>
-                            <input type="text" id="prCode" placeholder="Promo Code (e.g. AURA50)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none mb-3">
-                            <input type="number" id="prDisc" placeholder="Discount Percentage (%)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none mb-3">
-                            <button onclick="addPromo()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl">Add & Notify</button>
+                            <input type="text" id="prCode" placeholder="Promo Code (e.g. AURA50)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none mb-3 focus:border-blue-500">
+                            <input type="number" id="prDisc" placeholder="Discount Percentage (%)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none mb-3 focus:border-blue-500">
+                            <button onclick="addPromo()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-colors">Add & Notify</button>
                         </div>
                     </div>
                     <h2 class="text-xl font-black text-white mb-4">Active Redeem Codes</h2>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Code & Amount</th><th class="p-6">Usage & Expiry</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="redeemListBody" class="divide-y divide-slate-800"></tbody></table></div>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto">
+                        <table class="w-full text-left min-w-[600px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs uppercase font-black tracking-widest">
+                                    <th class="p-6">Code & Amount</th>
+                                    <th class="p-6">Usage & Expiry</th>
+                                    <th class="p-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="redeemListBody" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div id="adminsTab" class="tab-content hidden animate-fade">
                     <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-crown mr-3"></i>System Admins</h1>
-                    <h2 class="text-xl font-bold text-white mb-4">Pending Requests</h2><div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Applicant</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="pendingAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
-                    <h2 class="text-xl font-bold text-white mb-4">Active Admins</h2><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="activeAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
+                    
+                    <h2 class="text-xl font-bold text-white mb-4">Pending Requests</h2>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto mb-10">
+                        <table class="w-full text-left min-w-[600px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs uppercase font-black tracking-widest">
+                                    <th class="p-6">Applicant</th>
+                                    <th class="p-6">Location</th>
+                                    <th class="p-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingAdminBody" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                    
+                    <h2 class="text-xl font-bold text-white mb-4">Active Admins</h2>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto">
+                        <table class="w-full text-left min-w-[600px]">
+                            <thead class="bg-slate-900/80">
+                                <tr class="text-slate-400 text-xs uppercase font-black tracking-widest">
+                                    <th class="p-6">Name & Email</th>
+                                    <th class="p-6">Location</th>
+                                    <th class="p-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activeAdminBody" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div id="storectrlTab" class="tab-content hidden animate-fade">
                     <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-store mr-3"></i>Web Controls</h1>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"><div class="glass-panel p-6 rounded-[32px]"><h3 class="text-xl font-black text-white mb-4">Maintenance Mode</h3><p class="text-sm text-slate-400 mb-4">Turn off the main website temporarily.</p><button onclick="ownerAction('toggle_maintenance')" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm w-full"><i class="fa-solid fa-power-off mr-2"></i> Toggle Power</button></div><div class="glass-panel p-6 rounded-[32px]"><h3 class="text-xl font-black text-white mb-4">Notice Board</h3><input type="text" id="noticeText" placeholder="Enter Notice Text" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500 mb-3 text-sm"><div class="flex gap-2"><button onclick="ownerAction('add_notice')" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm flex-1">Publish</button><button onclick="ownerAction('clear_notices')" class="bg-slate-700 text-red-400 px-4 py-3 rounded-xl font-bold text-sm">Clear All</button></div></div></div>
-                    <div class="glass-panel p-6 rounded-[32px]"><h3 class="text-xl font-black text-white mb-4">Add Product</h3><div class="grid grid-cols-2 gap-4 mb-4"><input type="text" id="pName" placeholder="Product Name" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"><input type="text" id="pCat" placeholder="Category" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"><input type="number" id="pPrice" placeholder="Price (BDT)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"><input type="number" id="pStock" placeholder="Stock" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"><input type="text" id="pImage" placeholder="Image Base64 URL" class="col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"></div><button onclick="ownerAction('add_product')" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm w-full">Upload Product</button></div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="glass-panel p-6 rounded-[32px]">
+                            <h3 class="text-xl font-black text-white mb-4">Maintenance Mode</h3>
+                            <p class="text-sm text-slate-400 mb-4">Turn off the main website temporarily.</p>
+                            <button onclick="ownerAction('toggle_maintenance')" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm w-full hover:bg-red-500 transition-colors"><i class="fa-solid fa-power-off mr-2"></i> Toggle Power</button>
+                        </div>
+                        <div class="glass-panel p-6 rounded-[32px]">
+                            <h3 class="text-xl font-black text-white mb-4">Notice Board</h3>
+                            <input type="text" id="noticeText" placeholder="Enter Notice Text" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500 mb-3 text-sm">
+                            <div class="flex gap-2">
+                                <button onclick="ownerAction('add_notice')" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm flex-1 hover:bg-blue-500 transition-colors">Publish</button>
+                                <button onclick="ownerAction('clear_notices')" class="bg-slate-700 text-red-400 px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-600 transition-colors">Clear All</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-[32px]">
+                        <h3 class="text-xl font-black text-white mb-4">Add Product Manually</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <input type="text" id="pName" placeholder="Product Name" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500">
+                            <input type="text" id="pCat" placeholder="Category" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500">
+                            <input type="number" id="pPrice" placeholder="Price (BDT)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500">
+                            <input type="number" id="pStock" placeholder="Stock" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500">
+                            <input type="text" id="pImage" placeholder="Image Base64 URL" class="md:col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500">
+                        </div>
+                        <button onclick="ownerAction('add_product')" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm w-full hover:bg-emerald-500 transition-colors">Upload Product</button>
+                    </div>
                 </div>
 
                 <div id="configTab" class="tab-content hidden animate-fade max-w-2xl">
                     <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-user-tie mr-3"></i>Owner Profile</h1>
-                    <div class="glass-panel p-8 rounded-[32px] space-y-4">
+                    <div class="glass-panel p-6 md:p-8 rounded-[32px] space-y-4">
                         <p class="text-sm text-slate-400 mb-6 border-b border-slate-700 pb-4">Visible on website's 'Admin Support' section.</p>
-                        <input type="text" id="cfgName" placeholder="Owner Name" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                        <input type="text" id="cfgBio" placeholder="Short Bio / Title" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                        <input type="text" id="cfgPhone" placeholder="Contact Number" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                        <input type="text" id="cfgFb" placeholder="Facebook URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
-                        <input type="text" id="cfgTg" placeholder="Telegram URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold">
+                        
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Owner Name</label>
+                            <input type="text" id="cfgName" placeholder="Owner Name" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Short Bio</label>
+                            <input type="text" id="cfgBio" placeholder="Short Bio / Title" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Contact Number</label>
+                            <input type="text" id="cfgPhone" placeholder="Contact Number" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Facebook URL</label>
+                            <input type="text" id="cfgFb" placeholder="Facebook URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-2 mb-1 block">Telegram URL</label>
+                            <input type="text" id="cfgTg" placeholder="Telegram URL" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-yellow-500">
+                        </div>
                         <button onclick="saveStoreConfig()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-4 rounded-xl mt-6 uppercase tracking-widest hover:scale-[1.02] transition-transform">Save Live Website Info</button>
                     </div>
                 </div>
@@ -153,182 +392,490 @@
         </div>
     </div>
 
-    <div id="mapModal" class="fixed inset-0 bg-black/80 hidden justify-center items-center z-[999] backdrop-blur-md p-4 transition-opacity"><div class="bg-slate-900 border border-slate-700 w-full max-w-5xl h-[80vh] rounded-[32px] overflow-hidden flex flex-col relative shadow-[0_0_50px_rgba(0,0,0,0.6)] animate-slide-up"><div class="p-5 flex justify-between items-center bg-slate-800 border-b border-slate-700"><div><h3 class="font-black text-xl text-white flex items-center" id="mapTitle"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracking Rider</h3><p class="text-xs text-slate-400 font-bold tracking-widest mt-1 uppercase" id="mapTime">Last update: Loading...</p></div><button onclick="closeMap()" class="w-10 h-10 bg-slate-700 rounded-full text-white hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button></div><div id="mapArea" class="flex-1 w-full h-full bg-slate-950 z-0"></div></div></div>
+    <div id="mapModal" class="fixed inset-0 bg-black/80 hidden justify-center items-center z-[999] backdrop-blur-md p-4 transition-opacity">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-5xl h-[80vh] rounded-[32px] overflow-hidden flex flex-col relative shadow-[0_0_50px_rgba(0,0,0,0.6)] animate-slide-up">
+            <div class="p-5 flex justify-between items-center bg-slate-800 border-b border-slate-700">
+                <div>
+                    <h3 class="font-black text-xl text-white flex items-center" id="mapTitle"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracking Rider</h3>
+                    <p class="text-xs text-slate-400 font-bold tracking-widest mt-1 uppercase" id="mapTime">Last update: Loading...</p>
+                </div>
+                <button onclick="closeMap()" class="w-10 h-10 bg-slate-700 rounded-full text-white hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="mapArea" class="flex-1 w-full h-full bg-slate-950 z-0"></div>
+        </div>
+    </div>
 
     <script>
         const swalDark = { background: '#0f172a', color: '#fff', border:'1px solid #1e293b', confirmButtonColor: '#3b82f6' };
+        
         let adminEmail = sessionStorage.getItem('adminEmail');
         let adminPass = sessionStorage.getItem('adminPass'); 
         let currentRole = sessionStorage.getItem('adminRole');
-        let tempRegLocation = ''; let map = null; let marker = null; 
+        let tempRegLocation = ''; 
+        let map = null; 
+        let marker = null; 
 
-        if(adminEmail && adminPass) checkAuth();
+        if(adminEmail && adminPass) {
+            checkAuth();
+        }
 
         function toggleSidebar() { 
-            document.getElementById('sidebar').classList.toggle('-translate-x-full'); 
-            document.getElementById('sidebarOverlay').classList.toggle('hidden'); 
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
         }
 
         function toggleAuthForm() {
             const login = document.getElementById('formLogin');
             const reg = document.getElementById('formRegister');
-            if(login.classList.contains('hidden')) { login.classList.remove('hidden'); reg.classList.add('hidden'); }
-            else { login.classList.add('hidden'); reg.classList.remove('hidden'); }
+            if(login.classList.contains('hidden')) { 
+                login.classList.remove('hidden'); 
+                reg.classList.add('hidden'); 
+            } else { 
+                login.classList.add('hidden'); 
+                reg.classList.remove('hidden'); 
+            }
         }
         
         async function login() { 
             adminEmail = document.getElementById('adminEmail').value;
             adminPass = document.getElementById('adminPass').value; 
-            const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: adminEmail, password: adminPass }) }); 
-            const data = await res.json();
-            if(data.success) { 
-                sessionStorage.setItem('adminEmail', adminEmail);
-                sessionStorage.setItem('adminPass', adminPass); 
-                sessionStorage.setItem('adminRole', data.role); 
-                currentRole = data.role; checkAuth(); 
-            } else { Swal.fire({toast:true, position:'top-end', icon:'error', title: 'Access Denied', ...swalDark, showConfirmButton:false, timer:1500}); } 
+            
+            if (!adminEmail || !adminPass) return;
+            
+            Swal.fire({title: 'Authenticating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+            
+            try {
+                const res = await fetch('/api/admin/login', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ email: adminEmail, password: adminPass }) 
+                }); 
+                const data = await res.json();
+                
+                if(data.success) { 
+                    sessionStorage.setItem('adminEmail', adminEmail);
+                    sessionStorage.setItem('adminPass', adminPass); 
+                    sessionStorage.setItem('adminRole', data.role); 
+                    currentRole = data.role; 
+                    Swal.close();
+                    checkAuth(); 
+                } else { 
+                    Swal.fire({toast:true, position:'top-end', icon:'error', title: 'Access Denied', ...swalDark, showConfirmButton:false, timer:1500}); 
+                } 
+            } catch(e) {
+                Swal.fire('Error', 'Network connection failed.', 'error', swalDark);
+            }
         }
 
         async function requestAdminOTP() {
-            const name = document.getElementById('regName').value; const email = document.getElementById('regEmail').value; const pass = document.getElementById('regPass').value;
+            const name = document.getElementById('regName').value; 
+            const email = document.getElementById('regEmail').value; 
+            const pass = document.getElementById('regPass').value;
+            
             if(!name || !email || !pass) return Swal.fire('Error', 'Fill all fields', 'error', swalDark);
+            
             Swal.fire({title: 'Detecting Location...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+            
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     tempRegLocation = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-                    const res = await fetch('/api/admin/register/otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email}) });
-                    const data = await res.json();
-                    if(data.success) {
-                        Swal.fire('OTP Sent!', 'Check your email for the code.', 'success', swalDark);
-                        document.getElementById('btnRegSend').classList.add('hidden');
-                        document.getElementById('regOtpSection').classList.remove('hidden');
-                        document.getElementById('btnRegVerify').classList.remove('hidden');
-                    } else { Swal.fire('Error', data.error, 'error', swalDark); }
-                }, () => { Swal.fire('Location Required', 'You must allow location to register.', 'error', swalDark); });
+                    try {
+                        const res = await fetch('/api/admin/register/otp', { 
+                            method: 'POST', 
+                            headers: {'Content-Type': 'application/json'}, 
+                            body: JSON.stringify({email}) 
+                        });
+                        const data = await res.json();
+                        
+                        if(data.success) {
+                            Swal.fire('OTP Sent!', 'Check your email for the code.', 'success', swalDark);
+                            document.getElementById('btnRegSend').classList.add('hidden');
+                            document.getElementById('regOtpSection').classList.remove('hidden');
+                            document.getElementById('btnRegVerify').classList.remove('hidden');
+                        } else { 
+                            Swal.fire('Error', data.error, 'error', swalDark); 
+                        }
+                    } catch(e) {
+                        Swal.fire('Error', 'Failed to send OTP.', 'error', swalDark);
+                    }
+                }, () => { 
+                    Swal.fire('Location Required', 'You must allow location tracking to register as admin.', 'error', swalDark); 
+                });
+            } else {
+                Swal.fire('Error', 'Geolocation is not supported by your browser.', 'error', swalDark);
             }
         }
 
         async function verifyAdminReg() {
-            const name = document.getElementById('regName').value; const email = document.getElementById('regEmail').value; const pass = document.getElementById('regPass').value; const otp = document.getElementById('regOtp').value;
-            if(!otp) return;
-            Swal.fire({title: 'Submitting...', didOpen: ()=>Swal.showLoading(), ...swalDark});
-            const res = await fetch('/api/admin/register/verify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password: pass, location: tempRegLocation, otp}) });
-            const data = await res.json();
-            if(data.success) { Swal.fire('Application Sent!', 'Wait for Owner approval.', 'success', swalDark).then(()=>toggleAuthForm()); } else { Swal.fire('Error', data.error, 'error', swalDark); }
+            const name = document.getElementById('regName').value; 
+            const email = document.getElementById('regEmail').value; 
+            const pass = document.getElementById('regPass').value; 
+            const otp = document.getElementById('regOtp').value;
+            
+            if(!otp) return Swal.fire('Warning', 'Enter OTP code', 'warning', swalDark);
+            
+            Swal.fire({title: 'Submitting Application...', didOpen: ()=>Swal.showLoading(), ...swalDark});
+            
+            try {
+                const res = await fetch('/api/admin/register/verify', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({name, email, password: pass, location: tempRegLocation, otp}) 
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    Swal.fire('Application Sent!', 'Please wait for Owner approval via Telegram or Dashboard.', 'success', swalDark).then(()=>toggleAuthForm());
+                } else { 
+                    Swal.fire('Error', data.error, 'error', swalDark); 
+                }
+            } catch (e) {
+                Swal.fire('Error', 'Network Error', 'error', swalDark);
+            }
         }
 
         async function checkAuth() { 
-            document.getElementById('loginSection').style.display = 'none'; document.getElementById('dashSection').classList.remove('hidden'); 
+            document.getElementById('loginSection').style.display = 'none'; 
+            document.getElementById('dashSection').classList.remove('hidden'); 
+            
             if(currentRole === 'OWNER') {
-                document.getElementById('panelTitle').innerText = 'AURA OWNER'; document.getElementById('panelTitle').classList.replace('text-white', 'text-yellow-400');
-                document.getElementById('panelRole').innerText = 'OWNER'; document.getElementById('panelRole').className = 'text-[10px] font-black px-3 py-1 rounded bg-yellow-500/20 text-yellow-400 inline-block mt-1 uppercase';
-                document.getElementById('mobPanelRole').innerText = 'OWNER'; document.getElementById('mobPanelRole').classList.replace('text-blue-400', 'text-yellow-400');
-                document.getElementById('ownerMenu').classList.remove('hidden'); document.getElementById('ownerMenu').classList.add('flex');
-            } else { document.getElementById('panelRole').innerText = 'ADMIN'; }
-            loadAllData(); loadConfig();
+                document.getElementById('panelTitle').innerText = 'AURA OWNER'; 
+                document.getElementById('panelTitle').classList.replace('text-white', 'text-yellow-400');
+                document.getElementById('panelRole').innerText = 'OWNER'; 
+                document.getElementById('panelRole').className = 'text-[10px] font-black px-3 py-1 rounded bg-yellow-500/20 text-yellow-400 inline-block mt-1 uppercase tracking-widest border border-yellow-500/30';
+                
+                document.getElementById('mobPanelRole').innerText = 'OWNER'; 
+                document.getElementById('mobPanelRole').classList.replace('text-blue-400', 'text-yellow-400');
+                
+                document.getElementById('ownerMenu').classList.remove('hidden'); 
+                document.getElementById('ownerMenu').classList.add('flex');
+            } else { 
+                document.getElementById('panelRole').innerText = 'ADMIN'; 
+            }
+            
+            loadAllData(); 
+            loadConfig();
         }
 
         function showTab(tabId, btnElement) { 
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); 
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
-            document.getElementById(tabId + 'Tab').classList.remove('hidden'); 
+            
+            const selectedTab = document.getElementById(tabId + 'Tab');
+            selectedTab.classList.remove('hidden'); 
+            
+            // Re-trigger animation
+            selectedTab.classList.remove('animate-fade');
+            void selectedTab.offsetWidth;
+            selectedTab.classList.add('animate-fade');
+            
             if(btnElement) btnElement.classList.add('active'); 
-            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
+            
+            // Auto-close sidebar on mobile
+            if(window.innerWidth < 768) { 
+                document.getElementById('sidebar').classList.add('-translate-x-full'); 
+                document.getElementById('sidebarOverlay').classList.add('hidden'); 
+            }
         }
 
-        function logout() { sessionStorage.clear(); location.reload(); }
+        function logout() { 
+            sessionStorage.clear(); 
+            location.reload(); 
+        }
 
+        // ================= OWNER CONFIG =================
         async function loadConfig() {
             if(currentRole !== 'OWNER') return;
-            try { const res = await fetch('/api/store-config'); const data = await res.json();
-            document.getElementById('cfgName').value = data.owner.ownerName; document.getElementById('cfgBio').value = data.owner.ownerBio; document.getElementById('cfgPhone').value = data.owner.ownerPhone; document.getElementById('cfgFb').value = data.owner.fbLink; document.getElementById('cfgTg').value = data.owner.tgLink; } catch(e) {}
+            try { 
+                const res = await fetch('/api/store-config'); 
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('cfgName').value = data.owner.ownerName; 
+                    document.getElementById('cfgBio').value = data.owner.ownerBio; 
+                    document.getElementById('cfgPhone').value = data.owner.ownerPhone; 
+                    document.getElementById('cfgFb').value = data.owner.fbLink; 
+                    document.getElementById('cfgTg').value = data.owner.tgLink; 
+                }
+            } catch(e) {}
         }
+
         async function saveStoreConfig() {
-            const data = { password: adminPass, ownerName: document.getElementById('cfgName').value, ownerBio: document.getElementById('cfgBio').value, ownerPhone: document.getElementById('cfgPhone').value, fbLink: document.getElementById('cfgFb').value, tgLink: document.getElementById('cfgTg').value };
-            await fetch('/api/admin/store-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            Swal.fire({toast:true, position:'top-end', icon:'success', title:'Config Updated', ...swalDark, showConfirmButton:false, timer:2000});
+            const data = { 
+                password: adminPass, 
+                ownerName: document.getElementById('cfgName').value, 
+                ownerBio: document.getElementById('cfgBio').value, 
+                ownerPhone: document.getElementById('cfgPhone').value, 
+                fbLink: document.getElementById('cfgFb').value, 
+                tgLink: document.getElementById('cfgTg').value 
+            };
+            try {
+                await fetch('/api/admin/store-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                Swal.fire({toast:true, position:'top-end', icon:'success', title:'Config Updated on Live Website', ...swalDark, showConfirmButton:false, timer:2000});
+            } catch(e) {
+                Swal.fire('Error', 'Failed to save config', 'error', swalDark);
+            }
         }
         
         async function ownerAction(action) {
             let body = { password: adminPass, action };
             if(action === 'add_notice') body.text = document.getElementById('noticeText').value;
-            if(action === 'add_product') { body.pName = document.getElementById('pName').value; body.pCat = document.getElementById('pCat').value; body.pPrice = document.getElementById('pPrice').value; body.pStock = document.getElementById('pStock').value; body.pImage = document.getElementById('pImage').value; }
-            await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
-            Swal.fire('Done', 'Action completed', 'success', swalDark); loadAllData();
+            if(action === 'add_product') { 
+                body.pName = document.getElementById('pName').value; 
+                body.pCat = document.getElementById('pCat').value; 
+                body.pPrice = document.getElementById('pPrice').value; 
+                body.pStock = document.getElementById('pStock').value; 
+                body.pImage = document.getElementById('pImage').value; 
+            }
+            try {
+                await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+                Swal.fire('Done', 'Action completed successfully.', 'success', swalDark); 
+                loadAllData();
+            } catch(e) {
+                Swal.fire('Error', 'Action failed', 'error', swalDark);
+            }
         }
         
         async function addPromo() {
             const code = document.getElementById('prCode').value;
             const discount = document.getElementById('prDisc').value;
-            if(!code || !discount) return toast('warning', 'Fill all fields');
-            await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: adminPass, action: 'add_promo', code, discount})});
-            Swal.fire('Added', 'Promo live and users notified.', 'success', swalDark); loadAllData();
+            if(!code || !discount) return Swal.fire({toast:true, position:'top-end', icon:'warning', title:'Fill all fields', ...swalDark});
+            
+            try {
+                await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: adminPass, action: 'add_promo', code, discount})});
+                Swal.fire('Added', 'Promo is live and users have been notified via Notice Board.', 'success', swalDark); 
+                document.getElementById('prCode').value = '';
+                document.getElementById('prDisc').value = '';
+                loadAllData();
+            } catch(e) {
+                Swal.fire('Error', 'Failed to add promo', 'error', swalDark);
+            }
         }
 
+        // ================= MASTER DATA LOADER =================
         async function loadAllData() {
             try {
-                const res = await fetch('/api/admin/stats'); const data = await res.json();
-                document.getElementById('statUsers').innerText = data.users; document.getElementById('statOrders').innerText = data.orders.length;
+                const res = await fetch('/api/admin/stats'); 
+                const data = await res.json();
                 
+                document.getElementById('statUsers').innerText = data.users; 
+                document.getElementById('statOrders').innerText = data.orders.length;
+                
+                // --- Users List ---
                 document.getElementById('userListBody').innerHTML = data.userList.map(u => {
                     let roleBadge = u.role === 'OWNER' ? `<span class="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-black"><i class="fa-solid fa-crown"></i> OWNER</span>` : (u.role === 'ADMIN' ? `<span class="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded font-black">ADMIN</span>` : `<span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-black">USER</span>`);
-                    return `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${u.firstName}<br><span class="text-xs text-slate-400 font-normal">${u.email}</span></td><td class="p-6">${roleBadge}</td><td class="p-6 text-emerald-400 font-black">৳${u.balanceBdt} <span class="text-yellow-400 text-xs ml-2 bg-yellow-500/10 px-2 py-0.5 rounded"><i class="fa-solid fa-star"></i> ${u.loyaltyPoints}</span></td><td class="p-6 text-right"><button onclick="actionAPI('update_balance', ${u.id}, 'Amount')" class="text-blue-400 bg-blue-500/10 p-2 rounded-lg hover:bg-blue-500 hover:text-white mr-2 transition-colors" title="Edit Wallet"><i class="fa-solid fa-wallet"></i></button><button onclick="actionAPI('toggle_ban', ${u.id})" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Ban Toggle"><i class="fa-solid fa-ban"></i></button>${currentRole === 'OWNER' && u.role !== 'OWNER' ? `<button onclick="actionAPI('make_owner', ${u.id})" class="text-yellow-400 bg-yellow-500/10 p-2 rounded hover:bg-yellow-500 hover:text-black ml-2 text-xs font-bold transition-colors">Make Owner</button>` : ''}</td></tr>`;
+                    return `
+                    <tr class="table-row-hover">
+                        <td class="p-6 font-bold text-white">${u.firstName}<br><span class="text-xs text-slate-400 font-normal">${u.email}</span></td>
+                        <td class="p-6">${roleBadge}</td>
+                        <td class="p-6 text-emerald-400 font-black">৳${u.balanceBdt} <span class="text-yellow-400 text-xs ml-2 bg-yellow-500/10 px-2 py-0.5 rounded"><i class="fa-solid fa-star"></i> ${u.loyaltyPoints}</span></td>
+                        <td class="p-6 text-right">
+                            <button onclick="actionAPI('update_balance', ${u.id}, 'Amount')" class="text-blue-400 bg-blue-500/10 p-2 rounded-lg hover:bg-blue-500 hover:text-white mr-2 transition-colors" title="Edit Wallet"><i class="fa-solid fa-wallet"></i></button>
+                            <button onclick="actionAPI('toggle_ban', ${u.id})" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Ban Toggle"><i class="fa-solid fa-ban"></i></button>
+                            ${currentRole === 'OWNER' && u.role !== 'OWNER' ? `<button onclick="actionAPI('make_owner', ${u.id})" class="text-yellow-400 bg-yellow-500/10 p-2 rounded hover:bg-yellow-500 hover:text-black ml-2 text-xs font-bold transition-colors">Make Owner</button>` : ''}
+                        </td>
+                    </tr>`;
                 }).join('');
 
+                // --- Orders List ---
                 document.getElementById('adminOrderList').innerHTML = data.orders.map(o => {
                     let actionBtns = o.status === 'PENDING' ? `<button onclick="actionAPI('order_status', ${o.id}, 'RECEIVED')" class="text-[10px] bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded w-full mb-1 uppercase tracking-widest font-bold transition-colors">Accept & Pack</button>` : (o.status === 'RECEIVED' ? `<button onclick="actionAPI('order_status', ${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded w-full mb-1 uppercase tracking-widest font-bold transition-colors">Handover to Rider</button>` : '');
-                    return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${o.user.firstName}</p><p class="text-xs text-blue-400">${o.phone||''}</p></td><td class="p-6"><p class="font-bold">${o.product?o.product.name:'Deleted Product'}</p><p class="text-[10px] text-slate-500 mt-1">ID: #${o.id} ${o.promoApplied?`| Promo: <span class="text-indigo-400">${o.promoApplied}</span>`:''}</p></td><td class="p-6"><p class="text-xs font-bold">Total: ৳${o.priceTotal}</p><p class="text-xs font-black text-red-400">COD: ৳${o.dueCod}</p></td><td class="p-6 text-right"><span class="text-[10px] font-black uppercase tracking-widest block mb-2 text-slate-300">${o.status}</span>${actionBtns}</td></tr>`
+                    return `
+                    <tr class="table-row-hover">
+                        <td class="p-6"><p class="font-bold text-white">${o.user.firstName}</p><p class="text-xs text-blue-400">${o.phone||''}</p></td>
+                        <td class="p-6"><p class="font-bold text-white">${o.product?o.product.name:'Deleted Product'}</p><p class="text-[10px] text-slate-500 mt-1">ID: #${o.id} ${o.promoApplied?`| Promo: <span class="text-indigo-400">${o.promoApplied}</span>`:''}</p></td>
+                        <td class="p-6"><p class="text-xs font-bold text-white">Total: ৳${o.priceTotal}</p><p class="text-xs font-black text-red-400 mt-1">COD: ৳${o.dueCod}</p></td>
+                        <td class="p-6 text-right"><span class="text-[10px] font-black uppercase tracking-widest block mb-2 text-slate-400">${o.status}</span>${actionBtns}</td>
+                    </tr>`;
                 }).join('');
 
-                document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="table-row-hover"><td class="p-6 font-bold">${p.name}</td><td class="p-6 text-emerald-400 font-black">৳${p.price} <span class="text-slate-400 text-xs ml-2 font-normal">Stock: ${p.stock}</span></td><td class="p-6 text-right"><button onclick="ownerAction('delete_product')" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Owner Only Action"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+                // --- Products List ---
+                document.getElementById('adminProductList').innerHTML = data.products.map(p => `
+                <tr class="table-row-hover">
+                    <td class="p-6 font-bold text-white">${p.name}</td>
+                    <td class="p-6 text-emerald-400 font-black">৳${p.price} <span class="text-slate-400 text-xs ml-2 font-normal">Stock: ${p.stock}</span></td>
+                    <td class="p-6 text-right"><button onclick="ownerAction('delete_product')" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Owner Only Action"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`).join('');
 
-                document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="table-row-hover"><td class="p-6 font-bold">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400">${d.trxId}</td><td class="p-6 font-black text-emerald-400">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionAPI('deposit_status', ${d.id}, 'APPROVED')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="actionAPI('deposit_status', ${d.id}, 'REJECTED')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>` : `<span class="text-xs font-bold text-slate-500">${d.status}</span>`}</td></tr>`).join('');
+                // --- Deposits List ---
+                document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `
+                <tr class="table-row-hover">
+                    <td class="p-6 font-bold text-white">${d.user.firstName}</td>
+                    <td class="p-6 text-sm text-slate-400">${d.trxId}</td>
+                    <td class="p-6 font-black text-emerald-400">৳${d.amountBdt}</td>
+                    <td class="p-6 text-right">
+                        ${d.status === 'PENDING' ? `
+                        <button onclick="actionAPI('deposit_status', ${d.id}, 'APPROVED')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Approve</button>
+                        <button onclick="actionAPI('deposit_status', ${d.id}, 'REJECTED')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>
+                        ` : `<span class="text-xs font-bold text-slate-500">${d.status}</span>`}
+                    </td>
+                </tr>`).join('');
 
+                // --- Riders Fleet ---
                 document.getElementById('adminRiderList').innerHTML = data.riderList.map(r => {
-                    let trackBtn = (r.lastLat && r.lastLng) ? `<button onclick="trackRider(${r.lastLat}, ${r.lastLng}, '${r.name}', '${r.lastLocUpdate}')" class="text-emerald-400 p-2.5 bg-emerald-500/10 rounded-xl hover:bg-emerald-500 hover:text-white mr-2 transition-all shadow-sm" title="Track Live Location"><i class="fa-solid fa-map-location-dot"></i> Track</button>` : `<button disabled class="text-slate-600 p-2.5 bg-slate-800 rounded-xl mr-2 cursor-not-allowed"><i class="fa-solid fa-location-dot"></i> No GPS</button>`;
-                    return `<tr class="table-row-hover"><td class="p-6"><p class="font-bold">${r.name}</p><p class="text-xs text-slate-400">${r.phone}</p></td><td class="p-6"><p class="text-xl font-black text-emerald-400">${r.deliveryCount} <span class="text-[10px] text-slate-400 uppercase">Delivered</span></p><p class="text-xs text-blue-400 font-bold">Wallet: ৳${r.walletBalance}</p></td><td class="p-6 text-right">${trackBtn}</td></tr>`;
+                    let trackBtn = (r.lastLat && r.lastLng) 
+                        ? `<button onclick="trackRider(${r.lastLat}, ${r.lastLng}, '${r.name}', '${r.lastLocUpdate}')" class="text-emerald-400 p-2.5 bg-emerald-500/10 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm" title="Track Live Location"><i class="fa-solid fa-map-location-dot"></i> Track GPS</button>` 
+                        : `<button disabled class="text-slate-600 p-2.5 bg-slate-800 rounded-xl cursor-not-allowed"><i class="fa-solid fa-location-dot"></i> No GPS</button>`;
+                    return `
+                    <tr class="table-row-hover">
+                        <td class="p-6"><p class="font-bold text-white">${r.name}</p><p class="text-xs text-slate-400 mt-1">${r.phone}</p></td>
+                        <td class="p-6"><p class="text-xl font-black text-emerald-400">${r.deliveryCount} <span class="text-[10px] text-slate-400 uppercase">Delivered</span></p><p class="text-xs text-blue-400 font-bold mt-1">Wallet: ৳${r.walletBalance}</p></td>
+                        <td class="p-6 text-right">${trackBtn}</td>
+                    </tr>`;
                 }).join('');
 
+                // --- Rider Withdraws ---
                 document.getElementById('adminRiderWithdraws').innerHTML = data.riderWithdraws.map(w => {
-                    let btns = w.status === 'PENDING' ? `<button onclick="actionAPI('withdraw_status', ${w.id}, 'APPROVED')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Pay & Approve</button><button onclick="actionAPI('withdraw_status', ${w.id}, 'REJECTED')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>` : `<span class="text-xs font-black uppercase tracking-widest ${w.status==='APPROVED'?'text-emerald-500':'text-red-500'}">${w.status}</span>`;
-                    return `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${w.rider.name}</td><td class="p-6"><span class="uppercase font-black text-[10px] text-blue-400 bg-blue-500/10 px-2 py-1 rounded">${w.method}</span><p class="mt-2 text-sm text-slate-300 font-mono tracking-widest">${w.number}</p></td><td class="p-6 font-black text-emerald-400 text-xl">৳${w.amount}</td><td class="p-6 text-right">${btns}</td></tr>`;
+                    let btns = w.status === 'PENDING' 
+                        ? `<button onclick="actionAPI('withdraw_status', ${w.id}, 'APPROVED')" class="text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded mr-2 hover:bg-emerald-500 hover:text-white transition-colors">Pay & Approve</button>
+                           <button onclick="actionAPI('withdraw_status', ${w.id}, 'REJECTED')" class="text-red-400 bg-red-500/10 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors">Reject</button>` 
+                        : `<span class="text-xs font-black uppercase tracking-widest ${w.status==='APPROVED'?'text-emerald-500':'text-red-500'}">${w.status}</span>`;
+                    return `
+                    <tr class="table-row-hover">
+                        <td class="p-6 font-bold text-white">${w.rider.name}</td>
+                        <td class="p-6"><span class="uppercase font-black text-[10px] text-blue-400 bg-blue-500/10 px-2 py-1 rounded">${w.method}</span><p class="mt-2 text-sm text-slate-300 font-mono tracking-widest">${w.number}</p></td>
+                        <td class="p-6 font-black text-emerald-400 text-xl">৳${w.amount}</td>
+                        <td class="p-6 text-right">${btns}</td>
+                    </tr>`;
                 }).join('');
 
+                // --- OWNER EXCLUSIVES ---
                 if(currentRole === 'OWNER') {
-                    document.getElementById('redeemListBody').innerHTML = data.redeemCodes.map(r => `<tr class="table-row-hover"><td class="p-6"><p class="font-black text-emerald-400 text-lg">${r.code}</p><p class="text-xs text-slate-400 font-bold">Amount: ৳${r.amount}</p></td><td class="p-6"><p class="text-sm font-bold text-blue-400">Used: ${r.usedBy.length} / ${r.maxUses}</p><p class="text-[10px] text-slate-500">Exp: ${new Date(r.expiresAt).toLocaleTimeString()}</p></td><td class="p-6 text-right"><button onclick="actionAPI('delete_redeem', ${r.id})" class="text-red-400 bg-red-500/10 p-2 rounded-xl hover:bg-red-600 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
-                    document.getElementById('pendingAdminBody').innerHTML = data.pendingAdmins.map(a => `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-blue-400 font-normal">${a.email}</span></td><td class="p-6 text-xs text-slate-400"><i class="fa-solid fa-location-dot"></i> ${a.location || 'N/A'}</td><td class="p-6 text-right"><button onclick="adminAction('approve_admin', ${a.id})" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded mr-2 font-bold text-xs hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="adminAction('reject_admin', ${a.id})" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded font-bold text-xs hover:bg-red-500 hover:text-white transition-colors">Reject</button></td></tr>`).join('') || `<tr><td colspan="3" class="p-6 text-center text-slate-500">No pending requests.</td></tr>`;
-                    document.getElementById('activeAdminBody').innerHTML = data.activeAdmins.map(a => `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-slate-400 font-normal">${a.email}</span></td><td class="p-6 text-xs text-slate-400">${a.location || 'Owner Panel Access'}</td><td class="p-6 text-right">${a.role !== 'OWNER' ? `<button onclick="adminAction('delete_admin', ${a.id})" class="bg-red-500/10 text-red-400 p-2 rounded hover:bg-red-500 hover:text-white transition-colors" title="Revoke Role"><i class="fa-solid fa-trash"></i></button>`: '<span class="text-xs font-bold text-yellow-500">OWNER</span>'}</td></tr>`).join('');
+                    
+                    // Redeem Codes List
+                    document.getElementById('redeemListBody').innerHTML = data.redeemCodes.map(r => `
+                    <tr class="table-row-hover">
+                        <td class="p-6"><p class="font-black text-emerald-400 text-lg tracking-widest">${r.code}</p><p class="text-xs text-slate-400 font-bold mt-1">Amount: ৳${r.amount}</p></td>
+                        <td class="p-6"><p class="text-sm font-bold text-blue-400">Used: ${r.usedBy.length} / ${r.maxUses}</p><p class="text-[10px] text-slate-500 mt-1">Exp: ${new Date(r.expiresAt).toLocaleTimeString()}</p></td>
+                        <td class="p-6 text-right"><button onclick="actionAPI('delete_redeem', ${r.id})" class="text-red-400 bg-red-500/10 p-2.5 rounded-xl hover:bg-red-600 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>`).join('');
+
+                    // Pending Admins
+                    if (data.pendingAdmins.length === 0) {
+                        document.getElementById('pendingAdminBody').innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-500 font-bold">No pending requests.</td></tr>';
+                    } else {
+                        document.getElementById('pendingAdminBody').innerHTML = data.pendingAdmins.map(a => `
+                        <tr class="table-row-hover">
+                            <td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-blue-400 font-normal">${a.email}</span></td>
+                            <td class="p-6 text-xs text-slate-400"><i class="fa-solid fa-location-dot"></i> ${a.location || 'N/A'}</td>
+                            <td class="p-6 text-right">
+                                <button onclick="adminAction('approve_admin', ${a.id})" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded mr-2 font-bold text-xs hover:bg-emerald-500 hover:text-white transition-colors">Approve</button>
+                                <button onclick="adminAction('reject_admin', ${a.id})" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded font-bold text-xs hover:bg-red-500 hover:text-white transition-colors">Reject</button>
+                            </td>
+                        </tr>`).join('');
+                    }
+                    
+                    // Active Admins
+                    document.getElementById('activeAdminBody').innerHTML = data.activeAdmins.map(a => `
+                    <tr class="table-row-hover">
+                        <td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-slate-400 font-normal">${a.email}</span></td>
+                        <td class="p-6 text-xs text-slate-400">${a.location || 'Owner Panel Access'}</td>
+                        <td class="p-6 text-right">
+                            ${a.role !== 'OWNER' ? `<button onclick="adminAction('delete_admin', ${a.id})" class="bg-red-500/10 text-red-400 p-2 rounded hover:bg-red-500 hover:text-white transition-colors" title="Revoke Role"><i class="fa-solid fa-trash"></i></button>`: '<span class="text-xs font-black tracking-widest text-yellow-500 border border-yellow-500/30 px-2 py-1 rounded">OWNER</span>'}
+                        </td>
+                    </tr>`).join('');
                 }
-            } catch(e) {}
+
+            } catch(e) {
+                console.error("Failed to load admin data", e);
+            }
         }
 
+        // ================= UNIVERSAL ACTION TRIGGER =================
         async function actionAPI(action, id, valParam = null) {
             let body = { password: adminPass, action, id };
+            
             if (valParam) {
                 if(action === 'update_balance') {
-                    const { value: amt } = await Swal.fire({ title: 'Update Wallet Balance', input: 'number', confirmButtonText: 'Update', ...swalDark });
-                    if(!amt) return; body.amount = amt;
-                } else { body.status = valParam; }
+                    const { value: amt } = await Swal.fire({ 
+                        title: 'Update Wallet Balance', 
+                        input: 'number', 
+                        confirmButtonText: 'Update Balance', 
+                        ...swalDark 
+                    });
+                    if(!amt) return; 
+                    body.amount = amt;
+                } else { 
+                    body.status = valParam; 
+                }
             }
-            await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
-            loadAllData();
-            Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', ...swalDark, showConfirmButton:false, timer:1500});
+            
+            try {
+                await fetch('/api/admin/action', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(body) 
+                });
+                loadAllData();
+                Swal.fire({toast:true, position:'top-end', icon:'success', title:'Action Completed', ...swalDark, showConfirmButton:false, timer:1500});
+            } catch (e) {
+                Swal.fire('Error', 'Server failed to process request.', 'error', swalDark);
+            }
         }
 
         async function adminAction(action, id) {
-            if(!confirm('Are you sure you want to modify this admin?')) return;
-            await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: adminPass, action, id}) });
-            loadAllData();
+            if(!confirm('Are you sure you want to perform this action on the Admin account?')) return;
+            
+            try {
+                await fetch('/api/admin/action', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({password: adminPass, action, id}) 
+                });
+                loadAllData();
+            } catch(e) {
+                Swal.fire('Error', 'Failed to update admin status.', 'error', swalDark);
+            }
         }
 
+        // ================= LIVE MAP TRACKING =================
         function trackRider(lat, lng, name, time) {
-            document.getElementById('mapModal').classList.remove('hidden'); document.getElementById('mapModal').classList.add('flex');
+            document.getElementById('mapModal').classList.remove('hidden'); 
+            document.getElementById('mapModal').classList.add('flex');
+            
             document.getElementById('mapTitle').innerHTML = `<i class="fa-solid fa-satellite-dish text-emerald-400 mr-3 animate-pulse"></i> Tracing: ${name}`;
-            let dateStr = new Date(time).toLocaleString(); document.getElementById('mapTime').innerText = `GPS Ping: ${dateStr}`;
-            if(!map) { map = L.map('mapArea').setView([lat, lng], 16); L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap', subdomains: 'abcd', maxZoom: 20 }).addTo(map); const customIcon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background-color:#10b981;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 0 15px rgba(16,185,129,0.8);animation:pulse 2s infinite;"></div>`, iconSize: [24, 24], iconAnchor: [12, 12] }); marker = L.marker([lat, lng], {icon: customIcon}).addTo(map); } else { map.setView([lat, lng], 16); marker.setLatLng([lat, lng]); }
-            marker.bindPopup(`<div class="text-center"><p class="font-black text-sm mb-1 text-slate-800">${name}</p><p class="text-[10px] font-bold text-slate-500">${dateStr}</p></div>`).openPopup(); setTimeout(() => { map.invalidateSize(); }, 300);
+            
+            let dateStr = new Date(time).toLocaleString(); 
+            document.getElementById('mapTime').innerText = `Last GPS Ping: ${dateStr}`;
+            
+            if(!map) { 
+                map = L.map('mapArea').setView([lat, lng], 16); 
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { 
+                    attribution: '&copy; OpenStreetMap', 
+                    subdomains: 'abcd', 
+                    maxZoom: 20 
+                }).addTo(map); 
+                
+                const customIcon = L.divIcon({ 
+                    className: 'custom-div-icon', 
+                    html: `<div style="background-color:#10b981;width:24px;height:24px;border-radius:50%;border:4px solid white;box-shadow:0 0 15px rgba(16,185,129,0.8);animation:pulse 2s infinite;"></div>`, 
+                    iconSize: [24, 24], 
+                    iconAnchor: [12, 12] 
+                }); 
+                
+                marker = L.marker([lat, lng], {icon: customIcon}).addTo(map); 
+            } else { 
+                map.setView([lat, lng], 16); 
+                marker.setLatLng([lat, lng]); 
+            }
+            
+            marker.bindPopup(`<div class="text-center"><p class="font-black text-sm mb-1 text-slate-800">${name}</p><p class="text-[10px] font-bold text-slate-500">${dateStr}</p></div>`).openPopup(); 
+            
+            // Fix Leaflet container size bug in hidden modals
+            setTimeout(() => { map.invalidateSize(); }, 300);
         }
-        function closeMap() { document.getElementById('mapModal').classList.add('hidden'); document.getElementById('mapModal').classList.remove('flex'); }
+
+        function closeMap() { 
+            document.getElementById('mapModal').classList.add('hidden'); 
+            document.getElementById('mapModal').classList.remove('flex'); 
+        }
     </script>
 </body>
 </html>
