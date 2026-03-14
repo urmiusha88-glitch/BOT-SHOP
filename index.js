@@ -23,7 +23,7 @@ let isMaintenance = false;
 
 const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
 const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-color: #0b1121; border-radius: 12px; overflow: hidden; border: 1px solid #1e293b; font-family: Arial, sans-serif; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"><div style="background: linear-gradient(135deg, #2563eb, #4f46e5); padding: 25px; text-align: center;"><h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px;">AURA STORE</h1></div><div style="padding: 40px; color: #e2e8f0; background: #0f172a;">`;
-const emailFooter = `</div><div style="background-color: #0b1121; padding: 20px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE. All rights reserved.</p><p style="color: #475569; font-size: 10px; margin-top: 5px;">This is an automated system email.</p></div></div>`;
+const emailFooter = `</div><div style="background-color: #0b1121; padding: 20px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE. All rights reserved.</p></div></div>`;
 
 app.use((req, res, next) => {
     if (req.path.startsWith('/api/admin') || req.path === '/admin' || req.path === '/manifest.json' || req.path === '/sw.js') return next();
@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
-// TELEGRAM WIZARDS
+// ================= TELEGRAM WIZARDS =================
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
     (ctx) => { ctx.reply('🛍️ 1. Product Name?'); return ctx.wizard.next(); },
     (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('🗂️ 2. Category? (e.g. T-Shirt, Premium, Accessories)'); return ctx.wizard.next(); },
@@ -55,15 +55,37 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
 );
 
 const addNoticeWizard = new Scenes.WizardScene('ADD_NOTICE_SCENE', (ctx) => { ctx.reply('📢 *Type Notice:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, async (ctx) => { if(ctx.message.text) { await prisma.notice.create({ data: { text: ctx.message.text } }); ctx.reply('✅ *Notice live.*', { parse_mode: 'Markdown' }); } return ctx.scene.leave(); });
-const flashSaleWizard = new Scenes.WizardScene('FLASH_SALE_SCENE', (ctx) => { ctx.reply('⚡ *Duration in HOURS:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, (ctx) => { ctx.wizard.state.hours = parseInt(ctx.message.text); ctx.reply('💰 Discount Percentage:'); return ctx.wizard.next(); }, async (ctx) => { const discount = parseInt(ctx.message.text); const endTime = new Date(); endTime.setHours(endTime.getHours() + ctx.wizard.state.hours); let fs = await prisma.flashSale.findFirst(); if (fs) await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: true, endTime, discountPercent: discount } }); else await prisma.flashSale.create({ data: { id: 1, isActive: true, endTime, discountPercent: discount } }); ctx.reply(`✅ *FLASH SALE ACTIVATED!*`, { parse_mode: 'Markdown' }); return ctx.scene.leave(); });
+const flashSaleWizard = new Scenes.WizardScene('FLASH_SALE_SCENE', (ctx) => { ctx.reply('⚡ *Duration in HOURS:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, (ctx) => { ctx.wizard.state.hours = parseInt(ctx.message.text); ctx.reply('💰 Discount Percentage:'); return ctx.wizard.next(); }, async (ctx) => { const discount = parseInt(ctx.message.text); const endTime = new Date(); endTime.setHours(endTime.getHours() + ctx.wizard.state.hours); let fs = await prisma.flashSale.findFirst(); if (fs) await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: true, endTime, discountPercent: discount } }); else await prisma.flashSale.create({ data: { id: 1, isActive: true, endTime, discountPercent: discount } }); 
+    // Auto Notice Hook
+    await prisma.notice.create({ data: { text: `⚡ MEGA FLASH SALE IS LIVE! Get ${discount}% OFF for the next ${ctx.wizard.state.hours} hours!` } });
+    ctx.reply(`✅ *FLASH SALE ACTIVATED & NOTICE PUBLISHED!*`, { parse_mode: 'Markdown' }); return ctx.scene.leave(); 
+});
 
 const stage = new Scenes.Stage([addProductWizard, addNoticeWizard, flashSaleWizard]); mainBot.use(session()); mainBot.use(stage.middleware());
 
 mainBot.start((ctx) => { 
     if(ctx.from.id.toString() !== ADMIN_ID) return; 
     const mStatus = isMaintenance ? '🔴 ON' : '🟢 OFF';
-    ctx.reply(`🌟 *MASTER CONTROL*\nOwner Authority Granted.`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [ [{ text: '🛍️ Add Product', callback_data: 'menu_add_product' }, { text: '⚡ Flash Sale', callback_data: 'menu_flash_sale' }], [{ text: `🛠️ Maintenance Mode: ${mStatus}`, callback_data: 'toggle_maintenance' }], [{ text: '📢 Add Notice', callback_data: 'menu_add_notice' }, { text: '🗑️ Clear Notices', callback_data: 'menu_clear_notices' }], [{ text: '📊 View Store Stats', callback_data: 'menu_stats' }] ] } }); 
+    ctx.reply(`🌟 *MASTER CONTROL*\nOwner Authority Granted.\n\nTip: Use \`/gencode [amount] [quantity]\` to create redeem codes.`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [ [{ text: '🛍️ Add Product', callback_data: 'menu_add_product' }, { text: '⚡ Flash Sale', callback_data: 'menu_flash_sale' }], [{ text: `🛠️ Maintenance Mode: ${mStatus}`, callback_data: 'toggle_maintenance' }], [{ text: '📢 Add Notice', callback_data: 'menu_add_notice' }, { text: '🗑️ Clear Notices', callback_data: 'menu_clear_notices' }] ] } }); 
 });
+
+// 🔥 NEW: REDEEM CODE GENERATOR COMMAND
+mainBot.command('gencode', async (ctx) => {
+    if(ctx.from.id.toString() !== ADMIN_ID) return;
+    const args = ctx.message.text.split(' ');
+    if(args.length < 3) return ctx.reply('❌ Usage: `/gencode [amount] [quantity]`\nExample: `/gencode 50 10` (Creates 1 code worth 50tk for 10 users)', {parse_mode: 'Markdown'});
+    
+    const amount = parseFloat(args[1]);
+    const maxUses = parseInt(args[2]);
+    const code = 'AURA-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+    const expiresAt = new Date(Date.now() + 30 * 60000); // 30 Minutes
+    
+    await prisma.redeemCode.create({ data: { code, amount, maxUses, expiresAt, usedBy: [] } });
+    
+    ctx.reply(`🎁 *Redeem Code Generated!*\n\n🎟️ Code: \`${code}\`\n💰 Amount: ৳${amount}\n👥 Usable by: ${maxUses} people\n⏳ Expires in: 30 Minutes`, {parse_mode: 'Markdown'});
+    await prisma.notice.create({ data: { text: `🎁 NEW REDEEM CODE ALERT! Use code [ ${code} ] to get ৳${amount} Free! Valid for 30 mins only!` } });
+});
+
 mainBot.action('menu_add_product', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_PRODUCT_SCENE'); });
 mainBot.action('menu_add_notice', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_NOTICE_SCENE'); });
 mainBot.action('menu_clear_notices', async (ctx) => { await prisma.notice.deleteMany({}); ctx.answerCbQuery('Notices Cleared!'); ctx.reply('✅ Notices cleared.'); });
@@ -81,6 +103,7 @@ logBot.action(/rw_rej_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]);
 
 
 // ================= PUBLIC EXPRESS APIs =================
+
 app.get('/api/notices', async (req, res) => { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); const notices = await prisma.notice.findMany({ where: { isActive: true } }); res.json(notices); });
 app.get('/api/products', async (req, res) => { const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); res.json(products); }); 
 app.get('/api/photo/:fileId', async (req, res) => { try { const link = await mainBot.telegram.getFileLink(req.params.fileId); res.redirect(link.href); } catch(e) { res.status(404).send('Not found'); } });
@@ -88,16 +111,10 @@ app.get('/api/photo/:fileId', async (req, res) => { try { const link = await mai
 app.get('/api/store-config', async (req, res) => { 
     try {
         let conf = await prisma.storeConfig.findUnique({ where: { id: 1 } }); 
-        if (!conf) { 
-            conf = await prisma.storeConfig.create({ 
-                data: { id: 1, ownerName: "Ononto Hasan", ownerPhone: "+8801846849460", ownerBio: "Store Founder & Freestyle Player", fbLink: "https://www.facebook.com/yours.ononto", tgLink: "https://t.me/minato_namikaze143" } 
-            }); 
-        } 
+        if (!conf) { conf = await prisma.storeConfig.create({ data: { id: 1 } }); } 
         const admins = await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'OWNER'] } }, select: { firstName: true, location: true, email: true, phone: true, avatar: true, role: true } }); 
         res.json({ success: true, owner: conf, admins: admins }); 
-    } catch(e) {
-        res.json({ success: true, owner: { ownerName: 'Ononto Hasan', ownerBio: 'Store Founder', ownerPhone: '+8801846849460', fbLink: 'https://www.facebook.com/yours.ononto', tgLink: 'https://t.me/minato_namikaze143' }, admins: [] });
-    }
+    } catch(e) { res.json({ success: false }); }
 });
 
 app.get('/api/leaderboards', async (req, res) => { 
@@ -110,6 +127,23 @@ app.get('/api/leaderboards', async (req, res) => {
 });
 
 app.post('/api/chat', async (req, res) => { try { const response = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}` }, body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: `You are a helpful Support AI for AURA STORE.` }, { role: 'user', content: req.body.message }] }) }); const data = await response.json(); res.json({ reply: data.choices[0].message.content }); } catch (error) { res.json({ reply: "Our AI is currently taking a break. Please try again in a moment." }); } });
+
+// ================= REDEEM CODE API =================
+app.post('/api/redeem', async (req, res) => {
+    const { userId, code } = req.body;
+    try {
+        const rc = await prisma.redeemCode.findUnique({ where: { code: code.toUpperCase() } });
+        if(!rc) return res.json({success: false, error: 'Invalid Code'});
+        if(new Date() > rc.expiresAt) return res.json({success: false, error: 'Code Expired'});
+        if(rc.usedBy.length >= rc.maxUses) return res.json({success: false, error: 'Code usage limit reached'});
+        if(rc.usedBy.includes(parseInt(userId))) return res.json({success: false, error: 'You have already used this code'});
+        
+        await prisma.redeemCode.update({ where: { id: rc.id }, data: { usedBy: { push: parseInt(userId) } } });
+        await prisma.user.update({ where: { id: parseInt(userId) }, data: { balanceBdt: { increment: rc.amount } } });
+        
+        res.json({success: true, amount: rc.amount});
+    } catch(e) { res.json({success: false, error: 'Server Error'}); }
+});
 
 // ================= DUAL ADMIN & OWNER APIs =================
 app.post('/api/admin/login', async (req, res) => { 
@@ -143,16 +177,16 @@ app.post('/api/admin/register/verify', async (req, res) => {
 
 app.get('/api/admin/stats', async (req, res) => { 
     res.json({ 
-        users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }), userList: await prisma.user.findMany({ orderBy: { createdAt: 'desc' } }), riderList: await prisma.rider.findMany(), orders: await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }), riderWithdraws: await prisma.riderWithdraw.findMany({ include: { rider: true }, orderBy: { createdAt: 'desc' } }), pendingAdmins: await prisma.user.findMany({ where: { role: 'PENDING_ADMIN' } }), activeAdmins: await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'OWNER'] } } })
+        users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }), userList: await prisma.user.findMany({ orderBy: { createdAt: 'desc' } }), riderList: await prisma.rider.findMany(), orders: await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }), riderWithdraws: await prisma.riderWithdraw.findMany({ include: { rider: true }, orderBy: { createdAt: 'desc' } }), pendingAdmins: await prisma.user.findMany({ where: { role: 'PENDING_ADMIN' } }), activeAdmins: await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'OWNER'] } } }), redeemCodes: await prisma.redeemCode.findMany({ orderBy: { createdAt: 'desc' } })
     }); 
 });
 
 app.post('/api/admin/action', async (req, res) => {
     const { action, id, password } = req.body;
-    if(action === 'approve_admin' || action === 'reject_admin' || action === 'delete_admin' || action === 'add_product' || action === 'delete_product' || action === 'toggle_maintenance') {
+    if(action === 'approve_admin' || action === 'reject_admin' || action === 'delete_admin' || action === 'add_product' || action === 'delete_product' || action === 'toggle_maintenance' || action === 'add_promo') {
         if(password !== OWNER_PASS) return res.status(403).json({success: false, error: 'Owner verification required'});
     }
-    if (action === 'approve_admin') { await prisma.user.update({ where: { id }, data: { role: 'ADMIN' } }); } else if (action === 'reject_admin' || action === 'delete_admin') { await prisma.user.update({ where: { id }, data: { role: 'USER' } }); } else if (action === 'add_product') { const { pName, pCat, pPrice, pStock, pImage } = req.body; await prisma.product.create({ data: { name: pName, category: pCat, price: parseFloat(pPrice), stock: parseInt(pStock), abilities: 'Premium Item', imageIds: [pImage] } }); } else if (action === 'delete_product') { await prisma.product.delete({ where: { id } }); } else if (action === 'toggle_maintenance') { isMaintenance = !isMaintenance; } else if (action === 'add_notice') { await prisma.notice.create({ data: { text: req.body.text } }); } else if (action === 'clear_notices') { await prisma.notice.deleteMany({}); } else if (action === 'order_status') { await prisma.purchase.update({ where: { id }, data: { status: req.body.status } }); } else if (action === 'deposit_status') { const dep = await prisma.deposit.findUnique({ where: { id } }); if(dep && dep.status === 'PENDING') { if(req.body.status === 'APPROVED') { await prisma.user.update({ where: { id: dep.userId }, data: { balanceBdt: { increment: dep.amountBdt } } }); } await prisma.deposit.update({ where: { id }, data: { status: req.body.status } }); } } else if (action === 'withdraw_status') { const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { if(req.body.status === 'REJECTED') { await prisma.rider.update({ where: { id: rw.riderId }, data: { walletBalance: { increment: rw.amount } } }); } await prisma.riderWithdraw.update({ where: { id }, data: { status: req.body.status } }); } } else if (action === 'update_balance') { await prisma.user.update({ where: { id }, data: { balanceBdt: parseFloat(req.body.amount) } }); } else if (action === 'toggle_ban') { const u = await prisma.user.findUnique({ where: { id } }); await prisma.user.update({ where: { id }, data: { isBanned: !u.isBanned } }); } else if (action === 'make_owner') { if(password !== OWNER_PASS) return res.status(403).json({error: 'Unauthorized'}); await prisma.user.update({ where: { id }, data: { role: 'OWNER' } }); }
+    if (action === 'approve_admin') { await prisma.user.update({ where: { id }, data: { role: 'ADMIN' } }); } else if (action === 'reject_admin' || action === 'delete_admin') { await prisma.user.update({ where: { id }, data: { role: 'USER' } }); } else if (action === 'add_product') { const { pName, pCat, pPrice, pStock, pImage } = req.body; await prisma.product.create({ data: { name: pName, category: pCat, price: parseFloat(pPrice), stock: parseInt(pStock), abilities: 'Premium Item', imageIds: [pImage] } }); } else if (action === 'delete_product') { await prisma.product.delete({ where: { id } }); } else if (action === 'toggle_maintenance') { isMaintenance = !isMaintenance; } else if (action === 'add_notice') { await prisma.notice.create({ data: { text: req.body.text } }); } else if (action === 'clear_notices') { await prisma.notice.deleteMany({}); } else if (action === 'order_status') { await prisma.purchase.update({ where: { id }, data: { status: req.body.status } }); } else if (action === 'deposit_status') { const dep = await prisma.deposit.findUnique({ where: { id } }); if(dep && dep.status === 'PENDING') { if(req.body.status === 'APPROVED') { await prisma.user.update({ where: { id: dep.userId }, data: { balanceBdt: { increment: dep.amountBdt } } }); } await prisma.deposit.update({ where: { id }, data: { status: req.body.status } }); } } else if (action === 'withdraw_status') { const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { if(req.body.status === 'REJECTED') { await prisma.rider.update({ where: { id: rw.riderId }, data: { walletBalance: { increment: rw.amount } } }); } await prisma.riderWithdraw.update({ where: { id }, data: { status: req.body.status } }); } } else if (action === 'update_balance') { await prisma.user.update({ where: { id }, data: { balanceBdt: parseFloat(req.body.amount) } }); } else if (action === 'toggle_ban') { const u = await prisma.user.findUnique({ where: { id } }); await prisma.user.update({ where: { id }, data: { isBanned: !u.isBanned } }); } else if (action === 'make_owner') { if(password !== OWNER_PASS) return res.status(403).json({error: 'Unauthorized'}); await prisma.user.update({ where: { id }, data: { role: 'OWNER' } }); } else if (action === 'add_promo') { await prisma.promo.create({ data: { code: req.body.code, discount: parseInt(req.body.discount) } }); await prisma.notice.create({ data: { text: `🔥 NEW PROMO CODE: Use ${req.body.code} to get ${req.body.discount}% OFF!` } }); } else if (action === 'delete_redeem') { await prisma.redeemCode.delete({ where: { id } }); }
     res.json({ success: true });
 });
 
@@ -170,20 +204,12 @@ app.post('/api/auth/send-profile-otp', async (req, res) => {
         const { userId } = req.body;
         const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
         if (!user) return res.json({ success: false, error: 'User not found' });
-        
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         await prisma.user.update({ where: { id: user.id }, data: { resetCode: otp, resetExpiry: new Date(Date.now() + 15 * 60000) } });
-        
-        const mailOptions = { 
-            from: `"AURA SECURITY" <${process.env.EMAIL_USER}>`, to: user.email, subject: 'Profile Update Security Code', 
-            html: `${emailHeader}<h2 style="color: #facc15;">Security Alert</h2><p>An attempt was made to change your account password. Use this OTP to verify.</p><h1 style="text-align:center; font-size:40px; letter-spacing:10px; color:#3b82f6;">${otp}</h1>${emailFooter}` 
-        };
+        const mailOptions = { from: `"AURA SECURITY" <${process.env.EMAIL_USER}>`, to: user.email, subject: 'Profile Update Security Code', html: `${emailHeader}<h2 style="color: #facc15;">Security Alert</h2><p>An attempt was made to change your account password. Use this OTP to verify.</p><h1 style="text-align:center; font-size:40px; letter-spacing:10px; color:#3b82f6;">${otp}</h1>${emailFooter}` };
         await transporter.sendMail(mailOptions);
         res.json({ success: true });
-    } catch(e) { 
-        console.error(e); 
-        res.json({ success: false, error: 'Failed to connect to email server.'}); 
-    }
+    } catch(e) { res.json({ success: false, error: 'Failed to connect to email server.'}); }
 });
 
 app.post('/api/auth/send-otp', async (req, res) => {
@@ -197,8 +223,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
         const host = req.headers['x-forwarded-host'] || req.get('host');
         const resetLink = `https://${host}/reset-password?token=${token}`;
         const mailOptions = { from: `"AURA SECURITY" <${process.env.EMAIL_USER}>`, to: email, subject: 'Security: Password Reset / Change', html: `${emailHeader}<p style="font-size: 16px; margin-bottom: 20px;">Hello ${user.firstName || ''},</p><p>Use the 6-digit OTP code below to verify your password change request.</p><div style="text-align:center; margin: 40px 0; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px dashed #3b82f6;"><p style="color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Verification Code</p><h1 style="font-size:48px; letter-spacing:15px; color:#10b981; margin: 0;">${otp}</h1></div><p style="text-align: center; color: #94a3b8;">Or click below to reset directly:</p><div style="text-align:center; margin: 20px 0;"><a href="${resetLink}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 15px 35px; text-decoration: none; border-radius: 8px; font-weight: 900;">DIRECT RESET LINK</a></div>${emailFooter}` };
-        await transporter.sendMail(mailOptions); 
-        res.json({ success: true }); 
+        await transporter.sendMail(mailOptions); res.json({ success: true }); 
     } catch(e) { res.json({success: false, error: 'Error sending mail'}); }
 });
 
@@ -212,31 +237,7 @@ app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.depo
 app.post('/api/deposit', async (req, res) => { const { userId, method, amountBdt, senderNumber, trxId } = req.body; try { const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } }); const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(ADMIN_ID) logBot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ৳${amountBdt}\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] } }).catch(e=>{}); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); } });
 app.post('/api/register', async (req, res) => { try { const { name, email, password } = req.body; await prisma.user.create({ data: { firstName: name, email, password, refCode: generateRefCode(), isVerified: true } }); res.json({ success: true, message: 'Account created!' }); } catch(e) { res.status(400).json({ success: false, error: 'Email exists.' }); } });
 app.post('/api/login', async (req, res) => { try { const user = await prisma.user.findUnique({ where: { email: req.body.email } }); if (user && user.password === req.body.password) { if(user.isBanned) return res.status(403).json({ success: false, error: 'Account Banned' }); res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceBdt: user.balanceBdt, role: user.role, avatar: user.avatar, loyaltyPoints: user.loyaltyPoints } }); } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); } } catch(e) { res.status(500).json({ success: false }); } });
-
-// 🔥 FIXED FEEDBACK WITH EMAIL 
-app.post('/api/feedback', async (req, res) => { 
-    try { 
-        const { userId, subject, message } = req.body; 
-        const u = await prisma.user.findUnique({where:{id:parseInt(userId)}}); 
-        if (!u) return res.json({ success: false });
-
-        if (ADMIN_ID) { 
-            feedbackBot.telegram.sendMessage(ADMIN_ID, `📢 *NEW FEEDBACK*\n\n👤 User: ${u.firstName}\n📧 Email: ${u.email}\n📌 Subject: ${subject}\n📝 Message:\n${message}`, { parse_mode: 'Markdown' }).catch(()=>{}); 
-        } 
-
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-            const mailOptions = { 
-                from: `"AURA STORE" <${process.env.EMAIL_USER}>`, 
-                to: OWNER_EMAIL, 
-                subject: `New Feedback: ${subject}`, 
-                html: `${emailHeader}<h2 style="color: #facc15;">New Customer Feedback</h2><p style="color:#94a3b8;"><strong>From:</strong> ${u.firstName} (${u.email})</p><div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px dashed #3b82f6; margin-top: 20px;"><p style="color: #ffffff; margin: 0; line-height: 1.6;">${message}</p></div>${emailFooter}` 
-            };
-            await transporter.sendMail(mailOptions);
-        }
-
-        res.json({ success: true }); 
-    } catch(e){ res.json({ success: false, error: 'Server error' }); } 
-});
+app.post('/api/feedback', async (req, res) => { try { const { userId, subject, message } = req.body; const u = await prisma.user.findUnique({where:{id:parseInt(userId)}}); if (!u) return res.json({ success: false }); if (ADMIN_ID) { feedbackBot.telegram.sendMessage(ADMIN_ID, `📢 *NEW FEEDBACK*\n\n👤 User: ${u.firstName}\n📧 Email: ${u.email}\n📌 Subject: ${subject}\n📝 Message:\n${message}`, { parse_mode: 'Markdown' }).catch(()=>{}); } if (process.env.EMAIL_USER && process.env.EMAIL_PASS) { const mailOptions = { from: `"AURA STORE" <${process.env.EMAIL_USER}>`, to: OWNER_EMAIL, subject: `New Feedback: ${subject}`, html: `${emailHeader}<h2 style="color: #facc15;">New Customer Feedback</h2><p style="color:#94a3b8;"><strong>From:</strong> ${u.firstName} (${u.email})</p><div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px dashed #3b82f6; margin-top: 20px;"><p style="color: #ffffff; margin: 0; line-height: 1.6;">${message}</p></div>${emailFooter}` }; await transporter.sendMail(mailOptions); } res.json({ success: true }); } catch(e){ res.json({ success: false, error: 'Server error' }); } });
 
 // Rider APIs
 app.post('/api/rider/login', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { email: req.body.email } }); if (rider && rider.password === req.body.password) { res.json({ success: true, rider: { id: rider.id } }); } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); } } catch(e) { res.status(500).json({ success: false }); } });
@@ -245,11 +246,7 @@ app.post('/api/rider/orders', async (req, res) => { try { const rider = await pr
 app.post('/api/rider/history', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.json({success: false}); const history = await prisma.purchase.findMany({ where: { status: 'DELIVERED', deliveredBy: rider.name }, include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); res.json({ success: true, history }); } catch(e) { res.json({ success: false }); } });
 app.post('/api/rider/location', async (req, res) => { try { const { riderId, lat, lng } = req.body; await prisma.rider.update({ where: { id: parseInt(riderId) }, data: { lastLat: parseFloat(lat), lastLng: parseFloat(lng), lastLocUpdate: new Date() } }); res.json({success: true}); } catch(e) { res.json({success: false}); } });
 
-app.get('/reset-password', (req, res) => {
-    const token = req.query.token;
-    if(!token) return res.send("Invalid Link");
-    res.send(`<!DOCTYPE html><html class="dark"><head><title>Reset Password</title><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></head><body class="bg-slate-950 flex justify-center items-center h-screen font-sans"><div class="bg-slate-900/80 p-10 rounded-3xl w-full max-w-md border border-slate-800 shadow-[0_0_50px_rgba(59,130,246,0.2)] text-center backdrop-blur-xl"><div class="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-2xl mb-6 shadow-[0_0_20px_rgba(59,130,246,0.5)]">🔒</div><h2 class="text-3xl font-black text-white mb-2">New Password</h2><p class="text-slate-400 text-sm mb-8">Secure your AURA STORE account.</p><input type="password" id="pass" placeholder="Enter new password" class="w-full bg-slate-950 border border-slate-700 text-white px-5 py-4 rounded-xl font-bold mb-6 outline-none focus:border-blue-500 transition-colors"><button onclick="savePass()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl hover:bg-blue-500 transition-transform active:scale-95 shadow-lg uppercase tracking-widest">Confirm & Login</button></div><script>async function savePass(){ const newPassword = document.getElementById('pass').value; if(!newPassword) return; const res = await fetch('/api/auth/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token: '${token}', newPassword}) }); const data = await res.json(); if(data.success){ Swal.fire({title:'Success!', text:'Password Updated.', icon:'success', background:'#0f172a', color:'#fff', confirmButtonColor:'#3b82f6'}).then(()=>window.location.href='/login'); } else { Swal.fire({title:'Error', text:data.error, icon:'error', background:'#0f172a', color:'#fff'}); } }</script></body></html>`);
-});
+app.get('/reset-password', (req, res) => { const token = req.query.token; if(!token) return res.send("Invalid Link"); res.send(`<!DOCTYPE html><html class="dark"><head><title>Reset Password</title><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></head><body class="bg-slate-950 flex justify-center items-center h-screen font-sans"><div class="bg-slate-900/80 p-10 rounded-3xl w-full max-w-md border border-slate-800 shadow-[0_0_50px_rgba(59,130,246,0.2)] text-center backdrop-blur-xl"><div class="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-2xl mb-6 shadow-[0_0_20px_rgba(59,130,246,0.5)]">🔒</div><h2 class="text-3xl font-black text-white mb-2">New Password</h2><p class="text-slate-400 text-sm mb-8">Secure your AURA STORE account.</p><input type="password" id="pass" placeholder="Enter new password" class="w-full bg-slate-950 border border-slate-700 text-white px-5 py-4 rounded-xl font-bold mb-6 outline-none focus:border-blue-500 transition-colors"><button onclick="savePass()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl hover:bg-blue-500 transition-transform active:scale-95 shadow-lg uppercase tracking-widest">Confirm & Login</button></div><script>async function savePass(){ const newPassword = document.getElementById('pass').value; if(!newPassword) return; const res = await fetch('/api/auth/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token: '${token}', newPassword}) }); const data = await res.json(); if(data.success){ Swal.fire({title:'Success!', text:'Password Updated.', icon:'success', background:'#0f172a', color:'#fff', confirmButtonColor:'#3b82f6'}).then(()=>window.location.href='/login'); } else { Swal.fire({title:'Error', text:data.error, icon:'error', background:'#0f172a', color:'#fff'}); } }</script></body></html>`); });
 
 app.get('/manifest.json', (req, res) => res.sendFile(__dirname + '/manifest.json'));
 app.get('/sw.js', (req, res) => res.sendFile(__dirname + '/sw.js'));
