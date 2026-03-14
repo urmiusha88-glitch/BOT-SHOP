@@ -715,7 +715,7 @@
                 document.getElementById('statUsers').innerText = data.users; 
                 document.getElementById('statOrders').innerText = data.orders.length;
                 
-                // --- Users List (WITH ADD/REMOVE FUND BUTTONS) ---
+                // --- Users List ---
                 document.getElementById('userListBody').innerHTML = data.userList.map(u => {
                     let roleBadge = u.role === 'OWNER' ? `<span class="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-black"><i class="fa-solid fa-crown"></i> OWNER</span>` : (u.role === 'ADMIN' ? `<span class="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded font-black">ADMIN</span>` : `<span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-black">USER</span>`);
                     return `
@@ -749,7 +749,7 @@
                 <tr class="table-row-hover">
                     <td class="p-6 font-bold text-white">${p.name}</td>
                     <td class="p-6 text-emerald-400 font-black">৳${p.price} <span class="text-slate-400 text-xs ml-2 font-normal">Stock: ${p.stock}</span></td>
-                    <td class="p-6 text-right"><button onclick="ownerAction('delete_product')" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Owner Only Action"><i class="fa-solid fa-trash"></i></button></td>
+                    <td class="p-6 text-right"><button onclick="actionAPI('delete_product', ${p.id})" class="text-red-400 bg-red-500/10 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Delete Product"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`).join('');
 
                 // --- Deposits List ---
@@ -920,7 +920,6 @@
             
             marker.bindPopup(`<div class="text-center"><p class="font-black text-sm mb-1 text-slate-800">${name}</p><p class="text-[10px] font-bold text-slate-500">${dateStr}</p></div>`).openPopup(); 
             
-            // Fix Leaflet container size bug in hidden modals
             setTimeout(() => { map.invalidateSize(); }, 300);
         }
 
