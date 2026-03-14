@@ -144,7 +144,7 @@ model StoreConfig {
   ownerName   String   @default("Ononto Hasan")
   ownerPhone  String   @default("+8801846849460")
   ownerBio    String   @default("Store Founder & Freestyle Player")
-  fbLink      String   @default("https://www.facebook.com")
+  fbLink      String   @default("https://www.facebook.com/yours.ononto")
   tgLink      String   @default("https://t.me/minato_namikaze143")
 }
 
