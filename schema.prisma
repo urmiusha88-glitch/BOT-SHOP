@@ -79,6 +79,17 @@ model Promo {
   isActive  Boolean  @default(true)
 }
 
+// 🔥 NEW: REDEEM CODE SYSTEM
+model RedeemCode {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  amount    Float
+  maxUses   Int      @default(1)
+  usedBy    Int[]    // Array of User IDs who used this code
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
 model Deposit {
   id            Int      @id @default(autoincrement())
   userId        Int
@@ -138,7 +149,6 @@ model RiderWithdraw {
   createdAt DateTime @default(now())
 }
 
-// 🔥 DEFAULT OWNER INFO HARDCODED
 model StoreConfig {
   id          Int      @id @default(1)
   ownerName   String   @default("Ononto Hasan")
