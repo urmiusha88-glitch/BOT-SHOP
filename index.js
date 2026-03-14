@@ -55,35 +55,38 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
 );
 
 const addNoticeWizard = new Scenes.WizardScene('ADD_NOTICE_SCENE', (ctx) => { ctx.reply('📢 *Type Notice:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, async (ctx) => { if(ctx.message.text) { await prisma.notice.create({ data: { text: ctx.message.text } }); ctx.reply('✅ *Notice live.*', { parse_mode: 'Markdown' }); } return ctx.scene.leave(); });
-const flashSaleWizard = new Scenes.WizardScene('FLASH_SALE_SCENE', (ctx) => { ctx.reply('⚡ *Duration in HOURS:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, (ctx) => { ctx.wizard.state.hours = parseInt(ctx.message.text); ctx.reply('💰 Discount Percentage:'); return ctx.wizard.next(); }, async (ctx) => { const discount = parseInt(ctx.message.text); const endTime = new Date(); endTime.setHours(endTime.getHours() + ctx.wizard.state.hours); let fs = await prisma.flashSale.findFirst(); if (fs) await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: true, endTime, discountPercent: discount } }); else await prisma.flashSale.create({ data: { id: 1, isActive: true, endTime, discountPercent: discount } }); 
-    // Auto Notice Hook
-    await prisma.notice.create({ data: { text: `⚡ MEGA FLASH SALE IS LIVE! Get ${discount}% OFF for the next ${ctx.wizard.state.hours} hours!` } });
-    ctx.reply(`✅ *FLASH SALE ACTIVATED & NOTICE PUBLISHED!*`, { parse_mode: 'Markdown' }); return ctx.scene.leave(); 
-});
+const flashSaleWizard = new Scenes.WizardScene('FLASH_SALE_SCENE', (ctx) => { ctx.reply('⚡ *Duration in HOURS:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, (ctx) => { ctx.wizard.state.hours = parseInt(ctx.message.text); ctx.reply('💰 Discount Percentage:'); return ctx.wizard.next(); }, async (ctx) => { const discount = parseInt(ctx.message.text); const endTime = new Date(); endTime.setHours(endTime.getHours() + ctx.wizard.state.hours); let fs = await prisma.flashSale.findFirst(); if (fs) await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: true, endTime, discountPercent: discount } }); else await prisma.flashSale.create({ data: { id: 1, isActive: true, endTime, discountPercent: discount } }); await prisma.notice.create({ data: { text: `⚡ MEGA FLASH SALE IS LIVE! Get ${discount}% OFF for the next ${ctx.wizard.state.hours} hours!` } }); ctx.reply(`✅ *FLASH SALE ACTIVATED & NOTICE PUBLISHED!*`, { parse_mode: 'Markdown' }); return ctx.scene.leave(); });
 
-const stage = new Scenes.Stage([addProductWizard, addNoticeWizard, flashSaleWizard]); mainBot.use(session()); mainBot.use(stage.middleware());
+const stage = new Scenes.Stage([addProductWizard, addNoticeWizard, flashSaleWizard]); 
+mainBot.use(session()); mainBot.use(stage.middleware());
 
 mainBot.start((ctx) => { 
     if(ctx.from.id.toString() !== ADMIN_ID) return; 
     const mStatus = isMaintenance ? '🔴 ON' : '🟢 OFF';
-    ctx.reply(`🌟 *MASTER CONTROL*\nOwner Authority Granted.\n\nTip: Use \`/gencode [amount] [quantity]\` to create redeem codes.`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [ [{ text: '🛍️ Add Product', callback_data: 'menu_add_product' }, { text: '⚡ Flash Sale', callback_data: 'menu_flash_sale' }], [{ text: `🛠️ Maintenance Mode: ${mStatus}`, callback_data: 'toggle_maintenance' }], [{ text: '📢 Add Notice', callback_data: 'menu_add_notice' }, { text: '🗑️ Clear Notices', callback_data: 'menu_clear_notices' }] ] } }); 
+    ctx.reply(`🌟 *MASTER CONTROL*\nOwner Authority Granted.\n\n💡 Tip: Use \`/gencode [amount] [quantity]\` to create multiple redeem codes.`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [ [{ text: '🛍️ Add Product', callback_data: 'menu_add_product' }, { text: '⚡ Flash Sale', callback_data: 'menu_flash_sale' }], [{ text: `🛠️ Maintenance Mode: ${mStatus}`, callback_data: 'toggle_maintenance' }], [{ text: '📢 Add Notice', callback_data: 'menu_add_notice' }, { text: '🗑️ Clear Notices', callback_data: 'menu_clear_notices' }] ] } }); 
 });
 
-// 🔥 NEW: REDEEM CODE GENERATOR COMMAND
+// 🔥 UNIQUE MULTI-CODE GENERATOR
 mainBot.command('gencode', async (ctx) => {
     if(ctx.from.id.toString() !== ADMIN_ID) return;
     const args = ctx.message.text.split(' ');
-    if(args.length < 3) return ctx.reply('❌ Usage: `/gencode [amount] [quantity]`\nExample: `/gencode 50 10` (Creates 1 code worth 50tk for 10 users)', {parse_mode: 'Markdown'});
+    if(args.length < 3) return ctx.reply('❌ Usage: `/gencode [amount] [quantity]`\nExample: `/gencode 50 5` (Creates 5 distinct codes, 50tk each)', {parse_mode: 'Markdown'});
     
     const amount = parseFloat(args[1]);
-    const maxUses = parseInt(args[2]);
-    const code = 'AURA-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+    const qty = parseInt(args[2]);
+    if(qty > 20) return ctx.reply('❌ Max 20 codes at a time to prevent spam.');
+
+    let codesListStr = "";
     const expiresAt = new Date(Date.now() + 30 * 60000); // 30 Minutes
+
+    for(let i = 0; i < qty; i++) {
+        const code = 'AURA-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+        await prisma.redeemCode.create({ data: { code, amount, maxUses: 1, expiresAt, usedBy: [] } });
+        codesListStr += `\`${code}\`\n`;
+    }
     
-    await prisma.redeemCode.create({ data: { code, amount, maxUses, expiresAt, usedBy: [] } });
-    
-    ctx.reply(`🎁 *Redeem Code Generated!*\n\n🎟️ Code: \`${code}\`\n💰 Amount: ৳${amount}\n👥 Usable by: ${maxUses} people\n⏳ Expires in: 30 Minutes`, {parse_mode: 'Markdown'});
-    await prisma.notice.create({ data: { text: `🎁 NEW REDEEM CODE ALERT! Use code [ ${code} ] to get ৳${amount} Free! Valid for 30 mins only!` } });
+    ctx.reply(`🎁 *${qty} Redeem Codes Generated! (৳${amount} each)*\n\n${codesListStr}\n⏳ Expires in: 30 Minutes\n✅ Each code works for 1 person.`, {parse_mode: 'Markdown'});
+    await prisma.notice.create({ data: { text: `🎁 NEW REDEEM CODES DROPPED! Claim your Free ৳${amount} fast! Valid for 30 mins.` } });
 });
 
 mainBot.action('menu_add_product', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_PRODUCT_SCENE'); });
@@ -92,18 +95,16 @@ mainBot.action('menu_clear_notices', async (ctx) => { await prisma.notice.delete
 mainBot.action('menu_flash_sale', async (ctx) => { let fs = await prisma.flashSale.findFirst(); if(fs && fs.isActive) { await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: false } }); ctx.answerCbQuery('Flash Sale Stopped!'); ctx.reply('🛑 Flash Sale OFF.'); } else { ctx.answerCbQuery(); ctx.scene.enter('FLASH_SALE_SCENE'); } });
 mainBot.action('toggle_maintenance', async (ctx) => { isMaintenance = !isMaintenance; ctx.answerCbQuery(`Maintenance ${isMaintenance ? 'ON' : 'OFF'}`); ctx.reply(`Maintenance mode is now ${isMaintenance ? 'ON' : 'OFF'}`);});
 
-logBot.action(/approve_adm_(.+)/, async (ctx) => { await prisma.user.update({ where: { id: parseInt(ctx.match[1]) }, data: { role: 'ADMIN' } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n✅ *ADMIN APPROVED BY OWNER*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery('Admin Approved'); });
-logBot.action(/reject_adm_(.+)/, async (ctx) => { await prisma.user.delete({ where: { id: parseInt(ctx.match[1]) } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n❌ *ADMIN REJECTED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery('Admin Rejected'); });
+logBot.action(/approve_adm_(.+)/, async (ctx) => { await prisma.user.update({ where: { id: parseInt(ctx.match[1]) }, data: { role: 'ADMIN' } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n✅ *ADMIN APPROVED BY OWNER*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); });
+logBot.action(/reject_adm_(.+)/, async (ctx) => { await prisma.user.delete({ where: { id: parseInt(ctx.match[1]) } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n❌ *ADMIN REJECTED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); });
 logBot.action(/approve_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } }); if (dep && dep.status === 'PENDING') { await prisma.user.update({ where: { id: dep.userId }, data: { balanceBdt: { increment: dep.amountBdt } } }); await prisma.deposit.update({ where: { id }, data: { status: 'APPROVED' } }); ctx.editMessageText(`✅ Approved: ৳${dep.amountBdt}`); } }); 
 logBot.action(/reject_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const dep = await prisma.deposit.findUnique({ where: { id } }); if(dep && dep.status === 'PENDING') { await prisma.deposit.update({ where: { id }, data: { status: 'REJECTED' } }); ctx.editMessageText(`❌ Rejected Deposit`); } });
 logBot.action(/receive_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'RECEIVED' } }); ctx.editMessageText(`${ctx.callbackQuery.message.text}\n\n📥 *RECEIVED & PACKING*`, { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); });
 logBot.action(/ship_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'SHIPPED' } }); ctx.editMessageText(`${ctx.callbackQuery.message.text}\n\n🚚 *SHIPPED TO RIDER*`, { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); });
-logBot.action(/rw_app_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { await prisma.riderWithdraw.update({ where: { id }, data: { status: 'APPROVED' } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n✅ *PAYMENT SENT & APPROVED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery('Withdraw Approved'); } });
-logBot.action(/rw_rej_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { await prisma.riderWithdraw.update({ where: { id }, data: { status: 'REJECTED' } }); await prisma.rider.update({ where: { id: rw.riderId }, data: { walletBalance: { increment: rw.amount } } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n❌ *REJECTED & REFUNDED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery('Withdraw Rejected & Refunded'); } });
-
+logBot.action(/rw_app_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { await prisma.riderWithdraw.update({ where: { id }, data: { status: 'APPROVED' } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n✅ *PAYMENT SENT & APPROVED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); } });
+logBot.action(/rw_rej_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { await prisma.riderWithdraw.update({ where: { id }, data: { status: 'REJECTED' } }); await prisma.rider.update({ where: { id: rw.riderId }, data: { walletBalance: { increment: rw.amount } } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n❌ *REJECTED & REFUNDED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); } });
 
 // ================= PUBLIC EXPRESS APIs =================
-
 app.get('/api/notices', async (req, res) => { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); const notices = await prisma.notice.findMany({ where: { isActive: true } }); res.json(notices); });
 app.get('/api/products', async (req, res) => { const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); res.json(products); }); 
 app.get('/api/photo/:fileId', async (req, res) => { try { const link = await mainBot.telegram.getFileLink(req.params.fileId); res.redirect(link.href); } catch(e) { res.status(404).send('Not found'); } });
@@ -111,10 +112,10 @@ app.get('/api/photo/:fileId', async (req, res) => { try { const link = await mai
 app.get('/api/store-config', async (req, res) => { 
     try {
         let conf = await prisma.storeConfig.findUnique({ where: { id: 1 } }); 
-        if (!conf) { conf = await prisma.storeConfig.create({ data: { id: 1 } }); } 
+        if (!conf) { conf = await prisma.storeConfig.create({ data: { id: 1, ownerName: "Ononto Hasan", ownerPhone: "+8801846849460", ownerBio: "Store Founder & Freestyle Player", fbLink: "https://www.facebook.com", tgLink: "https://t.me/minato_namikaze143" } }); } 
         const admins = await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'OWNER'] } }, select: { firstName: true, location: true, email: true, phone: true, avatar: true, role: true } }); 
         res.json({ success: true, owner: conf, admins: admins }); 
-    } catch(e) { res.json({ success: false }); }
+    } catch(e) { res.json({ success: true, owner: { ownerName: 'Ononto Hasan', ownerBio: 'Store Founder', ownerPhone: '+8801846849460', fbLink: '#', tgLink: '#' }, admins: [] }); }
 });
 
 app.get('/api/leaderboards', async (req, res) => { 
@@ -128,19 +129,31 @@ app.get('/api/leaderboards', async (req, res) => {
 
 app.post('/api/chat', async (req, res) => { try { const response = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}` }, body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: `You are a helpful Support AI for AURA STORE.` }, { role: 'user', content: req.body.message }] }) }); const data = await response.json(); res.json({ reply: data.choices[0].message.content }); } catch (error) { res.json({ reply: "Our AI is currently taking a break. Please try again in a moment." }); } });
 
-// ================= REDEEM CODE API =================
+// 🔥 STRICT DAILY REDEEM SYSTEM
 app.post('/api/redeem', async (req, res) => {
     const { userId, code } = req.body;
     try {
+        const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
+        if (!user) return res.json({success: false, error: 'User not found'});
+
+        // Check Daily Limit
+        if (user.lastRedeemDate) {
+            const today = new Date();
+            const last = new Date(user.lastRedeemDate);
+            if (today.getFullYear() === last.getFullYear() && today.getMonth() === last.getMonth() && today.getDate() === last.getDate()) {
+                return res.json({success: false, error: 'Daily Limit Reached! You can only redeem 1 code per day.'});
+            }
+        }
+
         const rc = await prisma.redeemCode.findUnique({ where: { code: code.toUpperCase() } });
         if(!rc) return res.json({success: false, error: 'Invalid Code'});
-        if(new Date() > rc.expiresAt) return res.json({success: false, error: 'Code Expired'});
-        if(rc.usedBy.length >= rc.maxUses) return res.json({success: false, error: 'Code usage limit reached'});
-        if(rc.usedBy.includes(parseInt(userId))) return res.json({success: false, error: 'You have already used this code'});
-        
-        await prisma.redeemCode.update({ where: { id: rc.id }, data: { usedBy: { push: parseInt(userId) } } });
-        await prisma.user.update({ where: { id: parseInt(userId) }, data: { balanceBdt: { increment: rc.amount } } });
-        
+        if(new Date() > rc.expiresAt) return res.json({success: false, error: 'Code has expired'});
+        if(rc.usedBy.length >= rc.maxUses) return res.json({success: false, error: 'Code already used'});
+        if(rc.usedBy.includes(user.id)) return res.json({success: false, error: 'You have already used this code'});
+
+        await prisma.redeemCode.update({ where: { id: rc.id }, data: { usedBy: { push: user.id } } });
+        await prisma.user.update({ where: { id: user.id }, data: { balanceBdt: { increment: rc.amount }, lastRedeemDate: new Date() } });
+
         res.json({success: true, amount: rc.amount});
     } catch(e) { res.json({success: false, error: 'Server Error'}); }
 });
@@ -204,12 +217,17 @@ app.post('/api/auth/send-profile-otp', async (req, res) => {
         const { userId } = req.body;
         const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
         if (!user) return res.json({ success: false, error: 'User not found' });
+        
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         await prisma.user.update({ where: { id: user.id }, data: { resetCode: otp, resetExpiry: new Date(Date.now() + 15 * 60000) } });
-        const mailOptions = { from: `"AURA SECURITY" <${process.env.EMAIL_USER}>`, to: user.email, subject: 'Profile Update Security Code', html: `${emailHeader}<h2 style="color: #facc15;">Security Alert</h2><p>An attempt was made to change your account password. Use this OTP to verify.</p><h1 style="text-align:center; font-size:40px; letter-spacing:10px; color:#3b82f6;">${otp}</h1>${emailFooter}` };
+        
+        const mailOptions = { 
+            from: `"AURA SECURITY" <${process.env.EMAIL_USER}>`, to: user.email, subject: 'Profile Update Security Code', 
+            html: `${emailHeader}<h2 style="color: #facc15;">Security Alert</h2><p>An attempt was made to change your account password. Use this OTP to verify.</p><h1 style="text-align:center; font-size:40px; letter-spacing:10px; color:#3b82f6;">${otp}</h1>${emailFooter}` 
+        };
         await transporter.sendMail(mailOptions);
         res.json({ success: true });
-    } catch(e) { res.json({ success: false, error: 'Failed to connect to email server.'}); }
+    } catch(e) { console.error(e); res.json({ success: false, error: 'Failed to connect to email server.'}); }
 });
 
 app.post('/api/auth/send-otp', async (req, res) => {
